@@ -1,7 +1,12 @@
-﻿namespace Foxtaur.Desktop.ViewModels
+﻿using System.IO;
+using Microsoft.Extensions.Configuration;
+
+namespace Foxtaur.Desktop.ViewModels
 {
+    /// <summary>
+    /// Main view model
+    /// </summary>
     public class MainWindowViewModel : ViewModelBase
     {
-        public string Greeting => "Welcome to Avalonia!";
     }
 }
