@@ -12,6 +12,18 @@
         <Folder Include="Models\" />
         <AvaloniaResource Include="Assets\**" />
         <None Remove=".gitignore" />
+        <None Update="Resources\davydovo.png">
+          <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
+        <None Update="Resources\davydovo_res.png">
+          <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
+        <None Update="Controls\Renderer\Shaders\shader.frag">
+          <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
+        <None Update="Controls\Renderer\Shaders\shader.vert">
+          <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
     </ItemGroup>
     <ItemGroup>
         <!--This helps with theme dll-s trimming.
@@ -21,15 +33,16 @@
         <TrimmableAssembly Include="Avalonia.Themes.Default" />
     </ItemGroup>
     <ItemGroup>
-        <PackageReference Include="Avalonia" Version="11.0.0-preview4" />
-        <PackageReference Include="Avalonia.Desktop" Version="11.0.0-preview4" />
+        <PackageReference Include="Avalonia" Version="0.10.18" />
+        <PackageReference Include="Avalonia.Desktop" Version="0.10.18" />
         <!--Condition below is needed to remove Avalonia.Diagnostics package from build output in Release configuration.-->
-        <PackageReference Condition="'$(Configuration)' == 'Debug'" Include="Avalonia.Diagnostics" Version="11.0.0-preview4" />
-        <PackageReference Include="Avalonia.ReactiveUI" Version="11.0.0-preview4" />
-        <PackageReference Include="Avalonia.Themes.Fluent" Version="11.0.0-preview4" />
+        <PackageReference Condition="'$(Configuration)' == 'Debug'" Include="Avalonia.Diagnostics" Version="0.10.18" />
+        <PackageReference Include="Avalonia.ReactiveUI" Version="0.10.18" />
         <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="7.0.0" />
         <PackageReference Include="NLog" Version="5.0.5" />
         <PackageReference Include="NLog.Extensions.Logging" Version="5.1.0" />
+        <PackageReference Include="Silk.NET.Core" Version="2.16.0" />
+        <PackageReference Include="Silk.NET.OpenGL" Version="2.16.0" />
         <PackageReference Include="XamlNameReferenceGenerator" Version="1.4.2" />
     </ItemGroup>
     <ItemGroup>
@@ -39,20 +52,11 @@
       </Content>
     </ItemGroup>
     <ItemGroup>
-      <Compile Update="Controls\Renderer\DesktopRenderer.axaml.cs">
-        <DependentUpon>DesktopRenderer.axaml</DependentUpon>
+      <Compile Update="Controls\Renderer\DesktopRenderer.cs">
         <SubType>Code</SubType>
-      </Compile>
-      <Compile Update="Controls\Renderer\Shaders.Designer.cs">
-        <DesignTime>True</DesignTime>
-        <AutoGen>True</AutoGen>
-        <DependentUpon>Shaders.resx</DependentUpon>
       </Compile>
     </ItemGroup>
     <ItemGroup>
-      <EmbeddedResource Update="Controls\Renderer\Shaders.resx">
-        <Generator>ResXFileCodeGenerator</Generator>
-        <LastGenOutput>Shaders.Designer.cs</LastGenOutput>
-      </EmbeddedResource>
+      <ProjectReference Include="..\Foxtaur.LibRenderer\Foxtaur.LibRenderer.csproj" />
     </ItemGroup>
 </Project>

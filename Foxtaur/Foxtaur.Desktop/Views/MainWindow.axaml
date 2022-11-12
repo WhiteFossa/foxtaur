@@ -13,6 +13,6 @@
         <vm:MainWindowViewModel/>
     </Design.DataContext>
 
-    <renderer:DesktopRenderer />
+    <renderer:DesktopRendererControl />
 
 </Window>

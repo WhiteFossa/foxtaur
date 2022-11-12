@@ -13,4 +13,9 @@ public struct Vertex
     /// Vertex position
     /// </summary>
     public Vector3 Position;
+
+    /// <summary>
+    /// Texture coordinates
+    /// </summary>
+    public Vector2 TextureCoords;
 }

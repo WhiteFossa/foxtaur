@@ -2,6 +2,8 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Foxtaur.Desktop", "Foxtaur.Desktop\Foxtaur.Desktop.csproj", "{D7D20CFC-E973-4E53-AD0A-6614F3FA2A18}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Foxtaur.LibRenderer", "Foxtaur.LibRenderer\Foxtaur.LibRenderer.csproj", "{260A599C-392D-4A59-A5C1-904D8EDE3F1F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -12,5 +14,9 @@ Global
 		{D7D20CFC-E973-4E53-AD0A-6614F3FA2A18}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D7D20CFC-E973-4E53-AD0A-6614F3FA2A18}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D7D20CFC-E973-4E53-AD0A-6614F3FA2A18}.Release|Any CPU.Build.0 = Release|Any CPU
+		{260A599C-392D-4A59-A5C1-904D8EDE3F1F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{260A599C-392D-4A59-A5C1-904D8EDE3F1F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{260A599C-392D-4A59-A5C1-904D8EDE3F1F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{260A599C-392D-4A59-A5C1-904D8EDE3F1F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
