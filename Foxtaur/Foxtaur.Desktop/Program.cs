@@ -2,8 +2,6 @@
 using Avalonia.ReactiveUI;
 using System;
 using System.IO;
-using Foxtaur.LibRenderer.Services.Abstractions;
-using Foxtaur.LibRenderer.Services.Implementations;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using NLog;
@@ -55,7 +53,7 @@ namespace Foxtaur.Desktop
         {
             IServiceCollection services = new ServiceCollection();
 
-            services.AddSingleton<ITexturesLoader, TexturesLoader>();
+            //services.AddSingleton<ITexturesLoader, TexturesLoader>();
 
             return services;
         }

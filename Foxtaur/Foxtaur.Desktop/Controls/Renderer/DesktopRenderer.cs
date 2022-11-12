@@ -5,7 +5,6 @@ using System.Runtime.InteropServices;
 using Avalonia.OpenGL;
 using Avalonia.OpenGL.Controls;
 using Avalonia.Threading;
-using Foxtaur.LibRenderer.Services.Abstractions;
 using Microsoft.Extensions.DependencyInjection;
 using NLog;
 using Silk.NET.OpenGL;
@@ -28,8 +27,6 @@ public class DesktopRendererControl : OpenGlControlBase
     /// Silk.NET OpenGL context
     /// </summary>
     private GL _silkGLContext;
-    
-    private readonly ITexturesLoader _texturesLoader;
 
     /// <summary>
     /// Vertex size in bytes
@@ -54,6 +51,8 @@ public class DesktopRendererControl : OpenGlControlBase
 
     private Shader _shader;
 
+    private Texture _textureObject;
+
     //private readonly Foxtaur.LibRenderer.Models.Texture _texture;
     
     /// <summary>
@@ -70,18 +69,16 @@ public class DesktopRendererControl : OpenGlControlBase
     /// </summary>
     public DesktopRendererControl()
     {
-        _texturesLoader = Program.Di.GetService<ITexturesLoader>();
-        
         _vertexSize = Marshal.SizeOf<Vertex>();
         
         // Loading points
         _vertices = new float[]
         {
-            // X    Y       Z       R   G   B   A
-            0.5f,   0.5f,   0.0f,   1,  0,  0,  1,
-            0.5f,   -0.5f,  0.0f,   0,  0,  0,  1,
-            -0.5f,  -0.5f,  0.0f,   0,  0,  1,  1,
-            -0.5f,  0.5f,   0.5f,   0,  0,  0,  1
+            // X    Y       Z       Tx     Ty
+            0.5f,   0.5f,   0.0f,   1.0f,  1.0f,
+            0.5f,   -0.5f,  0.0f,   1.0f,  0.0f,
+            -0.5f,  -0.5f,  0.0f,   0.0f,  0.0f,
+            -0.5f,  0.5f,   0.0f,   0.0f,  1.0f,
         };
         
         _indices = new uint[]
@@ -89,21 +86,6 @@ public class DesktopRendererControl : OpenGlControlBase
             0, 1, 3,
             1, 2, 3
         };
-        
-        // Loading texture
-        //_texture = _texturesLoader.LoadTextureFromFile(@"Resources/davydovo_res.png");
-
-        /*_texture = new Foxtaur.LibRenderer.Models.Texture()
-        {
-            Width = 1024,
-            Height = 1024,
-            Data = new byte[1024 * 1024 * 4]
-        };
-
-        for (var i = 0; i < _texture.Data.Length; i++)
-        {
-            _texture.Data[i] = (byte)(i % 256);
-        }*/
     }
 
     /// <summary>
@@ -125,26 +107,14 @@ public class DesktopRendererControl : OpenGlControlBase
         _verticesArrayObject = new VertexArrayObject<float, uint>(_silkGLContext, _verticesBufferObject, _elementsBufferObject);
 
         //Telling the VAO object how to lay out the attribute pointers
-        _verticesArrayObject.VertexAttributePointer(VerticesPositionLocation, 3, VertexAttribPointerType.Float, 7, 0);
-        _verticesArrayObject.VertexAttributePointer(VerticesTextureCoordsLocation, 4, VertexAttribPointerType.Float, 7, 3);
+        _verticesArrayObject.VertexAttributePointer(VerticesPositionLocation, 3, VertexAttribPointerType.Float, 5, 0);
+        _verticesArrayObject.VertexAttributePointer(VerticesTextureCoordsLocation, 2, VertexAttribPointerType.Float, 5, 3);
 
         // Loading shaders
-        _shader = new Shader(_silkGLContext, @"Controls/Renderer/Shaders/shader.vert", @"Controls/Renderer/Shaders/shader.frag");
-        
-        /*// Texture
-        _textureObject = GL.GenTexture();
-        GL.BindTexture(GL_TEXTURE_2D, _textureObject);
-        CheckAndLogOpenGLErrors(GL);
+        _shader = new Shader(_silkGLContext, @"Resources/Shaders/shader.vert", @"Resources/Shaders/shader.frag");
 
-        fixed (void* tdata = _texture.Data)
-        {
-            GL.TexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, _texture.Width, _texture.Height, 0, GL_RGBA, GL_UNSIGNED_BYTE, new IntPtr(tdata));
-        }
-        CheckAndLogOpenGLErrors(GL);
-        
-        GL.TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        GL.TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-        CheckAndLogOpenGLErrors(GL);*/
+        // Loading texture
+        _textureObject = new Texture(_silkGLContext, @"Resources/davydovo.png");
     }
     
     /// <summary>
@@ -162,7 +132,9 @@ public class DesktopRendererControl : OpenGlControlBase
         _verticesArrayObject.Bind();
         
         _shader.Use();
-        //_shader.SetUniform1i("uBlue", (float) Math.Sin(DateTime.Now.Millisecond / 1000f * Math.PI));
+        _shader.SetUniform1i("ourTexture", 0);
+        
+        _textureObject.Bind();
 
         _silkGLContext.DrawElements(PrimitiveType.Triangles, (uint)_indices.Length, DrawElementsType.UnsignedInt, null);
         Dispatcher.UIThread.Post(InvalidateVisual, DispatcherPriority.Background);
@@ -176,6 +148,7 @@ public class DesktopRendererControl : OpenGlControlBase
         _verticesBufferObject.Dispose();
         _elementsBufferObject.Dispose();
         _verticesArrayObject.Dispose();
+        _textureObject.Dispose();
         _shader.Dispose();
         base.OnOpenGlDeinit(gl, fb);
     }
