@@ -1,11 +1,11 @@
 ﻿using Avalonia;
 using Avalonia.ReactiveUI;
-using System;
-using System.IO;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using NLog;
 using NLog.Extensions.Logging;
+using System;
+using System.IO;
 
 namespace Foxtaur.Desktop
 {
@@ -45,6 +45,7 @@ namespace Foxtaur.Desktop
             return AppBuilder.Configure<App>()
                 .UsePlatformDetect()
                 .LogToTrace()
+                .With(new Win32PlatformOptions { UseWgl = true })
                 .UseReactiveUI();
         }
         
