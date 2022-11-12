@@ -73,55 +73,80 @@ public class DesktopRendererControl : OpenGlControlBase
     {
         // Loading points
         var earthVertices = new List<float>();
-        
-        for (var lat = -1.0f * (float)Math.PI / 2.0f; lat < (float)Math.PI / 2.0f; lat += (float)Math.PI / 10.0f)
-        {
-            for (var lon = (float)Math.PI; lon > -1.0f * (float)Math.PI; lon -= (float)Math.PI / 10.0f)
-            {
-                var geoPoint = new GeoPoint() { Lat = lat, Lon = lon, H = 0.5f };
 
-                var p3D = _sphereCoordinatesProvider.GeoToPlanar3D(geoPoint);
+        var earthIndices = new List<uint>();
+
+        uint verticesCounter = 0;
+        
+        for (var lat = 0.0f; lat < (float)Math.PI / 2.0f; lat += (float)Math.PI / 90.0f)
+        {
+            var latNorther = lat + (float)Math.PI / 90.0f;
+            
+            for (var lon = (float)Math.PI; lon > -1.0f * (float)Math.PI; lon -= (float)Math.PI / 90.0f)
+            {
+                var lonEaster = lon - (float)Math.PI / 90.0f;
                 
-                // 3D coords
-                earthVertices.Add(p3D.X);
-                earthVertices.Add(p3D.Y);
-                earthVertices.Add(p3D.Z);
+                var geoPoint0 = new GeoPoint() { Lat = lat, Lon = lon, H = 1.0f };
+                var geoPoint1 = new GeoPoint() { Lat = latNorther, Lon = lon, H = 1.0f };
+                var geoPoint2 = new GeoPoint() { Lat = latNorther, Lon = lonEaster, H = 1.0f };
+                var geoPoint3 = new GeoPoint() { Lat = lat, Lon = lonEaster, H = 1.0f };
+
+                var p3D0 = _sphereCoordinatesProvider.GeoToPlanar3D(geoPoint0);
+                var t2D0 = _sphereCoordinatesProvider.GeoToPlanar2D(geoPoint0);
                 
-                // Texture coords
-                earthVertices.Add(0.0f);
-                earthVertices.Add(0.0f);
+                var p3D1 = _sphereCoordinatesProvider.GeoToPlanar3D(geoPoint1);
+                var t2D1 = _sphereCoordinatesProvider.GeoToPlanar2D(geoPoint1);
+                
+                var p3D2 = _sphereCoordinatesProvider.GeoToPlanar3D(geoPoint2);
+                var t2D2 = _sphereCoordinatesProvider.GeoToPlanar2D(geoPoint2);
+                
+                var p3D3 = _sphereCoordinatesProvider.GeoToPlanar3D(geoPoint3);
+                var t2D3 = _sphereCoordinatesProvider.GeoToPlanar2D(geoPoint3);
+
+                var i3D0 = verticesCounter;
+                earthVertices.Add(p3D0.X);
+                earthVertices.Add(p3D0.Y);
+                earthVertices.Add(p3D0.Z);
+                earthVertices.Add(t2D0.Y);
+                earthVertices.Add(t2D0.X);
+                verticesCounter++;
+                
+                var i3D1 = verticesCounter;
+                earthVertices.Add(p3D1.X);
+                earthVertices.Add(p3D1.Y);
+                earthVertices.Add(p3D1.Z);
+                earthVertices.Add(t2D1.Y);
+                earthVertices.Add(t2D1.X);
+                verticesCounter++;
+                
+                var i3D2 = verticesCounter;
+                earthVertices.Add(p3D2.X);
+                earthVertices.Add(p3D2.Y);
+                earthVertices.Add(p3D2.Z);
+                earthVertices.Add(t2D2.Y);
+                earthVertices.Add(t2D2.X);
+                verticesCounter++;
+                
+                var i3D3 = verticesCounter;
+                earthVertices.Add(p3D3.X);
+                earthVertices.Add(p3D3.Y);
+                earthVertices.Add(p3D3.Z);
+                earthVertices.Add(t2D3.Y);
+                earthVertices.Add(t2D3.X);
+                verticesCounter++;
+                
+                earthIndices.Add(i3D0);
+                earthIndices.Add(i3D1);
+                earthIndices.Add(i3D2);
+                
+                earthIndices.Add(i3D2);
+                earthIndices.Add(i3D3);
+                earthIndices.Add(i3D0);
             }
         }
         
         _vertices = earthVertices.ToArray();
-
-        var indicesCount = _vertices.Length - 2;
-        _indices = new uint[indicesCount * 3];
-        
-        uint index = 0;
-        for (var i = 0; i < indicesCount; i++)
-        {
-            _indices[3 * i + 0] = index;
-            _indices[3 * i + 1] = index + 1;
-            _indices[3 * i + 2] = index + 2;
-
-            index++;
-        }
-
-        /*_vertices = new float[]
-        {
-            // X    Y       Z       Tx     Ty
-            1.0f,   1.0f,   0.0f,   1.0f,  1.0f,
-            1.0f,   -1.0f,  0.0f,   1.0f,  0.0f,
-            -1.0f,  -1.0f,  0.0f,   0.0f,  0.0f,
-            -1.0f,  1.0f,   0.0f,   0.0f,  1.0f,
-        };*/
-
-        /*_indices = new uint[]
-        {
-            0, 1, 3,
-            1, 2, 3
-        };*/
+        _indices = earthIndices.ToArray();
     }
 
     /// <summary>
@@ -170,9 +195,9 @@ public class DesktopRendererControl : OpenGlControlBase
         _shader.Use();
         _shader.SetUniform1i("ourTexture", 0);
         
-        //_textureObject.Bind();
+        _textureObject.Bind();
 
-        _silkGLContext.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Line);
+        //_silkGLContext.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Line);
 
         _silkGLContext.DrawElements(PrimitiveType.Triangles, (uint)_indices.Length, DrawElementsType.UnsignedInt, null);
         Dispatcher.UIThread.Post(InvalidateVisual, DispatcherPriority.Background);
