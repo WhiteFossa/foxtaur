@@ -38,4 +38,21 @@
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </Content>
     </ItemGroup>
+    <ItemGroup>
+      <Compile Update="Controls\Renderer\DesktopRenderer.axaml.cs">
+        <DependentUpon>DesktopRenderer.axaml</DependentUpon>
+        <SubType>Code</SubType>
+      </Compile>
+      <Compile Update="Controls\Renderer\Shaders.Designer.cs">
+        <DesignTime>True</DesignTime>
+        <AutoGen>True</AutoGen>
+        <DependentUpon>Shaders.resx</DependentUpon>
+      </Compile>
+    </ItemGroup>
+    <ItemGroup>
+      <EmbeddedResource Update="Controls\Renderer\Shaders.resx">
+        <Generator>ResXFileCodeGenerator</Generator>
+        <LastGenOutput>Shaders.Designer.cs</LastGenOutput>
+      </EmbeddedResource>
+    </ItemGroup>
 </Project>

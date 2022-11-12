@@ -1,7 +1,6 @@
 using System;
 using System.Numerics;
 using System.Runtime.InteropServices;
-using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
 using Avalonia.OpenGL;
@@ -9,7 +8,7 @@ using Avalonia.OpenGL.Controls;
 using NLog;
 using static Avalonia.OpenGL.GlConsts;
 
-namespace Foxtaur.Desktop.Controls;
+namespace Foxtaur.Desktop.Controls.Renderer;
 
 public partial class DesktopRenderer : UserControl
 {
@@ -30,15 +29,6 @@ public class DesktopRendererControl : OpenGlControlBase
     /// Vertexes positions
     /// </summary>
     private const int VertexesPositionLocation = 0;
-    
-    /// <summary>
-    /// OpenGL Vertex
-    /// </summary>
-    [StructLayout(LayoutKind.Sequential, Pack = 4)]
-    private struct Vertex
-    {
-        public Vector3 Position;
-    }
 
     /// <summary>
     /// Vertex size in bytes
@@ -52,31 +42,9 @@ public class DesktopRendererControl : OpenGlControlBase
     
     private readonly Vertex[] _points;
 
-    private int _vertexShader;
-    private int _fragmentShader;
-    private int _shaderProgram;
-    
-    private string VertexShaderSource = @"#version 400 core
-    attribute vec3 vPos;
-
-    out vec4 vertexColor;
-
-    void main()
-    {
-        gl_Position = vec4(vPos, 1.0);
-        vertexColor = vec4(0.0, 0.0, 1.0, 1.0);
-    }
-";
-
-    private string FragmentShaderSource = @"#version 400 core
-
-in vec4 vertexColor;  
-out vec4 color;
-
-void main()
-{
-  color = vertexColor;
-}";
+    private int _defaultVertexShader;
+    private int _defaultFragmentShader;
+    private int _defaultShaderProgram;
     
     /// <summary>
     /// Static constructor 
@@ -111,20 +79,20 @@ void main()
         _logger.Info($"Renderer: { GL.GetString(GL_RENDERER) } Version: { GL.GetString(GL_VERSION) }");
         
         // Load the source of the vertex shader and compile it
-        _vertexShader = GL.CreateShader(GL_VERTEX_SHADER);
-        _logger.Info(GL.CompileShaderAndGetError(_vertexShader, VertexShaderSource));
+        _defaultVertexShader = GL.CreateShader(GL_VERTEX_SHADER);
+        _logger.Info(GL.CompileShaderAndGetError(_defaultVertexShader, Shaders.DefaultVertexesShader));
 
         // Load the source of the fragment shader and compile it
-        _fragmentShader = GL.CreateShader(GL_FRAGMENT_SHADER);
-        _logger.Info(GL.CompileShaderAndGetError(_fragmentShader, FragmentShaderSource));
+        _defaultFragmentShader = GL.CreateShader(GL_FRAGMENT_SHADER);
+        _logger.Info(GL.CompileShaderAndGetError(_defaultFragmentShader, Shaders.DefaultFragmentsShader));
         
         // Create the shader program, attach the vertex and fragment shaders and link the program.
-        _shaderProgram = GL.CreateProgram();
-        GL.AttachShader(_shaderProgram, _vertexShader);
-        GL.AttachShader(_shaderProgram, _fragmentShader);
+        _defaultShaderProgram = GL.CreateProgram();
+        GL.AttachShader(_defaultShaderProgram, _defaultVertexShader);
+        GL.AttachShader(_defaultShaderProgram, _defaultFragmentShader);
         
-        GL.BindAttribLocationString(_shaderProgram, VertexesPositionLocation, "vPos");
-        _logger.Info(GL.LinkProgramAndGetError(_shaderProgram));
+        GL.BindAttribLocationString(_defaultShaderProgram, VertexesPositionLocation, "vPos");
+        _logger.Info(GL.LinkProgramAndGetError(_defaultShaderProgram));
         CheckAndLogOpenGLErrors(GL);
         
         // Object for vertices
@@ -161,7 +129,7 @@ void main()
             
             gl.BindBuffer(GL_ARRAY_BUFFER, _vertexBufferObject);
             gl.BindVertexArray(_vertexArrayObject);
-            gl.UseProgram(_shaderProgram);
+            gl.UseProgram(_defaultShaderProgram);
             CheckAndLogOpenGLErrors(gl);
 
             gl.DrawArrays(GL_TRIANGLES, 0, new IntPtr(3));
@@ -182,9 +150,9 @@ void main()
 
         // Delete all resources.
         GL.DeleteBuffer(_vertexBufferObject);
-        GL.DeleteProgram(_shaderProgram);
-        GL.DeleteShader(_fragmentShader);
-        GL.DeleteShader(_vertexShader);
+        GL.DeleteProgram(_defaultShaderProgram);
+        GL.DeleteShader(_defaultFragmentShader);
+        GL.DeleteShader(_defaultVertexShader);
     }
     
     /// <summary>

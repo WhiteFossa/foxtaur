@@ -2,10 +2,10 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             xmlns:controls="clr-namespace:Foxtaur.Desktop.Controls"
+             xmlns:renderer="clr-namespace:Foxtaur.Desktop.Controls.Renderer"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-             x:Class="Foxtaur.Desktop.Controls.DesktopRenderer">
+             x:Class="Foxtaur.Desktop.Controls.Renderer.DesktopRenderer">
     
-    <controls:DesktopRendererControl />
+    <renderer:DesktopRendererControl />
     
 </UserControl>

@@ -3,7 +3,7 @@
         xmlns:vm="using:Foxtaur.Desktop.ViewModels"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:controls="clr-namespace:Foxtaur.Desktop.Controls"
+        xmlns:renderer="clr-namespace:Foxtaur.Desktop.Controls.Renderer"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="Foxtaur.Desktop.Views.MainWindow"
         Icon="/Assets/avalonia-logo.ico"
@@ -13,6 +13,6 @@
         <vm:MainWindowViewModel/>
     </Design.DataContext>
 
-    <controls:DesktopRenderer />
+    <renderer:DesktopRenderer />
 
 </Window>
