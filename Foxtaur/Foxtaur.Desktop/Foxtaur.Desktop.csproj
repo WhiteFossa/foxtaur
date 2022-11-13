@@ -24,6 +24,9 @@
         <None Update="Resources\Textures\Basemaps\HYP_50M_SR_W.jpeg">
           <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </None>
+        <None Update="Resources\Textures\Basemaps\HYP_50M_SR_W_SMALL.jpeg">
+          <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
     </ItemGroup>
     <ItemGroup>
         <!--This helps with theme dll-s trimming.
