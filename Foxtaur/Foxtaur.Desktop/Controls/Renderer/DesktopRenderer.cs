@@ -53,9 +53,7 @@ public class DesktopRendererControl : OpenGlControlBase
     ///     Camera
     /// </summary>
     private Camera _camera;
-
-    private float _cameraLatStep = (float)Math.PI / 900.0f;
-
+    
     private Texture _textureObject;
 
     private float ViewportWidth = 1920.0f;
@@ -205,6 +203,7 @@ public class DesktopRendererControl : OpenGlControlBase
         _silkGLContext.ClearColor(Color.Black);
         _silkGLContext.Clear((uint)(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit));
         _silkGLContext.Enable(EnableCap.DepthTest);
+
         _silkGLContext.Viewport(0, 0, (uint)ViewportWidth, (uint)ViewportHeight); // TODO: Move me to constants
 
         _elementsBufferObject.Bind();
@@ -238,12 +237,6 @@ public class DesktopRendererControl : OpenGlControlBase
         _silkGLContext.DrawElements(PrimitiveType.Triangles, (uint)_indices.Length, DrawElementsType.UnsignedInt, null);
 
         // Rotate camera (debug)
-        _camera.Lat += _cameraLatStep;
-        if (_camera.Lat > (Math.PI / 2.0f) - _cameraLatStep || _camera.Lat < (Math.PI / -2.0f) + _cameraLatStep)
-        {
-            _cameraLatStep *= -1.0f;
-        }
-
         _camera.Lon += (float)Math.PI / 400.0f;
         if (_camera.Lon > Math.PI)
         {

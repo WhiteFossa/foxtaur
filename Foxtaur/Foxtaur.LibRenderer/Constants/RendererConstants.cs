@@ -13,7 +13,7 @@ public static class RendererConstants
     /// <summary>
     ///     Add this delta to coordinates check to avoid exceptions in case of non-precise calculations (geocoordinates)
     /// </summary>
-    public const float GeoCoordinatesCheckDelta = 0.001f;
+    public const float GeoCoordinatesCheckDelta = 0.01f;
 
     /// <summary>
     ///     Minimal possible latitude
