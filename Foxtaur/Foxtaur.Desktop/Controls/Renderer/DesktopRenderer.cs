@@ -81,8 +81,8 @@ public class DesktopRendererControl : OpenGlControlBase
         // Creating camera
         _camera = new Camera()
         {
-            Lat = 1.5f,
-            Lon = 0.0f,
+            Lat = -1.0f,
+            Lon = -1.0f,
             H = RendererConstants.EarthRadius * 2.1f
         };
 
@@ -237,9 +237,9 @@ public class DesktopRendererControl : OpenGlControlBase
 
         _silkGLContext.DrawElements(PrimitiveType.Triangles, (uint)_indices.Length, DrawElementsType.UnsignedInt, null);
 
-        // Rotate camera (debug)
-        /*_camera.Lat += _cameraLatStep;
-        if (_camera.Lat > Math.PI / 2.0f || _camera.Lat < Math.PI / -2.0f)
+        /*// Rotate camera (debug)
+        _camera.Lat += _cameraLatStep;
+        if (_camera.Lat > (Math.PI / 2.0f) - _cameraLatStep || _camera.Lat < (Math.PI / -2.0f) + _cameraLatStep)
         {
             _cameraLatStep *= -1.0f;
         }
@@ -248,9 +248,7 @@ public class DesktopRendererControl : OpenGlControlBase
         if (_camera.Lon > Math.PI)
         {
             _camera.Lon -= 2.0f * (float)Math.PI;
-        }
-        */
-
+        }*/
 
         Dispatcher.UIThread.Post(InvalidateVisual, DispatcherPriority.Background);
     }
