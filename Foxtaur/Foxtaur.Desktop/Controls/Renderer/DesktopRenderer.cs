@@ -215,16 +215,4 @@ public class DesktopRendererControl : OpenGlControlBase
         _shader.Dispose();
         base.OnOpenGlDeinit(gl, fb);
     }
-    
-    /// <summary>
-    /// Check and log OpenGL errors
-    /// </summary>
-    private void CheckAndLogOpenGLErrors(GlInterface gl)
-    {
-        int error;
-        while ((error = gl.GetError()) != GlConsts.GL_NO_ERROR)
-        {
-            _logger.Error($"OpenGL error: { error }");   
-        }
-    }
 }

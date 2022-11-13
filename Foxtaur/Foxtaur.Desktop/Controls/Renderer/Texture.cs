@@ -73,6 +73,7 @@ public class Texture : IDisposable
             _silkGl.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int) GLEnum.Linear);
             _silkGl.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureBaseLevel, 0);
             _silkGl.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMaxLevel, 8);
+            
             //Generating mipmaps.
             _silkGl.GenerateMipmap(TextureTarget.Texture2D);
         }
