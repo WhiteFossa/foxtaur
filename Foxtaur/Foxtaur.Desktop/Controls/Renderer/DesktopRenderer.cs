@@ -85,11 +85,11 @@ public class DesktopRendererControl : OpenGlControlBase
             for (var lon = (float)Math.PI; lon > -1.0f * (float)Math.PI; lon -= (float)Math.PI / 90.0f)
             {
                 var lonEaster = lon - (float)Math.PI / 90.0f;
-                
-                var geoPoint0 = new GeoPoint() { Lat = lat, Lon = lon, H = 1.0f };
-                var geoPoint1 = new GeoPoint() { Lat = latNorther, Lon = lon, H = 1.0f };
-                var geoPoint2 = new GeoPoint() { Lat = latNorther, Lon = lonEaster, H = 1.0f };
-                var geoPoint3 = new GeoPoint() { Lat = lat, Lon = lonEaster, H = 1.0f };
+
+                var geoPoint0 = new GeoPoint(lat, lon, 0.4f);
+                var geoPoint1 = new GeoPoint(latNorther, lon, 0.4f);
+                var geoPoint2 = new GeoPoint(latNorther, lonEaster, 0.4f);
+                var geoPoint3 = new GeoPoint(lat, lonEaster, 0.4f);
 
                 var p3D0 = _sphereCoordinatesProvider.GeoToPlanar3D(geoPoint0);
                 var t2D0 = _sphereCoordinatesProvider.GeoToPlanar2D(geoPoint0);
@@ -186,8 +186,8 @@ public class DesktopRendererControl : OpenGlControlBase
         _silkGLContext.ClearColor(Color.Blue);
         _silkGLContext.Clear((uint)(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit));
         _silkGLContext.Enable(EnableCap.DepthTest);
-        _silkGLContext.Viewport(0,0, (uint)Bounds.Width, (uint)Bounds.Height);
-            
+        _silkGLContext.Viewport(0,0, (uint)1000, (uint)1000); // TODO: Move me to constants
+
         _elementsBufferObject.Bind();
         _verticesBufferObject.Bind();
         _verticesArrayObject.Bind();
