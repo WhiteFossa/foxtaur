@@ -91,7 +91,7 @@ public class DesktopRendererControl : OpenGlControlBase
 
         uint verticesCounter = 0;
 
-        var step = (float)Math.PI / 90.0f;
+        var step = (float)Math.PI / 900.0f;
 
         for (var lat = (float)Math.PI / -2.0f; lat < (float)Math.PI / 2.0f; lat += step)
         {
@@ -200,6 +200,8 @@ public class DesktopRendererControl : OpenGlControlBase
     /// </summary>
     protected unsafe override void OnOpenGlRender(GlInterface gl, int fb)
     {
+        _logger.Error($"Width: { Bounds.Width }, Height: { Bounds.Height }");
+        
         _silkGLContext.ClearColor(Color.Black);
         _silkGLContext.Clear((uint)(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit));
         _silkGLContext.Enable(EnableCap.DepthTest);
