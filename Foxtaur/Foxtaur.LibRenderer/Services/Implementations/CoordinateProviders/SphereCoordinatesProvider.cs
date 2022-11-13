@@ -12,7 +12,7 @@ public class SphereCoordinatesProvider : ICoordinatesProvider
 {
     public PlanarPoint2D GeoToPlanar2D(GeoPoint geo)
     {
-        return new PlanarPoint2D((geo.Lon - (float)Math.PI) / (-2.0f * (float)Math.PI), geo.Lat / (float)Math.PI + 0.5f);
+        return new PlanarPoint2D((geo.Lon - (float)Math.PI) / (2.0f * (float)Math.PI) + 1.0f, geo.Lat / (float)Math.PI + 0.5f);
     }
 
     public PlanarPoint3D GeoToPlanar3D(GeoPoint geo)

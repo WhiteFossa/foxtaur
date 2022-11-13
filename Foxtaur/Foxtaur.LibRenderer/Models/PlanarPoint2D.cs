@@ -19,16 +19,6 @@ public class PlanarPoint2D
 
     public PlanarPoint2D(float x, float y)
     {
-        if (x < RendererConstants.MinPlanarCoord || x > RendererConstants.MaxPlanarCoord)
-        {
-            throw new ArgumentException(nameof(x));
-        }
-        
-        if (y < RendererConstants.MinPlanarCoord || y > RendererConstants.MaxPlanarCoord)
-        {
-            throw new ArgumentException(nameof(y));
-        }
-
         X = x;
         Y = y;
     }

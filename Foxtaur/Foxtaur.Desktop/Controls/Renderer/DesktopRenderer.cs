@@ -51,16 +51,14 @@ public class DesktopRendererControl : OpenGlControlBase
 
     private Shader _shader;
 
+    /// <summary>
+    /// Camera
+    /// </summary>
+    private Camera _camera;
+
     private Texture _textureObject;
     
-    // private static Vector3 CameraDirection = Vector3.Zero;
-    // private static float CameraYaw = -90f;
-    // private static float CameraPitch = 0f;
-    // private static float CameraZoom = 45f;
-
-    /// <summary>
-    /// Sphere coordinates provider (will be moved to a service)
-    /// </summary>
+    // DI stuff
     private ICoordinatesProvider _sphereCoordinatesProvider = new SphereCoordinatesProvider();
 
     /// <summary>
@@ -77,11 +75,13 @@ public class DesktopRendererControl : OpenGlControlBase
     /// </summary>
     public DesktopRendererControl()
     {
-        /*var gp1 = new GeoPoint(0.0f, 0.0f, 0.3f);
-        var gp2 = new GeoPoint(-0.5f, (float)Math.PI / -2.0f, 0.3f);
-        
-        var pp1 = _sphereCoordinatesProvider.GeoToPlanar3D(gp1);
-        var pp2 = _sphereCoordinatesProvider.GeoToPlanar3D(gp2);*/
+        // Creating camera
+        _camera = new Camera()
+        {
+            Lat = 0.0f,
+            Lon = 0.0f,
+            H = RendererConstants.EarthRadius * 2.1f
+        };
         
         // Loading points
         var earthVertices = new List<float>();
@@ -202,7 +202,7 @@ public class DesktopRendererControl : OpenGlControlBase
         _silkGLContext.ClearColor(Color.Blue);
         _silkGLContext.Clear((uint)(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit));
         _silkGLContext.Enable(EnableCap.DepthTest);
-        _silkGLContext.Viewport(0,0, (uint)Bounds.Width, (uint)Bounds.Height); // TODO: Move me to constants
+        _silkGLContext.Viewport(0,0, (uint)3840, (uint)2160); // TODO: Move me to constants
 
         _elementsBufferObject.Bind();
         _verticesBufferObject.Bind();
@@ -214,15 +214,16 @@ public class DesktopRendererControl : OpenGlControlBase
         _shader.SetUniform1i("ourTexture", 0);
         
         // Projections
-        var cameraPosition = new Vector3(0.1f, 0.1f, 0.0f);
+        var cameraPositionP3D = _camera.GetCameraPosition();
+        var cameraPosition = new Vector3(cameraPositionP3D.X, cameraPositionP3D.Y, cameraPositionP3D.Z);
         var cameraTarget = new Vector3(0.0f, 0.0f, 0.0f);
         var cameraDirection = Vector3.Normalize(cameraPosition - cameraTarget);
         
-        var cameraUp = Vector3.UnitY;
+        var cameraUp = Vector3.UnitZ;
         
-        var model = Matrix4x4.CreateRotationZ(0.0f) * Matrix4x4.CreateRotationY(0.0f) * Matrix4x4.CreateRotationX((float)Math.PI / -2.0f); // Rotation
+        var model = Matrix4x4.CreateRotationZ(0.0f) * Matrix4x4.CreateRotationY(0.0f) * Matrix4x4.CreateRotationX(0.0f); // Rotation
         var view = Matrix4x4.CreateLookAt(cameraPosition, cameraDirection, cameraUp); // Camera position
-        var projection = Matrix4x4.CreatePerspectiveFieldOfView(3.0f, (float)Bounds.Width / (float)Bounds.Height, 0.1f, 100.0f); // Zoom
+        var projection = Matrix4x4.CreatePerspectiveFieldOfView(1.0f, 1.0f, 0.1f, 100.0f); // Zoom
         
         _shader.SetUniform4f("uModel", model);
         _shader.SetUniform4f("uView", view);
@@ -233,6 +234,21 @@ public class DesktopRendererControl : OpenGlControlBase
         //_silkGLContext.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Line);
 
         _silkGLContext.DrawElements(PrimitiveType.Triangles, (uint)_indices.Length, DrawElementsType.UnsignedInt, null);
+        
+        // Rotate camera (debug)
+        _camera.Lat += (float)Math.PI / 900.0f;
+        if (_camera.Lat > Math.PI / 2.0f)
+        {
+            _camera.Lat -= (float)Math.PI;
+        }
+        
+        _camera.Lon += (float)Math.PI / 400.0f;
+        if (_camera.Lon > Math.PI)
+        {
+            _camera.Lon -= 2.0f * (float)Math.PI;
+        }
+        
+        
         Dispatcher.UIThread.Post(InvalidateVisual, DispatcherPriority.Background);
     }
 

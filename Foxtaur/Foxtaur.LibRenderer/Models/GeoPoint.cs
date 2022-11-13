@@ -34,11 +34,6 @@ public class GeoPoint
             throw new ArgumentException(nameof(lon));
         }
 
-        if (h < RendererConstants.MinH || h > RendererConstants.MaxH)
-        {
-            throw new ArgumentException(nameof(h));
-        }
-
         Lat = lat;
         Lon = lon;
         H = h;

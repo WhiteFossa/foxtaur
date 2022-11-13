@@ -14,11 +14,6 @@ public class PlanarPoint3D : PlanarPoint2D
 
     public PlanarPoint3D(float x, float y, float z) : base(x, y)
     {
-        if (z < RendererConstants.MinPlanarCoord || z > RendererConstants.MaxPlanarCoord)
-        {
-            throw new ArgumentException(nameof(z));
-        }
-
         Z = z;
     }
 }
