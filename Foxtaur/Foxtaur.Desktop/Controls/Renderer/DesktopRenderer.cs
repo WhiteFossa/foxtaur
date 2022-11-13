@@ -83,52 +83,78 @@ public class DesktopRendererControl : OpenGlControlBase
         _camera = new Camera()
         {
             Lat = 0.0f,
-            Lon = 0.0f,
+            Lon = (float)Math.PI,
             H = RendererConstants.EarthRadius * 2.5f
         };
 
         // Generating the Earth
-        var step = (float)Math.PI / 900.0f;
+        var step = (float)Math.PI / 90.0f;
 
         for (var lat = (float)Math.PI / -2.0f; lat < (float)Math.PI / 2.0f; lat += step)
         {
             var latNorther = lat + step;
 
-            for (var lon = (float)Math.PI; lon > -1.0f * (float)Math.PI; lon -= step)
+            // First two points of a stripe
+            var geoPoint0 = new GeoPoint(lat, (float)Math.PI, RendererConstants.EarthRadius);
+            var geoPoint1 = new GeoPoint(latNorther, (float)Math.PI, RendererConstants.EarthRadius);
+            
+            // Planar coordinates of the two first points
+            var p3D0 = _sphereCoordinatesProvider.GeoToPlanar3D(geoPoint0);
+            var t2D0 = _sphereCoordinatesProvider.GeoToPlanar2D(geoPoint0);
+            
+            var p3D1 = _sphereCoordinatesProvider.GeoToPlanar3D(geoPoint1);
+            var t2D1 = _sphereCoordinatesProvider.GeoToPlanar2D(geoPoint1);
+            
+            // Adding vertexes (not indexes!)
+            var i3D0 = _earthMesh.AddVertex(p3D0, t2D0);
+            var i3D1 = _earthMesh.AddVertex(p3D1, t2D1);
+            
+            for (var lon = (float)Math.PI - step; lon > -1.0f * (float)Math.PI; lon -= step)
             {
-                var lonEaster = lon - step;
-
-                var geoPoint0 = new GeoPoint(lat, lon, RendererConstants.EarthRadius);
-                var geoPoint1 = new GeoPoint(latNorther, lon, RendererConstants.EarthRadius);
-                var geoPoint2 = new GeoPoint(latNorther, lonEaster, RendererConstants.EarthRadius);
-                var geoPoint3 = new GeoPoint(lat, lonEaster, RendererConstants.EarthRadius);
-
-                var p3D0 = _sphereCoordinatesProvider.GeoToPlanar3D(geoPoint0);
-                var t2D0 = _sphereCoordinatesProvider.GeoToPlanar2D(geoPoint0);
-
-                var p3D1 = _sphereCoordinatesProvider.GeoToPlanar3D(geoPoint1);
-                var t2D1 = _sphereCoordinatesProvider.GeoToPlanar2D(geoPoint1);
-
-                var p3D2 = _sphereCoordinatesProvider.GeoToPlanar3D(geoPoint2);
-                var t2D2 = _sphereCoordinatesProvider.GeoToPlanar2D(geoPoint2);
-
-                var p3D3 = _sphereCoordinatesProvider.GeoToPlanar3D(geoPoint3);
-                var t2D3 = _sphereCoordinatesProvider.GeoToPlanar2D(geoPoint3);
-
+                geoPoint0 = new GeoPoint(lat, lon, RendererConstants.EarthRadius);
+                geoPoint1 = new GeoPoint(latNorther, lon, RendererConstants.EarthRadius);
                 
-                var i3D0 = _earthMesh.AddVertex(p3D0, t2D0);
-                var i3D1 = _earthMesh.AddVertex(p3D1, t2D1);
-                var i3D2 = _earthMesh.AddVertex(p3D2, t2D2);
-                var i3D3 = _earthMesh.AddVertex(p3D3, t2D3);
-
+                p3D0 = _sphereCoordinatesProvider.GeoToPlanar3D(geoPoint0);
+                t2D0 = _sphereCoordinatesProvider.GeoToPlanar2D(geoPoint0);
+            
+                p3D1 = _sphereCoordinatesProvider.GeoToPlanar3D(geoPoint1);
+                t2D1 = _sphereCoordinatesProvider.GeoToPlanar2D(geoPoint1);
+                
+                var i3D2 = _earthMesh.AddVertex(p3D0, t2D0);
+                var i3D3 = _earthMesh.AddVertex(p3D1, t2D1);
+                
                 _earthMesh.AddIndex(i3D0);
                 _earthMesh.AddIndex(i3D1);
-                _earthMesh.AddIndex(i3D2);
-
-                _earthMesh.AddIndex(i3D2);
                 _earthMesh.AddIndex(i3D3);
+                
+                _earthMesh.AddIndex(i3D3);
+                _earthMesh.AddIndex(i3D2);
                 _earthMesh.AddIndex(i3D0);
+
+                i3D0 = i3D2;
+                i3D1 = i3D3;
             }
+            
+            // Two final triangles of a stripe
+            geoPoint0 = new GeoPoint(lat, -1.0f * (float)Math.PI, RendererConstants.EarthRadius);
+            geoPoint1 = new GeoPoint(latNorther, -1.0f * (float)Math.PI, RendererConstants.EarthRadius);
+                
+            p3D0 = _sphereCoordinatesProvider.GeoToPlanar3D(geoPoint0);
+            t2D0 = _sphereCoordinatesProvider.GeoToPlanar2D(geoPoint0);
+            
+            p3D1 = _sphereCoordinatesProvider.GeoToPlanar3D(geoPoint1);
+            t2D1 = _sphereCoordinatesProvider.GeoToPlanar2D(geoPoint1);
+                
+            var i3final0 = _earthMesh.AddVertex(p3D0, t2D0);
+            var i3final1 = _earthMesh.AddVertex(p3D1, t2D1);
+            
+            _earthMesh.AddIndex(i3D0);
+            _earthMesh.AddIndex(i3D1);
+            _earthMesh.AddIndex(i3final1);
+                
+            _earthMesh.AddIndex(i3final1);
+            _earthMesh.AddIndex(i3final0);
+            _earthMesh.AddIndex(i3D0);
         }
     }
 
@@ -200,7 +226,7 @@ public class DesktopRendererControl : OpenGlControlBase
         _silkGLContext.DrawElements(PrimitiveType.Triangles, (uint)_earthMesh.Indices.Count, DrawElementsType.UnsignedInt, null);
 
         // Rotate camera (debug)
-        _camera.Lon += (float)Math.PI / 400.0f;
+        _camera.Lon += (float)Math.PI / 200.0f;
         if (_camera.Lon > Math.PI)
         {
             _camera.Lon -= 2.0f * (float)Math.PI;
