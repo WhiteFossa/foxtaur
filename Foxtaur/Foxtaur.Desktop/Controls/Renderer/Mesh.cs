@@ -38,12 +38,12 @@ public class Mesh: IDisposable
     /// <summary>
     /// Vertices
     /// </summary>
-    public List<float> Vertices = new List<float>();
+    public List<float> Vertices { get; private set; } = new List<float>();
 
     /// <summary>
     /// Indices
     /// </summary>
-    public List<uint> Indices = new List<uint>();
+    public List<uint> Indices { get; private set; } = new List<uint>();
 
     /// <summary>
     /// Vertices buffer object
@@ -91,9 +91,9 @@ public class Mesh: IDisposable
     }
 
     /// <summary>
-    /// Add vertex to mesh
+    /// Adds vertex to mesh. Returns index of fresh-added vertex in mesh
     /// </summary>
-    public void AddVertex(PlanarPoint3D vertexCoords, PlanarPoint2D textureCoords)
+    public uint AddVertex(PlanarPoint3D vertexCoords, PlanarPoint2D textureCoords)
     {
         _ = vertexCoords ?? throw new ArgumentNullException(nameof(vertexCoords));
         _ = textureCoords ?? throw new ArgumentNullException(nameof(textureCoords));
@@ -103,6 +103,16 @@ public class Mesh: IDisposable
         Vertices.Add(vertexCoords.Z);
         Vertices.Add(textureCoords.X);
         Vertices.Add(textureCoords.Y);
+
+        return (uint)(Vertices.Count / VertexSize - 1);
+    }
+
+    /// <summary>
+    /// Adds index to mesh
+    /// </summary>
+    public void AddIndex(uint index)
+    {
+        Indices.Add(index);
     }
     
     public void Dispose()

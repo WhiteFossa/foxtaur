@@ -88,8 +88,6 @@ public class DesktopRendererControl : OpenGlControlBase
         };
 
         // Generating the Earth
-        uint verticesCounter = 0;
-
         var step = (float)Math.PI / 900.0f;
 
         for (var lat = (float)Math.PI / -2.0f; lat < (float)Math.PI / 2.0f; lat += step)
@@ -117,29 +115,19 @@ public class DesktopRendererControl : OpenGlControlBase
                 var p3D3 = _sphereCoordinatesProvider.GeoToPlanar3D(geoPoint3);
                 var t2D3 = _sphereCoordinatesProvider.GeoToPlanar2D(geoPoint3);
 
-                var i3D0 = verticesCounter;
-                _earthMesh.AddVertex(p3D0, t2D0);
-                verticesCounter++;
+                
+                var i3D0 = _earthMesh.AddVertex(p3D0, t2D0);
+                var i3D1 = _earthMesh.AddVertex(p3D1, t2D1);
+                var i3D2 = _earthMesh.AddVertex(p3D2, t2D2);
+                var i3D3 = _earthMesh.AddVertex(p3D3, t2D3);
 
-                var i3D1 = verticesCounter;
-                _earthMesh.AddVertex(p3D1, t2D1);
-                verticesCounter++;
+                _earthMesh.AddIndex(i3D0);
+                _earthMesh.AddIndex(i3D1);
+                _earthMesh.AddIndex(i3D2);
 
-                var i3D2 = verticesCounter;
-                _earthMesh.AddVertex(p3D2, t2D2);
-                verticesCounter++;
-
-                var i3D3 = verticesCounter;
-                _earthMesh.AddVertex(p3D3, t2D3);
-                verticesCounter++;
-
-                _earthMesh.Indices.Add(i3D0);
-                _earthMesh.Indices.Add(i3D1);
-                _earthMesh.Indices.Add(i3D2);
-
-                _earthMesh.Indices.Add(i3D2);
-                _earthMesh.Indices.Add(i3D3);
-                _earthMesh.Indices.Add(i3D0);
+                _earthMesh.AddIndex(i3D2);
+                _earthMesh.AddIndex(i3D3);
+                _earthMesh.AddIndex(i3D0);
             }
         }
     }
