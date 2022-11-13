@@ -10,13 +10,13 @@ public class SphereCoordinatesProvider : ICoordinatesProvider
 {
     public PlanarPoint2D GeoToPlanar2D(GeoPoint geo)
     {
-        return new PlanarPoint2D(1 - (geo.Lon / (2.0f * (float)Math.PI) + 0.5f), geo.Lat / (float)Math.PI + 0.5f);
+        return new PlanarPoint2D(1 - (geo.Lon / (2.0f * (float)Math.PI) + 0.5f), 1 - (geo.Lat / (float)Math.PI + 0.5f));
     }
 
     public PlanarPoint3D GeoToPlanar3D(GeoPoint geo)
     {
-        var z = geo.H * (float)Math.Cos(geo.Lat) * (float)Math.Cos(geo.Lon);
-        var x = -1.0f * geo.H * (float)Math.Cos(geo.Lat) * (float)Math.Sin(geo.Lon);
+        var x = geo.H * (float)Math.Cos(geo.Lat) * (float)Math.Cos(geo.Lon);
+        var z = -1.0f * geo.H * (float)Math.Cos(geo.Lat) * (float)Math.Sin(geo.Lon);
         var y = geo.H * (float)Math.Sin(geo.Lat);
 
         return new PlanarPoint3D(x, y, z);

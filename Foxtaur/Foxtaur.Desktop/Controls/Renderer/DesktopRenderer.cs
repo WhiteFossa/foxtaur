@@ -81,9 +81,9 @@ public class DesktopRendererControl : OpenGlControlBase
         // Creating camera
         _camera = new Camera()
         {
-            Lat = -1.0f,
-            Lon = -1.0f,
-            H = RendererConstants.EarthRadius * 2.1f
+            Lat = 0.0f,
+            Lon = 0.0f,
+            H = RendererConstants.EarthRadius * 2.5f
         };
 
         // Loading points
@@ -161,7 +161,7 @@ public class DesktopRendererControl : OpenGlControlBase
                 earthIndices.Add(i3D0);
             }
         }
-
+        
         _vertices = earthVertices.ToArray();
         _indices = earthIndices.ToArray();
     }
@@ -219,7 +219,7 @@ public class DesktopRendererControl : OpenGlControlBase
         var cameraTarget = new Vector3(0.0f, 0.0f, 0.0f);
         var cameraDirection = Vector3.Normalize(cameraPosition - cameraTarget);
 
-        var cameraUp = Vector3.UnitY;
+        var cameraUp = new Vector3(0.0f, -1.0f, 0.0f);
 
         var model = Matrix4x4.CreateRotationZ(0.0f) * Matrix4x4.CreateRotationY(0.0f) * Matrix4x4.CreateRotationX(0.0f); // Rotation
         var view = Matrix4x4.CreateLookAt(cameraPosition, cameraDirection, cameraUp); // Camera position
@@ -237,7 +237,7 @@ public class DesktopRendererControl : OpenGlControlBase
 
         _silkGLContext.DrawElements(PrimitiveType.Triangles, (uint)_indices.Length, DrawElementsType.UnsignedInt, null);
 
-        /*// Rotate camera (debug)
+        // Rotate camera (debug)
         _camera.Lat += _cameraLatStep;
         if (_camera.Lat > (Math.PI / 2.0f) - _cameraLatStep || _camera.Lat < (Math.PI / -2.0f) + _cameraLatStep)
         {
@@ -248,7 +248,7 @@ public class DesktopRendererControl : OpenGlControlBase
         if (_camera.Lon > Math.PI)
         {
             _camera.Lon -= 2.0f * (float)Math.PI;
-        }*/
+        }
 
         Dispatcher.UIThread.Post(InvalidateVisual, DispatcherPriority.Background);
     }
