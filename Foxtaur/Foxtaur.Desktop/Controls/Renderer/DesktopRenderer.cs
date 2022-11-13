@@ -92,14 +92,12 @@ public class DesktopRendererControl : OpenGlControlBase
 
         var step = (float)Math.PI / 90.0f;
         
-        for (var lat = 0.0f; lat < (float)Math.PI / 2.0f - step; lat += step)
+        for (var lat = 0.0f; lat < (float)Math.PI / 2.0f; lat += step)
         {
             var latNorther = lat + step;
             
-            for (var lon = (float)Math.PI; lon > -1.0f * (float)Math.PI + step; lon -= step)
+            for (var lon = (float)Math.PI; lon > -1.0f * (float)Math.PI; lon -= step)
             {
-                //_logger.Error($"Lat: { lat }, Lon: { lon }");
-                
                 var lonEaster = lon - step;
 
                 var geoPoint0 = new GeoPoint(lat, lon, RendererConstants.EarthRadius);
