@@ -191,7 +191,7 @@ public class DesktopRendererControl : OpenGlControlBase
         _shader = new Shader(_silkGLContext, @"Resources/Shaders/shader.vert", @"Resources/Shaders/shader.frag");
 
         // Loading texture
-        _textureObject = new Texture(_silkGLContext, @"Resources/Textures/Basemaps/HYP_50M_SR_W.tif");
+        _textureObject = new Texture(_silkGLContext, @"Resources/Textures/Basemaps/HYP_50M_SR_W.jpeg");
     }
     
     /// <summary>
@@ -214,7 +214,7 @@ public class DesktopRendererControl : OpenGlControlBase
         _shader.SetUniform1i("ourTexture", 0);
         
         // Projections
-        var cameraPosition = new Vector3(0.1f, 0.0f, 0.0f);
+        var cameraPosition = new Vector3(0.1f, 0.1f, 0.0f);
         var cameraTarget = new Vector3(0.0f, 0.0f, 0.0f);
         var cameraDirection = Vector3.Normalize(cameraPosition - cameraTarget);
         
