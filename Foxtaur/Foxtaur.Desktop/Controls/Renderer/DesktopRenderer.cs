@@ -107,32 +107,32 @@ public class DesktopRendererControl : OpenGlControlBase
                 earthVertices.Add(p3D0.X);
                 earthVertices.Add(p3D0.Y);
                 earthVertices.Add(p3D0.Z);
-                earthVertices.Add(t2D0.Y);
                 earthVertices.Add(t2D0.X);
+                earthVertices.Add(t2D0.Y);
                 verticesCounter++;
                 
                 var i3D1 = verticesCounter;
                 earthVertices.Add(p3D1.X);
                 earthVertices.Add(p3D1.Y);
                 earthVertices.Add(p3D1.Z);
-                earthVertices.Add(t2D1.Y);
                 earthVertices.Add(t2D1.X);
+                earthVertices.Add(t2D1.Y);
                 verticesCounter++;
                 
                 var i3D2 = verticesCounter;
                 earthVertices.Add(p3D2.X);
                 earthVertices.Add(p3D2.Y);
                 earthVertices.Add(p3D2.Z);
-                earthVertices.Add(t2D2.Y);
                 earthVertices.Add(t2D2.X);
+                earthVertices.Add(t2D2.Y);
                 verticesCounter++;
                 
                 var i3D3 = verticesCounter;
                 earthVertices.Add(p3D3.X);
                 earthVertices.Add(p3D3.Y);
                 earthVertices.Add(p3D3.Z);
-                earthVertices.Add(t2D3.Y);
                 earthVertices.Add(t2D3.X);
+                earthVertices.Add(t2D3.Y);
                 verticesCounter++;
                 
                 earthIndices.Add(i3D0);
@@ -175,7 +175,7 @@ public class DesktopRendererControl : OpenGlControlBase
         _shader = new Shader(_silkGLContext, @"Resources/Shaders/shader.vert", @"Resources/Shaders/shader.frag");
 
         // Loading texture
-        _textureObject = new Texture(_silkGLContext, @"Resources/davydovo.png");
+        _textureObject = new Texture(_silkGLContext, @"Resources/Textures/Basemaps/HYP_50M_SR_W.tif");
     }
     
     /// <summary>

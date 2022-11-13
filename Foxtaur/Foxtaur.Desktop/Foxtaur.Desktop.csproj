@@ -11,6 +11,7 @@
     <ItemGroup>
         <Folder Include="Models\" />
         <AvaloniaResource Include="Assets\**" />
+        <Folder Include="Resources\Textures\Basemaps" />
         <None Remove=".gitignore" />
         <None Update="Resources\davydovo.png">
           <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -19,6 +20,9 @@
           <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </None>
         <None Update="Resources\Shaders\shader.vert">
+          <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
+        <None Update="Resources\Textures\Basemaps\HYP_50M_SR_W.tif">
           <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </None>
     </ItemGroup>
