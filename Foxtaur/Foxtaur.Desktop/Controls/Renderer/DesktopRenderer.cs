@@ -2,8 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Numerics;
+using Avalonia.Controls;
 using Avalonia.OpenGL;
 using Avalonia.OpenGL.Controls;
+using Avalonia.Rendering;
 using Avalonia.Threading;
 using Foxtaur.LibRenderer.Constants;
 using Foxtaur.LibRenderer.Models;
@@ -56,8 +58,26 @@ public class DesktopRendererControl : OpenGlControlBase
     
     private Texture _textureObject;
 
-    private float ViewportWidth = 1920.0f;
-    private float ViewportHeight = 1080.0f;
+    /// <summary>
+    /// Screen scaling
+    /// </summary>
+    private float _scaling;
+
+    /// <summary>
+    /// Viewport width
+    /// </summary>
+    private float _viewportWidth;
+
+    /// <summary>
+    /// Viewport height
+    /// </summary>
+    private float _viewportHeight;
+
+    /// <summary>
+    /// Renderer aspect ratio
+    /// </summary>
+    private float _aspectRatio;
+    
 
     // DI stuff
     private ICoordinatesProvider _sphereCoordinatesProvider = new SphereCoordinatesProvider();
@@ -171,6 +191,8 @@ public class DesktopRendererControl : OpenGlControlBase
     {
         base.OnOpenGlInit(gl, fb);
 
+        CalculateViewportSizes();
+
         _silkGLContext = GL.GetApi(gl.GetProcAddress);
 
         // Object for vertices
@@ -200,13 +222,13 @@ public class DesktopRendererControl : OpenGlControlBase
     /// </summary>
     protected unsafe override void OnOpenGlRender(GlInterface gl, int fb)
     {
-        _logger.Error($"Width: { Bounds.Width }, Height: { Bounds.Height }");
+        CalculateViewportSizes();
         
         _silkGLContext.ClearColor(Color.Black);
         _silkGLContext.Clear((uint)(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit));
         _silkGLContext.Enable(EnableCap.DepthTest);
 
-        _silkGLContext.Viewport(0, 0, (uint)ViewportWidth, (uint)ViewportHeight); // TODO: Move me to constants
+        _silkGLContext.Viewport(0, 0, (uint)_viewportWidth, (uint)_viewportHeight); // TODO: Move me to constants
 
         _elementsBufferObject.Bind();
         _verticesBufferObject.Bind();
@@ -224,10 +246,10 @@ public class DesktopRendererControl : OpenGlControlBase
 
         var model = Matrix4x4.CreateRotationZ(0.0f) * Matrix4x4.CreateRotationY(0.0f) * Matrix4x4.CreateRotationX(0.0f); // Rotation
         var view = Matrix4x4.CreateLookAt(cameraPosition, cameraDirection, cameraUp); // Camera position
-        var projection = Matrix4x4.CreatePerspectiveFieldOfView(1.0f, ViewportWidth / ViewportHeight, 0.1f, 100.0f); // Zoom
+        var projection = Matrix4x4.CreatePerspectiveFieldOfView(1.0f, _aspectRatio, 0.1f, 100.0f); // Zoom
 
         // Setting shader parameters (common)
-        _shader.SetUniform2f("resolution", new Vector2(ViewportWidth, ViewportHeight));
+        _shader.SetUniform2f("resolution", new Vector2(_viewportWidth, _viewportHeight));
         
         // Setting shader parameters (vertex)
         _shader.SetUniform4f("uModel", model);
@@ -263,5 +285,18 @@ public class DesktopRendererControl : OpenGlControlBase
         _textureObject.Dispose();
         _shader.Dispose();
         base.OnOpenGlDeinit(gl, fb);
+    }
+
+    /// <summary>
+    /// Calculate scaling and viewport sizes
+    /// </summary>
+    private void CalculateViewportSizes()
+    {
+        _scaling = (float)VisualRoot.RenderScaling;
+
+        _viewportWidth = (float)Bounds.Width * _scaling;
+        _viewportHeight = (float)Bounds.Height * _scaling;
+
+        _aspectRatio = _viewportWidth / _viewportHeight;
     }
 }
