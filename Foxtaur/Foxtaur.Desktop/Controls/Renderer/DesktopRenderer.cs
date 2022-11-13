@@ -224,11 +224,15 @@ public class DesktopRendererControl : OpenGlControlBase
         var view = Matrix4x4.CreateLookAt(cameraPosition, cameraDirection, cameraUp); // Camera position
         var projection = Matrix4x4.CreatePerspectiveFieldOfView(1.0f, ViewportWidth / ViewportHeight, 0.1f, 100.0f); // Zoom
 
-        // Setting shader parameters
+        // Setting shader parameters (common)
+        _shader.SetUniform2f("resolution", new Vector2(ViewportWidth, ViewportHeight));
+        
+        // Setting shader parameters (vertex)
         _shader.SetUniform4f("uModel", model);
         _shader.SetUniform4f("uView", view);
         _shader.SetUniform4f("uProjection", projection);
         
+        // Setting shader parameters (fragments)
         _shader.SetUniform1i("ourTexture", 0);
         _textureObject.Bind();
 

@@ -77,6 +77,17 @@ public class Shader : IDisposable
 
         _silkGl.UniformMatrix4(location, 1, false, (float*)&value);
     }
+    
+    public unsafe void SetUniform2f(string name, Vector2 value)
+    {
+        int location = _silkGl.GetUniformLocation(_handle, name);
+        if (location == -1)
+        {
+            RendererHelper.LogAndThrowFatalError(_logger, $"{name} uniform not found on shader.");
+        }
+
+        _silkGl.Uniform2(location, value);
+    }
 
     public void Dispose()
     {
