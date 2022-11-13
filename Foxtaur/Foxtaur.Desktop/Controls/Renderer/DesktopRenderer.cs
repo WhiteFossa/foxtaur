@@ -19,44 +19,9 @@ namespace Foxtaur.Desktop.Controls.Renderer;
 public class DesktopRendererControl : OpenGlControlBase
 {
     /// <summary>
-    ///     Vertexes positions
+    /// Logger
     /// </summary>
-    private const int VerticesPositionLocation = 0;
-
-    /// <summary>
-    ///     Vertexes texture coords
-    /// </summary>
-    private const int VerticesTextureCoordsLocation = 1;
-
-    /// <summary>
-    ///     Silk.NET OpenGL context
-    /// </summary>
-    private GL _silkGLContext;
-
     private Logger _logger = LogManager.GetCurrentClassLogger();
-
-    /// <summary>
-    ///     Vertices
-    /// </summary>
-    private readonly float[] _vertices;
-
-    /// <summary>
-    ///     Indices
-    /// </summary>
-    private readonly uint[] _indices;
-
-    private BufferObject<float> _verticesBufferObject;
-    private BufferObject<uint> _elementsBufferObject;
-    private VertexArrayObject<float, uint> _verticesArrayObject;
-
-    private Shader _shader;
-
-    /// <summary>
-    ///     Camera
-    /// </summary>
-    private Camera _camera;
-    
-    private Texture _textureObject;
 
     /// <summary>
     /// Screen scaling
@@ -78,7 +43,25 @@ public class DesktopRendererControl : OpenGlControlBase
     /// </summary>
     private float _aspectRatio;
     
+    /// <summary>
+    /// Silk.NET OpenGL context
+    /// </summary>
+    private GL _silkGLContext;
+    
+    private Shader _shader;
 
+    /// <summary>
+    ///     Camera
+    /// </summary>
+    private Camera _camera;
+
+    /// <summary>
+    /// Earth mesh
+    /// </summary>
+    private Mesh _earthMesh = new Mesh();
+    
+    private Texture _textureObject;
+    
     // DI stuff
     private ICoordinatesProvider _sphereCoordinatesProvider = new SphereCoordinatesProvider();
 
@@ -180,8 +163,8 @@ public class DesktopRendererControl : OpenGlControlBase
             }
         }
         
-        _vertices = earthVertices.ToArray();
-        _indices = earthIndices.ToArray();
+        _earthMesh.Vertices = earthVertices.ToArray();
+        _earthMesh.Indices = earthIndices.ToArray();
     }
 
     /// <summary>
@@ -194,25 +177,13 @@ public class DesktopRendererControl : OpenGlControlBase
         CalculateViewportSizes();
 
         _silkGLContext = GL.GetApi(gl.GetProcAddress);
-
-        // Object for vertices
-        _verticesBufferObject = new BufferObject<float>(_silkGLContext, _vertices, BufferTargetARB.ArrayBuffer);
-
-        // Object for indices
-        _elementsBufferObject = new BufferObject<uint>(_silkGLContext, _indices, BufferTargetARB.ElementArrayBuffer);
-
-        // Vertices array
-        _verticesArrayObject =
-            new VertexArrayObject<float, uint>(_silkGLContext, _verticesBufferObject, _elementsBufferObject);
-
-        //Telling the VAO object how to lay out the attribute pointers
-        _verticesArrayObject.VertexAttributePointer(VerticesPositionLocation, 3, VertexAttribPointerType.Float, 5, 0);
-        _verticesArrayObject.VertexAttributePointer(VerticesTextureCoordsLocation, 2, VertexAttribPointerType.Float, 5,
-            3);
-
+        
         // Loading shaders
         _shader = new Shader(_silkGLContext, @"Resources/Shaders/shader.vert", @"Resources/Shaders/shader.frag");
 
+        // Earth
+        _earthMesh.GenerateBuffers(_silkGLContext);
+        
         // Loading texture
         _textureObject = new Texture(_silkGLContext, @"Resources/Textures/Basemaps/HYP_50M_SR_W_SMALL.jpeg");
     }
@@ -229,10 +200,6 @@ public class DesktopRendererControl : OpenGlControlBase
         _silkGLContext.Enable(EnableCap.DepthTest);
 
         _silkGLContext.Viewport(0, 0, (uint)_viewportWidth, (uint)_viewportHeight); // TODO: Move me to constants
-
-        _elementsBufferObject.Bind();
-        _verticesBufferObject.Bind();
-        _verticesArrayObject.Bind();
 
         _shader.Use();
 
@@ -262,7 +229,9 @@ public class DesktopRendererControl : OpenGlControlBase
 
         //_silkGLContext.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Line);
 
-        _silkGLContext.DrawElements(PrimitiveType.Triangles, (uint)_indices.Length, DrawElementsType.UnsignedInt, null);
+        // Earth
+        _earthMesh.BindBuffers();
+        _silkGLContext.DrawElements(PrimitiveType.Triangles, (uint)_earthMesh.Indices.Length, DrawElementsType.UnsignedInt, null);
 
         // Rotate camera (debug)
         _camera.Lon += (float)Math.PI / 400.0f;
@@ -279,10 +248,10 @@ public class DesktopRendererControl : OpenGlControlBase
     /// </summary>
     protected override void OnOpenGlDeinit(GlInterface gl, int fb)
     {
-        _verticesBufferObject.Dispose();
-        _elementsBufferObject.Dispose();
-        _verticesArrayObject.Dispose();
+        // Earth
+        _earthMesh.Dispose();
         _textureObject.Dispose();
+        
         _shader.Dispose();
         base.OnOpenGlDeinit(gl, fb);
     }
