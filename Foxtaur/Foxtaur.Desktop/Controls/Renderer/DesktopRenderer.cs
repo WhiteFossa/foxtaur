@@ -56,7 +56,12 @@ public class DesktopRendererControl : OpenGlControlBase
     /// </summary>
     private Camera _camera;
 
+    private float _cameraLatStep = (float)Math.PI / 900.0f;
+
     private Texture _textureObject;
+    
+    private float ViewportWidth = 1920.0f;
+    private float ViewportHeight = 1080.0f;
     
     // DI stuff
     private ICoordinatesProvider _sphereCoordinatesProvider = new SphereCoordinatesProvider();
@@ -92,7 +97,7 @@ public class DesktopRendererControl : OpenGlControlBase
 
         var step = (float)Math.PI / 90.0f;
         
-        for (var lat = 0.0f; lat < (float)Math.PI / 2.0f; lat += step)
+        for (var lat = (float)Math.PI / -2.0f; lat < (float)Math.PI / 2.0f; lat += step)
         {
             var latNorther = lat + step;
             
@@ -200,7 +205,7 @@ public class DesktopRendererControl : OpenGlControlBase
         _silkGLContext.ClearColor(Color.Blue);
         _silkGLContext.Clear((uint)(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit));
         _silkGLContext.Enable(EnableCap.DepthTest);
-        _silkGLContext.Viewport(0,0, (uint)3840, (uint)2160); // TODO: Move me to constants
+        _silkGLContext.Viewport(0,0, (uint)ViewportWidth, (uint)ViewportHeight); // TODO: Move me to constants
 
         _elementsBufferObject.Bind();
         _verticesBufferObject.Bind();
@@ -221,7 +226,7 @@ public class DesktopRendererControl : OpenGlControlBase
         
         var model = Matrix4x4.CreateRotationZ(0.0f) * Matrix4x4.CreateRotationY(0.0f) * Matrix4x4.CreateRotationX(0.0f); // Rotation
         var view = Matrix4x4.CreateLookAt(cameraPosition, cameraDirection, cameraUp); // Camera position
-        var projection = Matrix4x4.CreatePerspectiveFieldOfView(1.0f, 1.0f, 0.1f, 100.0f); // Zoom
+        var projection = Matrix4x4.CreatePerspectiveFieldOfView(1.0f, ViewportWidth / ViewportHeight, 0.1f, 100.0f); // Zoom
         
         _shader.SetUniform4f("uModel", model);
         _shader.SetUniform4f("uView", view);
@@ -234,12 +239,12 @@ public class DesktopRendererControl : OpenGlControlBase
         _silkGLContext.DrawElements(PrimitiveType.Triangles, (uint)_indices.Length, DrawElementsType.UnsignedInt, null);
         
         // Rotate camera (debug)
-        _camera.Lat += (float)Math.PI / 900.0f;
-        if (_camera.Lat > Math.PI / 2.0f)
+        _camera.Lat += _cameraLatStep;
+        if (_camera.Lat > Math.PI / 2.0f || _camera.Lat < Math.PI / -2.0f)
         {
-            _camera.Lat -= (float)Math.PI;
+            _cameraLatStep *= -1.0f;
         }
-        
+
         _camera.Lon += (float)Math.PI / 400.0f;
         if (_camera.Lon > Math.PI)
         {
