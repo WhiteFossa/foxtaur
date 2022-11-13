@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Numerics;
 using Foxtaur.LibRenderer.Helpers;
 using NLog;
 using Silk.NET.OpenGL;
@@ -62,15 +63,15 @@ public class Shader : IDisposable
             }
             _silkGl.Uniform1(location, value);
         }
-
-        public void SetUniform(string name, float value)
+        
+        public unsafe void SetUniform4f(string name, Matrix4x4 value)
         {
             int location = _silkGl.GetUniformLocation(_handle, name);
             if (location == -1)
             {
                 RendererHelper.LogAndThrowFatalError(_logger, $"{ name } uniform not found on shader.");
             }
-            _silkGl.Uniform1(location, value);
+            _silkGl.UniformMatrix4(location, 1, false, (float*) &value);
         }
 
         public void Dispose()

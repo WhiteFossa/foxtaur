@@ -6,6 +6,7 @@ using System.Runtime.InteropServices;
 using Avalonia.OpenGL;
 using Avalonia.OpenGL.Controls;
 using Avalonia.Threading;
+using Foxtaur.LibRenderer.Constants;
 using Foxtaur.LibRenderer.Models;
 using Foxtaur.LibRenderer.Services.Abstractions.CoordinateProviders;
 using Foxtaur.LibRenderer.Services.Implementations.CoordinateProviders;
@@ -51,6 +52,11 @@ public class DesktopRendererControl : OpenGlControlBase
     private Shader _shader;
 
     private Texture _textureObject;
+    
+    // private static Vector3 CameraDirection = Vector3.Zero;
+    // private static float CameraYaw = -90f;
+    // private static float CameraPitch = 0f;
+    // private static float CameraZoom = 45f;
 
     /// <summary>
     /// Sphere coordinates provider (will be moved to a service)
@@ -71,25 +77,35 @@ public class DesktopRendererControl : OpenGlControlBase
     /// </summary>
     public DesktopRendererControl()
     {
+        /*var gp1 = new GeoPoint(0.0f, 0.0f, 0.3f);
+        var gp2 = new GeoPoint(-0.5f, (float)Math.PI / -2.0f, 0.3f);
+        
+        var pp1 = _sphereCoordinatesProvider.GeoToPlanar3D(gp1);
+        var pp2 = _sphereCoordinatesProvider.GeoToPlanar3D(gp2);*/
+        
         // Loading points
         var earthVertices = new List<float>();
 
         var earthIndices = new List<uint>();
 
         uint verticesCounter = 0;
-        
-        for (var lat = 0.0f; lat < (float)Math.PI / 2.0f; lat += (float)Math.PI / 90.0f)
-        {
-            var latNorther = lat + (float)Math.PI / 90.0f;
-            
-            for (var lon = (float)Math.PI; lon > -1.0f * (float)Math.PI; lon -= (float)Math.PI / 90.0f)
-            {
-                var lonEaster = lon - (float)Math.PI / 90.0f;
 
-                var geoPoint0 = new GeoPoint(lat, lon, 0.4f);
-                var geoPoint1 = new GeoPoint(latNorther, lon, 0.4f);
-                var geoPoint2 = new GeoPoint(latNorther, lonEaster, 0.4f);
-                var geoPoint3 = new GeoPoint(lat, lonEaster, 0.4f);
+        var step = (float)Math.PI / 90.0f;
+        
+        for (var lat = 0.0f; lat < (float)Math.PI / 2.0f - step; lat += step)
+        {
+            var latNorther = lat + step;
+            
+            for (var lon = (float)Math.PI; lon > -1.0f * (float)Math.PI + step; lon -= step)
+            {
+                //_logger.Error($"Lat: { lat }, Lon: { lon }");
+                
+                var lonEaster = lon - step;
+
+                var geoPoint0 = new GeoPoint(lat, lon, RendererConstants.EarthRadius);
+                var geoPoint1 = new GeoPoint(latNorther, lon, RendererConstants.EarthRadius);
+                var geoPoint2 = new GeoPoint(latNorther, lonEaster, RendererConstants.EarthRadius);
+                var geoPoint3 = new GeoPoint(lat, lonEaster, RendererConstants.EarthRadius);
 
                 var p3D0 = _sphereCoordinatesProvider.GeoToPlanar3D(geoPoint0);
                 var t2D0 = _sphereCoordinatesProvider.GeoToPlanar2D(geoPoint0);
@@ -186,14 +202,31 @@ public class DesktopRendererControl : OpenGlControlBase
         _silkGLContext.ClearColor(Color.Blue);
         _silkGLContext.Clear((uint)(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit));
         _silkGLContext.Enable(EnableCap.DepthTest);
-        _silkGLContext.Viewport(0,0, (uint)1000, (uint)1000); // TODO: Move me to constants
+        _silkGLContext.Viewport(0,0, (uint)Bounds.Width, (uint)Bounds.Height); // TODO: Move me to constants
 
         _elementsBufferObject.Bind();
         _verticesBufferObject.Bind();
         _verticesArrayObject.Bind();
         
         _shader.Use();
+        
+        // Setting shader parameters
         _shader.SetUniform1i("ourTexture", 0);
+        
+        // Projections
+        var cameraPosition = new Vector3(0.1f, 0.0f, 0.0f);
+        var cameraTarget = new Vector3(0.0f, 0.0f, 0.0f);
+        var cameraDirection = Vector3.Normalize(cameraPosition - cameraTarget);
+        
+        var cameraUp = Vector3.UnitY;
+        
+        var model = Matrix4x4.CreateRotationZ(0.0f) * Matrix4x4.CreateRotationY(0.0f) * Matrix4x4.CreateRotationX((float)Math.PI / -2.0f); // Rotation
+        var view = Matrix4x4.CreateLookAt(cameraPosition, cameraDirection, cameraUp); // Camera position
+        var projection = Matrix4x4.CreatePerspectiveFieldOfView(3.0f, (float)Bounds.Width / (float)Bounds.Height, 0.1f, 100.0f); // Zoom
+        
+        _shader.SetUniform4f("uModel", model);
+        _shader.SetUniform4f("uView", view);
+        _shader.SetUniform4f("uProjection", projection);
         
         _textureObject.Bind();
 

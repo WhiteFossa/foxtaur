@@ -18,7 +18,7 @@ public static class RendererConstants
     /// <summary>
     /// Minimal possible planar coordinate value
     /// </summary>
-    public const float MinPlanarCoord = 0.0f - PlanarCoordinatesCheckDelta;
+    public const float MinPlanarCoord = -1.0f - PlanarCoordinatesCheckDelta;
     
     /// <summary>
     /// Maximal possible planar coordinate value
@@ -54,4 +54,9 @@ public static class RendererConstants
     /// Maximal altitude
     /// </summary>
     public const float MaxH = 1.0f + PlanarCoordinatesCheckDelta;
+
+    /// <summary>
+    /// Earth radius (in 3D coordinates)
+    /// </summary>
+    public const float EarthRadius = 1.0f;
 }
