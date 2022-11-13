@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using Foxtaur.LibRenderer.Models;
 using Silk.NET.OpenGL;
 
 namespace Foxtaur.Desktop.Controls.Renderer;
@@ -36,12 +38,12 @@ public class Mesh: IDisposable
     /// <summary>
     /// Vertices
     /// </summary>
-    public float[] Vertices;
+    public List<float> Vertices = new List<float>();
 
     /// <summary>
     /// Indices
     /// </summary>
-    public uint[] Indices;
+    public List<uint> Indices = new List<uint>();
 
     /// <summary>
     /// Vertices buffer object
@@ -65,10 +67,10 @@ public class Mesh: IDisposable
     {
         _ = silkGl ?? throw new ArgumentNullException(nameof(silkGl));
         
-        VerticesBufferObject = new BufferObject<float>(silkGl, Vertices, BufferTargetARB.ArrayBuffer);
+        VerticesBufferObject = new BufferObject<float>(silkGl, Vertices.ToArray(), BufferTargetARB.ArrayBuffer);
 
         // Object for indices
-        ElementsBufferObject = new BufferObject<uint>(silkGl, Indices, BufferTargetARB.ElementArrayBuffer);
+        ElementsBufferObject = new BufferObject<uint>(silkGl, Indices.ToArray(), BufferTargetARB.ElementArrayBuffer);
 
         // Vertices array
         VerticesArrayObject = new VertexArrayObject<float, uint>(silkGl, VerticesBufferObject, ElementsBufferObject);
@@ -86,6 +88,21 @@ public class Mesh: IDisposable
         ElementsBufferObject.Bind();
         VerticesBufferObject.Bind();
         VerticesArrayObject.Bind();
+    }
+
+    /// <summary>
+    /// Add vertex to mesh
+    /// </summary>
+    public void AddVertex(PlanarPoint3D vertexCoords, PlanarPoint2D textureCoords)
+    {
+        _ = vertexCoords ?? throw new ArgumentNullException(nameof(vertexCoords));
+        _ = textureCoords ?? throw new ArgumentNullException(nameof(textureCoords));
+        
+        Vertices.Add(vertexCoords.X);
+        Vertices.Add(vertexCoords.Y);
+        Vertices.Add(vertexCoords.Z);
+        Vertices.Add(textureCoords.X);
+        Vertices.Add(textureCoords.Y);
     }
     
     public void Dispose()

@@ -87,11 +87,7 @@ public class DesktopRendererControl : OpenGlControlBase
             H = RendererConstants.EarthRadius * 2.5f
         };
 
-        // Loading points
-        var earthVertices = new List<float>();
-
-        var earthIndices = new List<uint>();
-
+        // Generating the Earth
         uint verticesCounter = 0;
 
         var step = (float)Math.PI / 900.0f;
@@ -122,49 +118,30 @@ public class DesktopRendererControl : OpenGlControlBase
                 var t2D3 = _sphereCoordinatesProvider.GeoToPlanar2D(geoPoint3);
 
                 var i3D0 = verticesCounter;
-                earthVertices.Add(p3D0.X);
-                earthVertices.Add(p3D0.Y);
-                earthVertices.Add(p3D0.Z);
-                earthVertices.Add(t2D0.X);
-                earthVertices.Add(t2D0.Y);
+                _earthMesh.AddVertex(p3D0, t2D0);
                 verticesCounter++;
 
                 var i3D1 = verticesCounter;
-                earthVertices.Add(p3D1.X);
-                earthVertices.Add(p3D1.Y);
-                earthVertices.Add(p3D1.Z);
-                earthVertices.Add(t2D1.X);
-                earthVertices.Add(t2D1.Y);
+                _earthMesh.AddVertex(p3D1, t2D1);
                 verticesCounter++;
 
                 var i3D2 = verticesCounter;
-                earthVertices.Add(p3D2.X);
-                earthVertices.Add(p3D2.Y);
-                earthVertices.Add(p3D2.Z);
-                earthVertices.Add(t2D2.X);
-                earthVertices.Add(t2D2.Y);
+                _earthMesh.AddVertex(p3D2, t2D2);
                 verticesCounter++;
 
                 var i3D3 = verticesCounter;
-                earthVertices.Add(p3D3.X);
-                earthVertices.Add(p3D3.Y);
-                earthVertices.Add(p3D3.Z);
-                earthVertices.Add(t2D3.X);
-                earthVertices.Add(t2D3.Y);
+                _earthMesh.AddVertex(p3D3, t2D3);
                 verticesCounter++;
 
-                earthIndices.Add(i3D0);
-                earthIndices.Add(i3D1);
-                earthIndices.Add(i3D2);
+                _earthMesh.Indices.Add(i3D0);
+                _earthMesh.Indices.Add(i3D1);
+                _earthMesh.Indices.Add(i3D2);
 
-                earthIndices.Add(i3D2);
-                earthIndices.Add(i3D3);
-                earthIndices.Add(i3D0);
+                _earthMesh.Indices.Add(i3D2);
+                _earthMesh.Indices.Add(i3D3);
+                _earthMesh.Indices.Add(i3D0);
             }
         }
-        
-        _earthMesh.Vertices = earthVertices.ToArray();
-        _earthMesh.Indices = earthIndices.ToArray();
     }
 
     /// <summary>
@@ -186,6 +163,7 @@ public class DesktopRendererControl : OpenGlControlBase
         
         // Loading texture
         _textureObject = new Texture(_silkGLContext, @"Resources/Textures/Basemaps/HYP_50M_SR_W_SMALL.jpeg");
+        //_textureObject = new Texture(_silkGLContext, @"Resources/davydovo.png");
     }
 
     /// <summary>
@@ -231,7 +209,7 @@ public class DesktopRendererControl : OpenGlControlBase
 
         // Earth
         _earthMesh.BindBuffers();
-        _silkGLContext.DrawElements(PrimitiveType.Triangles, (uint)_earthMesh.Indices.Length, DrawElementsType.UnsignedInt, null);
+        _silkGLContext.DrawElements(PrimitiveType.Triangles, (uint)_earthMesh.Indices.Count, DrawElementsType.UnsignedInt, null);
 
         // Rotate camera (debug)
         _camera.Lon += (float)Math.PI / 400.0f;
