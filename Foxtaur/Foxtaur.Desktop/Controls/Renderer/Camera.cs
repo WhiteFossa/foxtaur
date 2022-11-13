@@ -7,47 +7,43 @@ using Foxtaur.LibRenderer.Services.Implementations.CoordinateProviders;
 namespace Foxtaur.Desktop.Controls.Renderer;
 
 /// <summary>
-/// Camera
+///     Camera
 /// </summary>
 public class Camera
 {
     /// <summary>
-    /// Camera latitude
+    ///     Camera latitude
     /// </summary>
     public float Lat { get; set; }
-    
+
     /// <summary>
-    /// Camera longitude
+    ///     Camera longitude
     /// </summary>
     public float Lon { get; set; }
 
     /// <summary>
-    /// Camera height (can't be less than Earth radius)
+    ///     Camera height (can't be less than Earth radius)
     /// </summary>
     public float H
     {
-        get
-        {
-            return _h;
-        }
-        
+        get { return _h; }
+
         set
         {
             if (value < RendererConstants.EarthRadius - RendererConstants.PlanarCoordinatesCheckDelta)
             {
                 throw new ArgumentException(nameof(value));
             }
-            
+
             _h = value;
         }
-        
     }
 
     /// <summary>
-    /// Camera height
+    ///     Camera height
     /// </summary>
     private float _h;
-    
+
     private ICoordinatesProvider _sphereCoordinatesProvider = new SphereCoordinatesProvider();
 
     public PlanarPoint3D GetCameraPosition()

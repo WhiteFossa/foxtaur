@@ -1,19 +1,17 @@
-using Foxtaur.LibRenderer.Constants;
-
 namespace Foxtaur.LibRenderer.Models;
 
 /// <summary>
-/// Point with planar coordinates (2D)
+///     Point with planar coordinates (2D)
 /// </summary>
 public class PlanarPoint2D
 {
     /// <summary>
-    /// Planar X
+    ///     Planar X
     /// </summary>
     public float X { get; }
 
     /// <summary>
-    /// Planar Y
+    ///     Planar Y
     /// </summary>
     public float Y { get; }
 

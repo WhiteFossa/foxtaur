@@ -1,21 +1,21 @@
-﻿using Avalonia;
+﻿using System;
+using System.IO;
+using Avalonia;
 using Avalonia.ReactiveUI;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using NLog;
 using NLog.Extensions.Logging;
-using System;
-using System.IO;
 
 namespace Foxtaur.Desktop
 {
     class Program
     {
         /// <summary>
-        /// Dependency injection service provider
+        ///     Dependency injection service provider
         /// </summary>
-        public static ServiceProvider Di {get; set; }
-        
+        public static ServiceProvider Di { get; set; }
+
         // Initialization code. Don't use any Avalonia, third-party APIs or any
         // SynchronizationContext-reliant code before AppMain is called: things aren't initialized
         // yet and stuff might break.
@@ -25,16 +25,16 @@ namespace Foxtaur.Desktop
             // Preparing DI
             Di = ConfigureServices()
                 .BuildServiceProvider();
-            
+
             var builder = new ConfigurationBuilder()
                 .SetBasePath(Directory.GetCurrentDirectory())
-                .AddJsonFile("appsettings.json",true, true);
+                .AddJsonFile("appsettings.json", true, true);
 
             var configuration = builder.Build();
-            
+
             // Setting-up NLog
             LogManager.Configuration = new NLogLoggingConfiguration(configuration.GetSection("NLog"));
-            
+
             BuildAvaloniaApp()
                 .StartWithClassicDesktopLifetime(args);
         }
@@ -48,7 +48,7 @@ namespace Foxtaur.Desktop
                 .With(new Win32PlatformOptions { UseWgl = true })
                 .UseReactiveUI();
         }
-        
+
         // Setting up DI
         public static IServiceCollection ConfigureServices()
         {

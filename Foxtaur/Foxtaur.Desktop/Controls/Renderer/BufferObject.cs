@@ -4,7 +4,7 @@ using Silk.NET.OpenGL;
 namespace Foxtaur.Desktop.Controls.Renderer;
 
 /// <summary>
-/// OpenGL buffer
+///     OpenGL buffer
 /// </summary>
 public class BufferObject<TDataType> : IDisposable where TDataType : unmanaged
 {
@@ -21,7 +21,7 @@ public class BufferObject<TDataType> : IDisposable where TDataType : unmanaged
         Bind();
         fixed (void* d = data)
         {
-            _silkGl.BufferData(bufferType, (nuint) (data.Length * sizeof(TDataType)), d, BufferUsageARB.StaticDraw);
+            _silkGl.BufferData(bufferType, (nuint)(data.Length * sizeof(TDataType)), d, BufferUsageARB.StaticDraw);
         }
     }
 

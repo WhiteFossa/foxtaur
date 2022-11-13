@@ -3,22 +3,22 @@ using Foxtaur.LibRenderer.Constants;
 namespace Foxtaur.LibRenderer.Models;
 
 /// <summary>
-/// Geo point (always 3D - lat, lon, h)
+///     Geo point (always 3D - lat, lon, h)
 /// </summary>
 public class GeoPoint
 {
     /// <summary>
-    /// Latitude
+    ///     Latitude
     /// </summary>
     public float Lat { get; }
 
     /// <summary>
-    /// Longitude
+    ///     Longitude
     /// </summary>
     public float Lon { get; }
 
     /// <summary>
-    /// Height
+    ///     Height
     /// </summary>
     public float H { get; }
 
@@ -28,7 +28,7 @@ public class GeoPoint
         {
             throw new ArgumentException(nameof(lat));
         }
-        
+
         if (lon < RendererConstants.MinLon || lat > RendererConstants.MaxLon)
         {
             throw new ArgumentException(nameof(lon));

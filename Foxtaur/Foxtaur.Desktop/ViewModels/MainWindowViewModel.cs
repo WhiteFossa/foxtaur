@@ -1,10 +1,7 @@
-﻿using System.IO;
-using Microsoft.Extensions.Configuration;
-
-namespace Foxtaur.Desktop.ViewModels
+﻿namespace Foxtaur.Desktop.ViewModels
 {
     /// <summary>
-    /// Main view model
+    ///     Main view model
     /// </summary>
     public class MainWindowViewModel : ViewModelBase
     {
