@@ -12,17 +12,17 @@ namespace Foxtaur.Desktop.Controls.Renderer;
 public class Camera
 {
     /// <summary>
-    ///     Camera latitude
+    /// Camera latitude
     /// </summary>
     public float Lat { get; set; }
 
     /// <summary>
-    ///     Camera longitude
+    /// Camera longitude
     /// </summary>
     public float Lon { get; set; }
 
     /// <summary>
-    ///     Camera height (can't be less than Earth radius)
+    /// Camera height (can't be less than Earth radius)
     /// </summary>
     public float H
     {
@@ -40,9 +40,33 @@ public class Camera
     }
 
     /// <summary>
-    ///     Camera height
+    /// Camera height
     /// </summary>
     private float _h;
+
+    /// <summary>
+    /// Camera zoom
+    /// </summary>
+    private float _zoom;
+
+    /// <summary>
+    /// Camera zoom (with overzoom and underzoom protection)
+    /// </summary>
+    public float Zoom
+    {
+        get
+        {
+            return _zoom;
+        }
+
+        set
+        {
+            if (value > 0 && value < Math.PI)
+            {
+                _zoom = value;
+            }
+        }
+    }
 
     private ICoordinatesProvider _sphereCoordinatesProvider = new SphereCoordinatesProvider();
 

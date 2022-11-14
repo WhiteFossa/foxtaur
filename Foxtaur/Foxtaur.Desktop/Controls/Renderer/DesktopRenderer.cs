@@ -1,8 +1,10 @@
 using System;
 using System.Drawing;
 using System.Numerics;
+using Avalonia.Input;
 using Avalonia.OpenGL;
 using Avalonia.OpenGL.Controls;
+using Avalonia.Remote.Protocol.Input;
 using Avalonia.Threading;
 using Foxtaur.Desktop.Controls.Renderer.Abstractions;
 using Foxtaur.LibRenderer.Constants;
@@ -64,7 +66,7 @@ public class DesktopRendererControl : OpenGlControlBase
     private IEarthGenerator _earthGenerator = Program.Di.GetService<IEarthGenerator>();
 
     /// <summary>
-    ///     Static constructor
+    /// Static constructor
     /// </summary>
     static DesktopRendererControl()
     {
@@ -73,7 +75,7 @@ public class DesktopRendererControl : OpenGlControlBase
     }
 
     /// <summary>
-    ///     Constructor
+    /// Constructor
     /// </summary>
     public DesktopRendererControl()
     {
@@ -82,15 +84,20 @@ public class DesktopRendererControl : OpenGlControlBase
         {
             Lat = 0.0f,
             Lon = (float)Math.PI,
-            H = RendererConstants.EarthRadius * 2.5f
+            H = RendererConstants.EarthRadius * 2.5f,
+            Zoom = 1.0f
         };
 
         // Generating the Earth
         _earthMesh = _earthGenerator.GenerateFullEarth((float)Math.PI / 90.0f);
+        
+        // Setting-up input events
+        PointerWheelChanged += OnWheel;
+        PointerMoved += OnMouseMoved;
     }
 
     /// <summary>
-    ///     OpenGL initialization
+    /// OpenGL initialization
     /// </summary>
     protected unsafe override void OnOpenGlInit(GlInterface gl, int fb)
     {
@@ -112,7 +119,7 @@ public class DesktopRendererControl : OpenGlControlBase
     }
 
     /// <summary>
-    ///     Called when frame have to be rendered
+    /// Called when frame have to be rendered
     /// </summary>
     protected unsafe override void OnOpenGlRender(GlInterface gl, int fb)
     {
@@ -134,10 +141,9 @@ public class DesktopRendererControl : OpenGlControlBase
 
         var cameraUp = new Vector3(0.0f, -1.0f, 0.0f);
 
-        var model = Matrix4x4.CreateRotationZ(0.0f) * Matrix4x4.CreateRotationY(0.0f) *
-                    Matrix4x4.CreateRotationX(0.0f); // Rotation
+        var model = Matrix4x4.CreateRotationZ(0.0f) * Matrix4x4.CreateRotationY(0.0f) * Matrix4x4.CreateRotationX(0.0f); // Rotation
         var view = Matrix4x4.CreateLookAt(cameraPosition, cameraDirection, cameraUp); // Camera position
-        var projection = Matrix4x4.CreatePerspectiveFieldOfView(1.0f, _aspectRatio, 0.1f, 100.0f); // Zoom
+        var projection = Matrix4x4.CreatePerspectiveFieldOfView(_camera.Zoom, _aspectRatio, 0.1f, 100.0f); // Zoom
 
         // Setting shader parameters (common)
         _shader.SetUniform2f("resolution", new Vector2(_viewportWidth, _viewportHeight));
@@ -169,7 +175,7 @@ public class DesktopRendererControl : OpenGlControlBase
     }
 
     /// <summary>
-    ///     OpenGL de-initialization
+    /// OpenGL de-initialization
     /// </summary>
     protected override void OnOpenGlDeinit(GlInterface gl, int fb)
     {
@@ -192,5 +198,18 @@ public class DesktopRendererControl : OpenGlControlBase
         _viewportHeight = (float)Bounds.Height * _scaling;
 
         _aspectRatio = _viewportWidth / _viewportHeight;
+    }
+
+    /// <summary>
+    /// Mouse wheel event
+    /// </summary>
+    private void OnWheel(object sender, PointerWheelEventArgs e)
+    {
+        _camera.Zoom *= 1.0f + (float)e.Delta.Y / 10.0f;
+    }
+
+    private void OnMouseMoved(object sender, PointerEventArgs e)
+    {
+        int a = 10;
     }
 }
