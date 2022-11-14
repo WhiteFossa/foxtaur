@@ -1,10 +1,6 @@
-using System;
-using System.Drawing;
-using System.Numerics;
 using Avalonia.Input;
 using Avalonia.OpenGL;
 using Avalonia.OpenGL.Controls;
-using Avalonia.Remote.Protocol.Input;
 using Avalonia.Threading;
 using Foxtaur.Desktop.Controls.Renderer.Abstractions;
 using Foxtaur.LibRenderer.Constants;
@@ -12,6 +8,9 @@ using Foxtaur.LibRenderer.Services.Abstractions.CoordinateProviders;
 using Microsoft.Extensions.DependencyInjection;
 using NLog;
 using Silk.NET.OpenGL;
+using System;
+using System.Drawing;
+using System.Numerics;
 
 namespace Foxtaur.Desktop.Controls.Renderer;
 
@@ -80,17 +79,17 @@ public class DesktopRendererControl : OpenGlControlBase
     public DesktopRendererControl()
     {
         // Creating camera
-        _camera = new Camera()
+        _camera = new Camera
         {
             Lat = 0.0f,
             Lon = -0.5f,
-            H = RendererConstants.EarthRadius * 2.5f,
-            Zoom = 1.0f
+            H = RendererConstants.CameraOrbitHeight,
+            Zoom = RendererConstants.CameraMaxZoom
         };
 
         // Generating the Earth
         _earthMesh = _earthGenerator.GenerateFullEarth((float)Math.PI / 90.0f);
-        
+
         // Setting-up input events
         PointerWheelChanged += OnWheel;
         PointerMoved += OnMouseMoved;
@@ -114,8 +113,8 @@ public class DesktopRendererControl : OpenGlControlBase
         _earthMesh.GenerateBuffers(_silkGLContext);
 
         // Loading texture
-        //_textureObject = new Texture(_silkGLContext, @"Resources/Textures/Basemaps/HYP_50M_SR_W_SMALL.jpeg");
-        _textureObject = new Texture(_silkGLContext, @"Resources/davydovo.png");
+        _textureObject = new Texture(_silkGLContext, @"Resources/Textures/Basemaps/HYP_50M_SR_W_SMALL.jpeg");
+        //_textureObject = new Texture(_silkGLContext, @"Resources/davydovo.png");
     }
 
     /// <summary>
@@ -134,8 +133,7 @@ public class DesktopRendererControl : OpenGlControlBase
         _shader.Use();
 
         // Projections
-        var cameraPositionP3D = _camera.GetCameraPosition();
-        var cameraPosition = new Vector3(cameraPositionP3D.X, cameraPositionP3D.Y, cameraPositionP3D.Z);
+        Vector3 cameraPosition = _camera.GetCameraPositionAsVector();
         var cameraTarget = new Vector3(0.0f, 0.0f, 0.0f);
         var cameraDirection = Vector3.Normalize(cameraPosition - cameraTarget);
 
@@ -205,11 +203,19 @@ public class DesktopRendererControl : OpenGlControlBase
     /// </summary>
     private void OnWheel(object sender, PointerWheelEventArgs e)
     {
-        _camera.Zoom *= 1.0f + (float)e.Delta.Y / 10.0f;
+        float steps = (float)Math.Abs(e.Delta.Y);
+
+        if (e.Delta.Y > 0)
+        {
+            _camera.ZoomOut(steps);
+        }
+        else
+        {
+            _camera.ZoomIn(steps);
+        }
     }
 
     private void OnMouseMoved(object sender, PointerEventArgs e)
     {
-        int a = 10;
     }
 }

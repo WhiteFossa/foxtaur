@@ -39,4 +39,29 @@ public static class RendererConstants
     ///     Earth radius (in 3D coordinates)
     /// </summary>
     public const float EarthRadius = 1.0f;
+
+    /// <summary>
+    /// Camera zoom must be greater than this
+    /// </summary>
+    public const float CameraMinZoom = 0.0f;
+
+    /// <summary>
+    /// Camera zoom must be lesser than this
+    /// </summary>
+    public const float CameraMaxZoom = (float)Math.PI / 2.0f;
+
+    /// <summary>
+    /// Camera zoom in multiplier
+    /// </summary>
+    public const float CameraZoomInMultiplier = 0.95f;
+
+    /// <summary>
+    /// Camera zoom out multiplier
+    /// </summary>
+    public const float CameraZoomOutMultiplier = 1.05f;
+
+    /// <summary>
+    /// Camera orbit height
+    /// </summary>
+    public const float CameraOrbitHeight = 2.0f * EarthRadius;
 }
