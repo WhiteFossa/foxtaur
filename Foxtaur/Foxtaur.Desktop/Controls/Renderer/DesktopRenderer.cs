@@ -11,6 +11,7 @@ using Silk.NET.OpenGL;
 using System;
 using System.Drawing;
 using System.Numerics;
+using Foxtaur.LibRenderer.Models;
 
 namespace Foxtaur.Desktop.Controls.Renderer;
 
@@ -88,12 +89,10 @@ public class DesktopRendererControl : OpenGlControlBase
     /// </summary>
     private Matrix4x4 _projectionMatrix;
 
-    /// <summary>
-    /// Earth mesh
-    /// </summary>
-    private Mesh _earthMesh = new Mesh();
+    private Mesh _earthMesh;
+    private Texture _earthTexture;
 
-    private Texture _textureObject;
+    private Texture _redDebugTexture;
 
     // DI stuff
     private ICoordinatesProvider _sphereCoordinatesProvider = Program.Di.GetService<ISphereCoordinatesProvider>();
@@ -113,6 +112,9 @@ public class DesktopRendererControl : OpenGlControlBase
     /// </summary>
     public DesktopRendererControl()
     {
+        // Generating the Earth
+        _earthMesh = _earthGenerator.GenerateFullEarth((float)Math.PI / 90.0f);
+        
         // Creating camera
         _camera = new Camera
         {
@@ -125,9 +127,6 @@ public class DesktopRendererControl : OpenGlControlBase
         // Targetting camera
         _cameraTarget = new Vector3(0.0f, 0.0f, 0.0f);
         _cameraUp = new Vector3(0.0f, -1.0f, 0.0f);
-
-        // Generating the Earth
-        _earthMesh = _earthGenerator.GenerateFullEarth((float)Math.PI / 90.0f);
 
         // Setting-up input events
         PointerWheelChanged += OnWheel;
@@ -147,13 +146,10 @@ public class DesktopRendererControl : OpenGlControlBase
 
         // Loading shaders
         _shader = new Shader(_silkGLContext, @"Resources/Shaders/shader.vert", @"Resources/Shaders/shader.frag");
-
-        // Earth
-        _earthMesh.GenerateBuffers(_silkGLContext);
-
-        // Loading texture
-        _textureObject = new Texture(_silkGLContext, @"Resources/Textures/Basemaps/HYP_50M_SR_W_SMALL.jpeg");
-        //_textureObject = new Texture(_silkGLContext, @"Resources/davydovo.png");
+        
+        // Loading textures
+        _earthTexture = new Texture(_silkGLContext, @"Resources/Textures/Basemaps/HYP_50M_SR_W_SMALL.jpeg");
+        _redDebugTexture = new Texture(_silkGLContext, @"Resources/davydovo.png");
     }
 
     /// <summary>
@@ -189,15 +185,19 @@ public class DesktopRendererControl : OpenGlControlBase
 
         // Setting shader parameters (fragments)
         _shader.SetUniform1i("ourTexture", 0);
-        _textureObject.Bind();
+        _earthTexture.Bind();
 
         //_silkGLContext.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Line);
 
         // Earth
+        _earthMesh.GenerateBuffers(_silkGLContext);
         _earthMesh.BindBuffers();
-        _silkGLContext.DrawElements(PrimitiveType.Triangles, (uint)_earthMesh.Indices.Count,
-            DrawElementsType.UnsignedInt, null);
+        _silkGLContext.DrawElements(PrimitiveType.Triangles, (uint)_earthMesh.Indices.Count, DrawElementsType.UnsignedInt, null);
+        _earthMesh.Dispose();
 
+        // Debug vector
+        DrawDebugVector(_silkGLContext, new PlanarPoint3D(0, 0, 0), new PlanarPoint3D(1, 1, 1));
+        
         // Rotate camera (debug)
         _camera.Lon += (float)Math.PI / 200.0f;
         if (_camera.Lon > Math.PI)
@@ -213,9 +213,7 @@ public class DesktopRendererControl : OpenGlControlBase
     /// </summary>
     protected override void OnOpenGlDeinit(GlInterface gl, int fb)
     {
-        // Earth
-        _earthMesh.Dispose();
-        _textureObject.Dispose();
+        _earthTexture.Dispose();
 
         _shader.Dispose();
         base.OnOpenGlDeinit(gl, fb);
@@ -253,5 +251,35 @@ public class DesktopRendererControl : OpenGlControlBase
 
     private void OnMouseMoved(object sender, PointerEventArgs e)
     {
+    }
+
+    /// <summary>
+    /// Draw debug vector
+    /// </summary>
+    private unsafe void DrawDebugVector(GL silkGlContext, PlanarPoint3D startPoint, PlanarPoint3D endPoint)
+    {
+        var mesh = new Mesh();
+        mesh.AddVertex(new PlanarPoint3D(startPoint.X - 0.1f, startPoint.Y, startPoint.Z), new PlanarPoint2D(0, 0));
+        mesh.AddVertex(new PlanarPoint3D(startPoint.X + 0.1f, startPoint.Y, startPoint.Z), new PlanarPoint2D(0, 0));
+        
+        mesh.AddVertex(new PlanarPoint3D(endPoint.X - 0.1f, endPoint.Y, endPoint.Z), new PlanarPoint2D(0, 0));
+        mesh.AddVertex(new PlanarPoint3D(endPoint.X + 0.1f, endPoint.Y, endPoint.Z), new PlanarPoint2D(0, 0));
+        
+        mesh.AddIndex(0);
+        mesh.AddIndex(1);
+        mesh.AddIndex(2);
+        
+        mesh.AddIndex(2);
+        mesh.AddIndex(3);
+        mesh.AddIndex(1);
+        
+        mesh.GenerateBuffers(silkGlContext);
+        
+        mesh.BindBuffers();
+        
+        _redDebugTexture.Bind();
+        silkGlContext.DrawElements(PrimitiveType.Triangles, (uint)mesh.Indices.Count, DrawElementsType.UnsignedInt, null);
+        
+        mesh.Dispose();
     }
 }
