@@ -11,6 +11,7 @@ using Silk.NET.OpenGL;
 using System;
 using System.Drawing;
 using System.Numerics;
+using Foxtaur.LibRenderer.Helpers;
 using Foxtaur.LibRenderer.Models;
 
 namespace Foxtaur.Desktop.Controls.Renderer;
@@ -89,11 +90,22 @@ public class DesktopRendererControl : OpenGlControlBase
     /// </summary>
     private Matrix4x4 _projectionMatrix;
 
+    /// <summary>
+    /// Earth
+    /// </summary>
     private Mesh _earthMesh;
     private Texture _earthTexture;
 
     private Texture _redDebugTexture;
 
+    /// <summary>
+    /// True if mouse left button pressed and not released yet
+    /// </summary>
+    private bool _isMouseLeftButtonPressed = false;
+
+    private PlanarPoint3D _rayStart;
+    private PlanarPoint3D _rayEnd;
+    
     // DI stuff
     private ICoordinatesProvider _sphereCoordinatesProvider = Program.Di.GetService<ISphereCoordinatesProvider>();
     private IEarthGenerator _earthGenerator = Program.Di.GetService<IEarthGenerator>();
@@ -130,6 +142,8 @@ public class DesktopRendererControl : OpenGlControlBase
 
         // Setting-up input events
         PointerWheelChanged += OnWheel;
+        PointerPressed += OnMousePressed;
+        PointerReleased += OnMouseReleased;
         PointerMoved += OnMouseMoved;
     }
 
@@ -196,13 +210,19 @@ public class DesktopRendererControl : OpenGlControlBase
         _earthMesh.Dispose();
 
         // Debug vector
-        DrawDebugVector(_silkGLContext, new PlanarPoint3D(0, 0, 0), new PlanarPoint3D(1, 1, 1));
-        
-        // Rotate camera (debug)
-        _camera.Lon += (float)Math.PI / 200.0f;
-        if (_camera.Lon > Math.PI)
+        if (_rayStart != null && _rayEnd != null)
         {
-            _camera.Lon -= 2.0f * (float)Math.PI;
+            DrawDebugVector(_silkGLContext, _rayStart, _rayEnd);
+        }
+
+        // Rotate camera (debug)
+        if (!_isMouseLeftButtonPressed)
+        {
+            _camera.Lon += (float)Math.PI / 200.0f;
+            if (_camera.Lon > Math.PI)
+            {
+                _camera.Lon -= 2.0f * (float)Math.PI;
+            }
         }
 
         Dispatcher.UIThread.Post(InvalidateVisual, DispatcherPriority.Background);
@@ -235,7 +255,7 @@ public class DesktopRendererControl : OpenGlControlBase
     /// <summary>
     /// Mouse wheel event
     /// </summary>
-    private void OnWheel(object sender, PointerWheelEventArgs e)
+    private void OnWheel(object? sender, PointerWheelEventArgs e)
     {
         float steps = (float)Math.Abs(e.Delta.Y);
 
@@ -249,8 +269,66 @@ public class DesktopRendererControl : OpenGlControlBase
         }
     }
 
-    private void OnMouseMoved(object sender, PointerEventArgs e)
+    /// <summary>
+    /// Mouse pressed event
+    /// </summary>
+    private void OnMousePressed(object? sender, PointerPressedEventArgs e)
     {
+        if (e.GetCurrentPoint(this).Properties.IsLeftButtonPressed)
+        {
+            _isMouseLeftButtonPressed = true;   
+        }
+    }
+    
+    /// <summary>
+    /// Mouse released event
+    /// </summary>
+    private void OnMouseReleased(object? sender, PointerReleasedEventArgs e)
+    {
+        if (!e.GetCurrentPoint(this).Properties.IsLeftButtonPressed)
+        {
+            _isMouseLeftButtonPressed = false;   
+        }
+    }
+    
+    /// <summary>
+    /// Mouse move event
+    /// </summary>
+    private void OnMouseMoved(object? sender, PointerEventArgs e)
+    {
+        if (!_isMouseLeftButtonPressed)
+        {
+            return;
+        }
+        
+        var x = (float)e.GetCurrentPoint(this).Position.X * _scaling;
+        var y = (float)e.GetCurrentPoint(this).Position.Y * _scaling;
+
+        var ray = CastRayFromScreen(x, y);
+
+        _rayStart = ray.Item1;
+        _rayEnd = ray.Item2;
+    }
+
+    /// <summary>
+    /// Cast ray from the screen
+    /// </summary>
+    private Tuple<PlanarPoint3D, PlanarPoint3D> CastRayFromScreen(float x, float y)
+    {
+        var viewProjection = _viewMatrix * _projectionMatrix;
+        Matrix4x4 invertedViewProjection;
+        if (!Matrix4x4.Invert(viewProjection, out invertedViewProjection))
+        {
+            throw new InvalidOperationException("Failed to invert view projection!");
+        }
+
+        var normalizedDeviceX = x / _viewportWidth * 2.0f - 1.0f;
+        var normalizedDeviceY = y / _viewportHeight * 2.0f - 1.0f;
+        
+        var nearPoint = invertedViewProjection.TransformPerspectively(new Vector3(normalizedDeviceX, normalizedDeviceY, 0.0f));
+        var farPoint = invertedViewProjection.TransformPerspectively(new Vector3(normalizedDeviceX, normalizedDeviceY, 1.0f));
+
+        return new Tuple<PlanarPoint3D, PlanarPoint3D>(nearPoint.ToPlanarPoint3D(), farPoint.ToPlanarPoint3D());
     }
 
     /// <summary>
