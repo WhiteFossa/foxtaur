@@ -8,7 +8,7 @@ namespace Foxtaur.Desktop.Controls.Renderer;
 /// <summary>
 /// Displayeable mesh
 /// </summary>
-public class Mesh: IDisposable
+public class Mesh : IDisposable
 {
     /// <summary>
     /// Vertex coordinates size (in floats)
@@ -19,7 +19,7 @@ public class Mesh: IDisposable
     /// Texture coordinates size (in floats)
     /// </summary>
     private const int TextureCoordsSize = 2;
-    
+
     /// <summary>
     /// Vertices positions
     /// </summary>
@@ -29,7 +29,7 @@ public class Mesh: IDisposable
     /// Vertices texture coords
     /// </summary>
     private const int VerticesTextureCoordsLocation = 1;
-    
+
     /// <summary>
     /// Vertex size (in floats)
     /// </summary>
@@ -66,7 +66,7 @@ public class Mesh: IDisposable
     public void GenerateBuffers(GL silkGl)
     {
         _ = silkGl ?? throw new ArgumentNullException(nameof(silkGl));
-        
+
         VerticesBufferObject = new BufferObject<float>(silkGl, Vertices.ToArray(), BufferTargetARB.ArrayBuffer);
 
         // Object for indices
@@ -76,8 +76,10 @@ public class Mesh: IDisposable
         VerticesArrayObject = new VertexArrayObject<float, uint>(silkGl, VerticesBufferObject, ElementsBufferObject);
 
         //Telling the VAO object how to lay out the attribute pointers
-        VerticesArrayObject.VertexAttributePointer(VerticesPositionLocation, VertexCoordsSize, VertexAttribPointerType.Float, VertexSize, 0);
-        VerticesArrayObject.VertexAttributePointer(VerticesTextureCoordsLocation, TextureCoordsSize, VertexAttribPointerType.Float, VertexSize, VertexCoordsSize);
+        VerticesArrayObject.VertexAttributePointer(VerticesPositionLocation, VertexCoordsSize,
+            VertexAttribPointerType.Float, VertexSize, 0);
+        VerticesArrayObject.VertexAttributePointer(VerticesTextureCoordsLocation, TextureCoordsSize,
+            VertexAttribPointerType.Float, VertexSize, VertexCoordsSize);
     }
 
     /// <summary>
@@ -97,7 +99,7 @@ public class Mesh: IDisposable
     {
         _ = vertexCoords ?? throw new ArgumentNullException(nameof(vertexCoords));
         _ = textureCoords ?? throw new ArgumentNullException(nameof(textureCoords));
-        
+
         Vertices.Add(vertexCoords.X);
         Vertices.Add(vertexCoords.Y);
         Vertices.Add(vertexCoords.Z);
@@ -114,7 +116,7 @@ public class Mesh: IDisposable
     {
         Indices.Add(index);
     }
-    
+
     public void Dispose()
     {
         VerticesBufferObject.Dispose();

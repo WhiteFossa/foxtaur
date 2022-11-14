@@ -1,17 +1,12 @@
 using System;
-using System.Collections.Generic;
 using System.Drawing;
 using System.Numerics;
-using Avalonia.Controls;
 using Avalonia.OpenGL;
 using Avalonia.OpenGL.Controls;
-using Avalonia.Rendering;
 using Avalonia.Threading;
 using Foxtaur.Desktop.Controls.Renderer.Abstractions;
 using Foxtaur.LibRenderer.Constants;
-using Foxtaur.LibRenderer.Models;
 using Foxtaur.LibRenderer.Services.Abstractions.CoordinateProviders;
-using Foxtaur.LibRenderer.Services.Implementations.CoordinateProviders;
 using Microsoft.Extensions.DependencyInjection;
 using NLog;
 using Silk.NET.OpenGL;
@@ -44,12 +39,12 @@ public class DesktopRendererControl : OpenGlControlBase
     /// Renderer aspect ratio
     /// </summary>
     private float _aspectRatio;
-    
+
     /// <summary>
     /// Silk.NET OpenGL context
     /// </summary>
     private GL _silkGLContext;
-    
+
     private Shader _shader;
 
     /// <summary>
@@ -61,9 +56,9 @@ public class DesktopRendererControl : OpenGlControlBase
     /// Earth mesh
     /// </summary>
     private Mesh _earthMesh = new Mesh();
-    
+
     private Texture _textureObject;
-    
+
     // DI stuff
     private ICoordinatesProvider _sphereCoordinatesProvider = Program.Di.GetService<ISphereCoordinatesProvider>();
     private IEarthGenerator _earthGenerator = Program.Di.GetService<IEarthGenerator>();
@@ -104,13 +99,13 @@ public class DesktopRendererControl : OpenGlControlBase
         CalculateViewportSizes();
 
         _silkGLContext = GL.GetApi(gl.GetProcAddress);
-        
+
         // Loading shaders
         _shader = new Shader(_silkGLContext, @"Resources/Shaders/shader.vert", @"Resources/Shaders/shader.frag");
 
         // Earth
         _earthMesh.GenerateBuffers(_silkGLContext);
-        
+
         // Loading texture
         _textureObject = new Texture(_silkGLContext, @"Resources/Textures/Basemaps/HYP_50M_SR_W_SMALL.jpeg");
         //_textureObject = new Texture(_silkGLContext, @"Resources/davydovo.png");
@@ -122,7 +117,7 @@ public class DesktopRendererControl : OpenGlControlBase
     protected unsafe override void OnOpenGlRender(GlInterface gl, int fb)
     {
         CalculateViewportSizes();
-        
+
         _silkGLContext.ClearColor(Color.Black);
         _silkGLContext.Clear((uint)(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit));
         _silkGLContext.Enable(EnableCap.DepthTest);
@@ -139,18 +134,19 @@ public class DesktopRendererControl : OpenGlControlBase
 
         var cameraUp = new Vector3(0.0f, -1.0f, 0.0f);
 
-        var model = Matrix4x4.CreateRotationZ(0.0f) * Matrix4x4.CreateRotationY(0.0f) * Matrix4x4.CreateRotationX(0.0f); // Rotation
+        var model = Matrix4x4.CreateRotationZ(0.0f) * Matrix4x4.CreateRotationY(0.0f) *
+                    Matrix4x4.CreateRotationX(0.0f); // Rotation
         var view = Matrix4x4.CreateLookAt(cameraPosition, cameraDirection, cameraUp); // Camera position
         var projection = Matrix4x4.CreatePerspectiveFieldOfView(1.0f, _aspectRatio, 0.1f, 100.0f); // Zoom
 
         // Setting shader parameters (common)
         _shader.SetUniform2f("resolution", new Vector2(_viewportWidth, _viewportHeight));
-        
+
         // Setting shader parameters (vertex)
         _shader.SetUniform4f("uModel", model);
         _shader.SetUniform4f("uView", view);
         _shader.SetUniform4f("uProjection", projection);
-        
+
         // Setting shader parameters (fragments)
         _shader.SetUniform1i("ourTexture", 0);
         _textureObject.Bind();
@@ -159,7 +155,8 @@ public class DesktopRendererControl : OpenGlControlBase
 
         // Earth
         _earthMesh.BindBuffers();
-        _silkGLContext.DrawElements(PrimitiveType.Triangles, (uint)_earthMesh.Indices.Count, DrawElementsType.UnsignedInt, null);
+        _silkGLContext.DrawElements(PrimitiveType.Triangles, (uint)_earthMesh.Indices.Count,
+            DrawElementsType.UnsignedInt, null);
 
         // Rotate camera (debug)
         _camera.Lon += (float)Math.PI / 200.0f;
@@ -179,7 +176,7 @@ public class DesktopRendererControl : OpenGlControlBase
         // Earth
         _earthMesh.Dispose();
         _textureObject.Dispose();
-        
+
         _shader.Dispose();
         base.OnOpenGlDeinit(gl, fb);
     }

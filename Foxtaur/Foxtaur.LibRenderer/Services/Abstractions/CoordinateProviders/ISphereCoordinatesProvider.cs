@@ -6,5 +6,4 @@ namespace Foxtaur.LibRenderer.Services.Abstractions.CoordinateProviders;
 /// </summary>
 public interface ISphereCoordinatesProvider : ICoordinatesProvider
 {
-    
 }

@@ -77,7 +77,7 @@ public class Shader : IDisposable
 
         _silkGl.UniformMatrix4(location, 1, false, (float*)&value);
     }
-    
+
     public unsafe void SetUniform2f(string name, Vector2 value)
     {
         int location = _silkGl.GetUniformLocation(_handle, name);
