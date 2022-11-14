@@ -76,7 +76,5 @@ vec2 v_rgbM) {
 void main()
 {
     vec2 fragCoord = fTexCoords * resolution;
-
     FragColor = fxaa(ourTexture, fragCoord, resolution, v_rgbNW, v_rgbNE, v_rgbSW, v_rgbSE, v_rgbM);
-
 }

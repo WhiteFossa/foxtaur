@@ -83,7 +83,7 @@ public class DesktopRendererControl : OpenGlControlBase
         _camera = new Camera()
         {
             Lat = 0.0f,
-            Lon = (float)Math.PI,
+            Lon = -0.5f,
             H = RendererConstants.EarthRadius * 2.5f,
             Zoom = 1.0f
         };
@@ -114,8 +114,8 @@ public class DesktopRendererControl : OpenGlControlBase
         _earthMesh.GenerateBuffers(_silkGLContext);
 
         // Loading texture
-        _textureObject = new Texture(_silkGLContext, @"Resources/Textures/Basemaps/HYP_50M_SR_W_SMALL.jpeg");
-        //_textureObject = new Texture(_silkGLContext, @"Resources/davydovo.png");
+        //_textureObject = new Texture(_silkGLContext, @"Resources/Textures/Basemaps/HYP_50M_SR_W_SMALL.jpeg");
+        _textureObject = new Texture(_silkGLContext, @"Resources/davydovo.png");
     }
 
     /// <summary>
