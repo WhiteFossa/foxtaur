@@ -149,7 +149,7 @@ public class DesktopRendererControl : OpenGlControlBase
         
         // Loading textures
         _earthTexture = new Texture(_silkGLContext, @"Resources/Textures/Basemaps/HYP_50M_SR_W_SMALL.jpeg");
-        _redDebugTexture = new Texture(_silkGLContext, @"Resources/davydovo.png");
+        _redDebugTexture = new Texture(_silkGLContext, @"Resources/Textures/debugVector.png");
     }
 
     /// <summary>
@@ -260,10 +260,10 @@ public class DesktopRendererControl : OpenGlControlBase
     {
         var mesh = new Mesh();
         mesh.AddVertex(new PlanarPoint3D(startPoint.X - 0.1f, startPoint.Y, startPoint.Z), new PlanarPoint2D(0, 0));
-        mesh.AddVertex(new PlanarPoint3D(startPoint.X + 0.1f, startPoint.Y, startPoint.Z), new PlanarPoint2D(0, 0));
+        mesh.AddVertex(new PlanarPoint3D(startPoint.X + 0.1f, startPoint.Y, startPoint.Z), new PlanarPoint2D(0, 1));
         
-        mesh.AddVertex(new PlanarPoint3D(endPoint.X - 0.1f, endPoint.Y, endPoint.Z), new PlanarPoint2D(0, 0));
-        mesh.AddVertex(new PlanarPoint3D(endPoint.X + 0.1f, endPoint.Y, endPoint.Z), new PlanarPoint2D(0, 0));
+        mesh.AddVertex(new PlanarPoint3D(endPoint.X - 0.1f, endPoint.Y, endPoint.Z), new PlanarPoint2D(1, 0));
+        mesh.AddVertex(new PlanarPoint3D(endPoint.X + 0.1f, endPoint.Y, endPoint.Z), new PlanarPoint2D(1, 1));
         
         mesh.AddIndex(0);
         mesh.AddIndex(1);
