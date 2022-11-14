@@ -49,9 +49,44 @@ public class DesktopRendererControl : OpenGlControlBase
     private Shader _shader;
 
     /// <summary>
-    ///     Camera
+    /// Camera
     /// </summary>
-    private Camera _camera;
+    private readonly Camera _camera;
+
+    /// <summary>
+    /// Camera position
+    /// </summary>
+    private Vector3 _cameraPosition;
+
+    /// <summary>
+    /// Camera target
+    /// </summary>
+    private Vector3 _cameraTarget;
+
+    /// <summary>
+    /// Camera direction
+    /// </summary>
+    private Vector3 _cameraDirection;
+
+    /// <summary>
+    /// Camera up direction
+    /// </summary>
+    private Vector3 _cameraUp;
+
+    /// <summary>
+    /// Model matrix
+    /// </summary>
+    private Matrix4x4 _modelMatrix;
+
+    /// <summary>
+    /// View matrix
+    /// </summary>
+    private Matrix4x4 _viewMatrix;
+
+    /// <summary>
+    /// Projection matrix
+    /// </summary>
+    private Matrix4x4 _projectionMatrix;
 
     /// <summary>
     /// Earth mesh
@@ -86,6 +121,10 @@ public class DesktopRendererControl : OpenGlControlBase
             H = RendererConstants.CameraOrbitHeight,
             Zoom = RendererConstants.CameraMaxZoom
         };
+
+        // Targetting camera
+        _cameraTarget = new Vector3(0.0f, 0.0f, 0.0f);
+        _cameraUp = new Vector3(0.0f, -1.0f, 0.0f);
 
         // Generating the Earth
         _earthMesh = _earthGenerator.GenerateFullEarth((float)Math.PI / 90.0f);
@@ -133,23 +172,20 @@ public class DesktopRendererControl : OpenGlControlBase
         _shader.Use();
 
         // Projections
-        Vector3 cameraPosition = _camera.GetCameraPositionAsVector();
-        var cameraTarget = new Vector3(0.0f, 0.0f, 0.0f);
-        var cameraDirection = Vector3.Normalize(cameraPosition - cameraTarget);
+        _cameraPosition = _camera.GetCameraPositionAsVector();
+        _cameraDirection = Vector3.Normalize(_cameraPosition - _cameraTarget);
 
-        var cameraUp = new Vector3(0.0f, -1.0f, 0.0f);
-
-        var model = Matrix4x4.CreateRotationZ(0.0f) * Matrix4x4.CreateRotationY(0.0f) * Matrix4x4.CreateRotationX(0.0f); // Rotation
-        var view = Matrix4x4.CreateLookAt(cameraPosition, cameraDirection, cameraUp); // Camera position
-        var projection = Matrix4x4.CreatePerspectiveFieldOfView(_camera.Zoom, _aspectRatio, 0.1f, 100.0f); // Zoom
+        _modelMatrix = Matrix4x4.CreateRotationZ(0.0f) * Matrix4x4.CreateRotationY(0.0f) * Matrix4x4.CreateRotationX(0.0f); // Rotation
+        _viewMatrix = Matrix4x4.CreateLookAt(_cameraPosition, _cameraDirection, _cameraUp); // Camera position
+        _projectionMatrix = Matrix4x4.CreatePerspectiveFieldOfView(_camera.Zoom, _aspectRatio, 0.1f, 100.0f); // Zoom
 
         // Setting shader parameters (common)
         _shader.SetUniform2f("resolution", new Vector2(_viewportWidth, _viewportHeight));
 
-        // Setting shader parameters (vertex)
-        _shader.SetUniform4f("uModel", model);
-        _shader.SetUniform4f("uView", view);
-        _shader.SetUniform4f("uProjection", projection);
+        // Setting shader parameters (vertices)
+        _shader.SetUniform4f("uModel", _modelMatrix);
+        _shader.SetUniform4f("uView", _viewMatrix);
+        _shader.SetUniform4f("uProjection", _projectionMatrix);
 
         // Setting shader parameters (fragments)
         _shader.SetUniform1i("ourTexture", 0);
