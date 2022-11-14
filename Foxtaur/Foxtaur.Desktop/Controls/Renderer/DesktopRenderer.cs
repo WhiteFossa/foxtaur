@@ -7,10 +7,12 @@ using Avalonia.OpenGL;
 using Avalonia.OpenGL.Controls;
 using Avalonia.Rendering;
 using Avalonia.Threading;
+using Foxtaur.Desktop.Controls.Renderer.Abstractions;
 using Foxtaur.LibRenderer.Constants;
 using Foxtaur.LibRenderer.Models;
 using Foxtaur.LibRenderer.Services.Abstractions.CoordinateProviders;
 using Foxtaur.LibRenderer.Services.Implementations.CoordinateProviders;
+using Microsoft.Extensions.DependencyInjection;
 using NLog;
 using Silk.NET.OpenGL;
 
@@ -63,7 +65,8 @@ public class DesktopRendererControl : OpenGlControlBase
     private Texture _textureObject;
     
     // DI stuff
-    private ICoordinatesProvider _sphereCoordinatesProvider = new SphereCoordinatesProvider();
+    private ICoordinatesProvider _sphereCoordinatesProvider = Program.Di.GetService<ISphereCoordinatesProvider>();
+    private IEarthGenerator _earthGenerator = Program.Di.GetService<IEarthGenerator>();
 
     /// <summary>
     ///     Static constructor
@@ -88,74 +91,7 @@ public class DesktopRendererControl : OpenGlControlBase
         };
 
         // Generating the Earth
-        var step = (float)Math.PI / 90.0f;
-
-        for (var lat = (float)Math.PI / -2.0f; lat < (float)Math.PI / 2.0f; lat += step)
-        {
-            var latNorther = lat + step;
-
-            // First two points of a stripe
-            var geoPoint0 = new GeoPoint(lat, (float)Math.PI, RendererConstants.EarthRadius);
-            var geoPoint1 = new GeoPoint(latNorther, (float)Math.PI, RendererConstants.EarthRadius);
-            
-            // Planar coordinates of the two first points
-            var p3D0 = _sphereCoordinatesProvider.GeoToPlanar3D(geoPoint0);
-            var t2D0 = _sphereCoordinatesProvider.GeoToPlanar2D(geoPoint0);
-            
-            var p3D1 = _sphereCoordinatesProvider.GeoToPlanar3D(geoPoint1);
-            var t2D1 = _sphereCoordinatesProvider.GeoToPlanar2D(geoPoint1);
-            
-            // Adding vertexes (not indexes!)
-            var i3D0 = _earthMesh.AddVertex(p3D0, t2D0);
-            var i3D1 = _earthMesh.AddVertex(p3D1, t2D1);
-            
-            for (var lon = (float)Math.PI - step; lon > -1.0f * (float)Math.PI; lon -= step)
-            {
-                geoPoint0 = new GeoPoint(lat, lon, RendererConstants.EarthRadius);
-                geoPoint1 = new GeoPoint(latNorther, lon, RendererConstants.EarthRadius);
-                
-                p3D0 = _sphereCoordinatesProvider.GeoToPlanar3D(geoPoint0);
-                t2D0 = _sphereCoordinatesProvider.GeoToPlanar2D(geoPoint0);
-            
-                p3D1 = _sphereCoordinatesProvider.GeoToPlanar3D(geoPoint1);
-                t2D1 = _sphereCoordinatesProvider.GeoToPlanar2D(geoPoint1);
-                
-                var i3D2 = _earthMesh.AddVertex(p3D0, t2D0);
-                var i3D3 = _earthMesh.AddVertex(p3D1, t2D1);
-                
-                _earthMesh.AddIndex(i3D0);
-                _earthMesh.AddIndex(i3D1);
-                _earthMesh.AddIndex(i3D3);
-                
-                _earthMesh.AddIndex(i3D3);
-                _earthMesh.AddIndex(i3D2);
-                _earthMesh.AddIndex(i3D0);
-
-                i3D0 = i3D2;
-                i3D1 = i3D3;
-            }
-            
-            // Two final triangles of a stripe
-            geoPoint0 = new GeoPoint(lat, -1.0f * (float)Math.PI, RendererConstants.EarthRadius);
-            geoPoint1 = new GeoPoint(latNorther, -1.0f * (float)Math.PI, RendererConstants.EarthRadius);
-                
-            p3D0 = _sphereCoordinatesProvider.GeoToPlanar3D(geoPoint0);
-            t2D0 = _sphereCoordinatesProvider.GeoToPlanar2D(geoPoint0);
-            
-            p3D1 = _sphereCoordinatesProvider.GeoToPlanar3D(geoPoint1);
-            t2D1 = _sphereCoordinatesProvider.GeoToPlanar2D(geoPoint1);
-                
-            var i3final0 = _earthMesh.AddVertex(p3D0, t2D0);
-            var i3final1 = _earthMesh.AddVertex(p3D1, t2D1);
-            
-            _earthMesh.AddIndex(i3D0);
-            _earthMesh.AddIndex(i3D1);
-            _earthMesh.AddIndex(i3final1);
-                
-            _earthMesh.AddIndex(i3final1);
-            _earthMesh.AddIndex(i3final0);
-            _earthMesh.AddIndex(i3D0);
-        }
+        _earthMesh = _earthGenerator.GenerateFullEarth((float)Math.PI / 90.0f);
     }
 
     /// <summary>

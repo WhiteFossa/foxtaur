@@ -2,6 +2,10 @@
 using System.IO;
 using Avalonia;
 using Avalonia.ReactiveUI;
+using Foxtaur.Desktop.Controls.Renderer.Abstractions;
+using Foxtaur.Desktop.Controls.Renderer.Implementations;
+using Foxtaur.LibRenderer.Services.Abstractions.CoordinateProviders;
+using Foxtaur.LibRenderer.Services.Implementations.CoordinateProviders;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using NLog;
@@ -54,7 +58,8 @@ namespace Foxtaur.Desktop
         {
             IServiceCollection services = new ServiceCollection();
 
-            //services.AddSingleton<ITexturesLoader, TexturesLoader>();
+            services.AddSingleton<ISphereCoordinatesProvider, SphereCoordinatesProvider>();
+            services.AddSingleton<IEarthGenerator, EarthGenerator>();
 
             return services;
         }

@@ -6,7 +6,7 @@ namespace Foxtaur.LibRenderer.Services.Implementations.CoordinateProviders;
 /// <summary>
 ///     Sphere (ideal Earth) coordinates provider
 /// </summary>
-public class SphereCoordinatesProvider : ICoordinatesProvider
+public class SphereCoordinatesProvider : ISphereCoordinatesProvider
 {
     public PlanarPoint2D GeoToPlanar2D(GeoPoint geo)
     {
