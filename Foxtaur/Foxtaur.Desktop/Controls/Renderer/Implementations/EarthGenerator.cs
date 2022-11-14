@@ -24,33 +24,16 @@ public class EarthGenerator : IEarthGenerator
             var latNorther = lat + gridStep;
 
             // First two points of a stripe
-            var geoPoint0 = new GeoPoint(lat, (float)Math.PI, RendererConstants.EarthRadius);
-            var geoPoint1 = new GeoPoint(latNorther, (float)Math.PI, RendererConstants.EarthRadius);
-            
-            // Planar coordinates of the two first points
-            var p3D0 = _sphereCoordinatesProvider.GeoToPlanar3D(geoPoint0);
-            var t2D0 = _sphereCoordinatesProvider.GeoToPlanar2D(geoPoint0);
-            
-            var p3D1 = _sphereCoordinatesProvider.GeoToPlanar3D(geoPoint1);
-            var t2D1 = _sphereCoordinatesProvider.GeoToPlanar2D(geoPoint1);
-            
-            // Adding vertexes (not indexes!)
-            var i3D0 = earthMesh.AddVertex(p3D0, t2D0);
-            var i3D1 = earthMesh.AddVertex(p3D1, t2D1);
-            
+            var firstPair = GenerateAndAddPointsPair(earthMesh, lat, (float)Math.PI, latNorther, (float)Math.PI);
+            var i3D0 = firstPair.Item1;
+            var i3D1 = firstPair.Item2;
+
+            // Intermediate triangles
             for (var lon = (float)Math.PI - gridStep; lon > -1.0f * (float)Math.PI; lon -= gridStep)
             {
-                geoPoint0 = new GeoPoint(lat, lon, RendererConstants.EarthRadius);
-                geoPoint1 = new GeoPoint(latNorther, lon, RendererConstants.EarthRadius);
-                
-                p3D0 = _sphereCoordinatesProvider.GeoToPlanar3D(geoPoint0);
-                t2D0 = _sphereCoordinatesProvider.GeoToPlanar2D(geoPoint0);
-            
-                p3D1 = _sphereCoordinatesProvider.GeoToPlanar3D(geoPoint1);
-                t2D1 = _sphereCoordinatesProvider.GeoToPlanar2D(geoPoint1);
-                
-                var i3D2 = earthMesh.AddVertex(p3D0, t2D0);
-                var i3D3 = earthMesh.AddVertex(p3D1, t2D1);
+                var intermediatePair = GenerateAndAddPointsPair(earthMesh, lat, lon, latNorther, lon);
+                var i3D2 = intermediatePair.Item1;
+                var i3D3 = intermediatePair.Item2;
                 
                 earthMesh.AddIndex(i3D0);
                 earthMesh.AddIndex(i3D1);
@@ -64,28 +47,46 @@ public class EarthGenerator : IEarthGenerator
                 i3D1 = i3D3;
             }
             
-            // Two final triangles of a stripe
-            geoPoint0 = new GeoPoint(lat, -1.0f * (float)Math.PI, RendererConstants.EarthRadius);
-            geoPoint1 = new GeoPoint(latNorther, -1.0f * (float)Math.PI, RendererConstants.EarthRadius);
-                
-            p3D0 = _sphereCoordinatesProvider.GeoToPlanar3D(geoPoint0);
-            t2D0 = _sphereCoordinatesProvider.GeoToPlanar2D(geoPoint0);
-            
-            p3D1 = _sphereCoordinatesProvider.GeoToPlanar3D(geoPoint1);
-            t2D1 = _sphereCoordinatesProvider.GeoToPlanar2D(geoPoint1);
-                
-            var i3final0 = earthMesh.AddVertex(p3D0, t2D0);
-            var i3final1 = earthMesh.AddVertex(p3D1, t2D1);
+            // Two last triangles of a stripe
+            var lastPair = GenerateAndAddPointsPair(earthMesh, lat, -1.0f * (float)Math.PI, latNorther, -1.0f * (float)Math.PI);
+            var i3last0 = lastPair.Item1;
+            var i3last1 = lastPair.Item2;
             
             earthMesh.AddIndex(i3D0);
             earthMesh.AddIndex(i3D1);
-            earthMesh.AddIndex(i3final1);
+            earthMesh.AddIndex(i3last1);
                 
-            earthMesh.AddIndex(i3final1);
-            earthMesh.AddIndex(i3final0);
+            earthMesh.AddIndex(i3last1);
+            earthMesh.AddIndex(i3last0);
             earthMesh.AddIndex(i3D0);
         }
 
         return earthMesh;
+    }
+
+    /// <summary>
+    /// Generates a pair of points (geo), converts them to planars and add them to mesh.
+    /// Returns pair of generated points indices 
+    /// </summary>
+    private ValueTuple<uint, uint> GenerateAndAddPointsPair(Mesh mesh, float p0Lat, float p0Lon, float p1Lat, float p1Lon)
+    {
+        _ = mesh ?? throw new ArgumentNullException(nameof(mesh));
+        
+        // Geopoints
+        var geoPoint0 = new GeoPoint(p0Lat, p0Lon, RendererConstants.EarthRadius);
+        var geoPoint1 = new GeoPoint(p1Lat, p1Lon, RendererConstants.EarthRadius);
+            
+        // Planar coordinates (3D + Texture)
+        var p3D0 = _sphereCoordinatesProvider.GeoToPlanar3D(geoPoint0);
+        var t2D0 = _sphereCoordinatesProvider.GeoToPlanar2D(geoPoint0);
+            
+        var p3D1 = _sphereCoordinatesProvider.GeoToPlanar3D(geoPoint1);
+        var t2D1 = _sphereCoordinatesProvider.GeoToPlanar2D(geoPoint1);
+            
+        // Adding vertices (not indices!)
+        var i3D0 = mesh.AddVertex(p3D0, t2D0);
+        var i3D1 = mesh.AddVertex(p3D1, t2D1);
+
+        return (i3D0, i3D1);
     }
 }
