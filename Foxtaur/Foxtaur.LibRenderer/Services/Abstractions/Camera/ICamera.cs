@@ -29,6 +29,11 @@ public interface ICamera
     PlanarPoint3D Position3D { get; }
 
     /// <summary>
+    /// Point where camera looking
+    /// </summary>
+    PlanarPoint3D Target { get; set; }
+
+    /// <summary>
     /// Camera zoom (in radians)
     /// </summary>
     float Zoom { get; set; }

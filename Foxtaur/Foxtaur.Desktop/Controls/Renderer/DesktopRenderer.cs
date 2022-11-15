@@ -58,11 +58,6 @@ public class DesktopRendererControl : OpenGlControlBase
     private readonly ICamera _camera = Program.Di.GetService<ICamera>();
 
     /// <summary>
-    /// Camera target
-    /// </summary>
-    private Vector3 _cameraTarget;
-
-    /// <summary>
     /// Camera direction
     /// </summary>
     private Vector3 _cameraDirection;
@@ -131,7 +126,7 @@ public class DesktopRendererControl : OpenGlControlBase
         _camera.Zoom = RendererConstants.CameraMinZoom;
 
         // Targetting camera
-        _cameraTarget = new Vector3(0.0f, 0.0f, 0.0f);
+        _camera.Target= new Vector3(0.0f, 0.0f, 0.0f).AsPlanarPoint3D();
         _cameraUp = new Vector3(0.0f, -1.0f, 0.0f);
 
         // Setting-up input events
@@ -176,7 +171,7 @@ public class DesktopRendererControl : OpenGlControlBase
         _shader.Use();
 
         // Projections;
-        _cameraDirection = Vector3.Normalize(_camera.Position3D.AsVector3() - _cameraTarget);
+        _cameraDirection = Vector3.Normalize(_camera.Position3D.AsVector3() - _camera.Target.AsVector3());
 
         _modelMatrix = Matrix4x4.CreateRotationZ(0.0f) * Matrix4x4.CreateRotationY(0.0f) * Matrix4x4.CreateRotationX(0.0f); // Rotation
         _viewMatrix = Matrix4x4.CreateLookAt(_camera.Position3D.AsVector3(), _cameraDirection, _cameraUp); // Camera position

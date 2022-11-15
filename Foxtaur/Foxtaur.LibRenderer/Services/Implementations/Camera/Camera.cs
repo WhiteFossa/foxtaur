@@ -31,6 +31,11 @@ public class Camera : ICamera
     /// Camera position in 3D space
     /// </summary>
     private PlanarPoint3D _position;
+
+    /// <summary>
+    /// Camera target
+    /// </summary>
+    private PlanarPoint3D _target;
     
     /// <summary>
     /// Camera zoom
@@ -92,6 +97,19 @@ public class Camera : ICamera
         }
     }
 
+    public PlanarPoint3D Target
+    {
+        get
+        {
+            return _target;
+        }
+
+        set
+        {
+            _target = value;
+        }
+    }
+
     public float Zoom
     {
         get
@@ -119,6 +137,8 @@ public class Camera : ICamera
     public Camera(ISphereCoordinatesProvider sphereCoordinatesProvider)
     {
         _sphereCoordinatesProvider = sphereCoordinatesProvider;
+        
+        CalculateCameraPosition();
     }
 
     public void ZoomIn(float steps)
