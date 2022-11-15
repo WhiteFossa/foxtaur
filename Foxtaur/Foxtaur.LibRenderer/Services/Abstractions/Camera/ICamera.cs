@@ -27,7 +27,7 @@ public interface ICamera
     /// Camera position for given geo coordinates
     /// </summary>
     PlanarPoint3D Position3D { get; }
-
+    
     /// <summary>
     /// Point where camera looking
     /// </summary>
@@ -37,6 +37,31 @@ public interface ICamera
     /// Camera zoom (in radians)
     /// </summary>
     float Zoom { get; set; }
+
+    /// <summary>
+    /// Model matrix
+    /// </summary>
+    Matrix4x4 ModelMatrix { get; }
+
+    /// <summary>
+    /// View matrix
+    /// </summary>
+    Matrix4x4 ViewMatrix { get; }
+
+    /// <summary>
+    /// Projection matrix
+    /// </summary>
+    Matrix4x4 ProjectionMatrix { get; }
+
+    /// <summary>
+    /// Matrix for raycasting
+    /// </summary>
+    Matrix4x4 BackProjectionMatrix { get; }
+
+    /// <summary>
+    /// Screen aspect ratio
+    /// </summary>
+    float AspectRatio { get; set; }
 
     /// <summary>
     /// Zoom in

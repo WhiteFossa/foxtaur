@@ -41,11 +41,6 @@ public class DesktopRendererControl : OpenGlControlBase
     private float _viewportHeight;
 
     /// <summary>
-    /// Renderer aspect ratio
-    /// </summary>
-    private float _aspectRatio;
-
-    /// <summary>
     /// Silk.NET OpenGL context
     /// </summary>
     private GL _silkGLContext;
@@ -56,32 +51,7 @@ public class DesktopRendererControl : OpenGlControlBase
     /// Camera
     /// </summary>
     private readonly ICamera _camera = Program.Di.GetService<ICamera>();
-
-    /// <summary>
-    /// Camera direction
-    /// </summary>
-    private Vector3 _cameraDirection;
-
-    /// <summary>
-    /// Camera up direction
-    /// </summary>
-    private Vector3 _cameraUp;
-
-    /// <summary>
-    /// Model matrix
-    /// </summary>
-    private Matrix4x4 _modelMatrix;
-
-    /// <summary>
-    /// View matrix
-    /// </summary>
-    private Matrix4x4 _viewMatrix;
-
-    /// <summary>
-    /// Projection matrix
-    /// </summary>
-    private Matrix4x4 _projectionMatrix;
-
+    
     /// <summary>
     /// Earth
     /// </summary>
@@ -127,7 +97,6 @@ public class DesktopRendererControl : OpenGlControlBase
 
         // Targetting camera
         _camera.Target= new Vector3(0.0f, 0.0f, 0.0f).AsPlanarPoint3D();
-        _cameraUp = new Vector3(0.0f, -1.0f, 0.0f);
 
         // Setting-up input events
         PointerWheelChanged += OnWheel;
@@ -166,24 +135,17 @@ public class DesktopRendererControl : OpenGlControlBase
         _silkGLContext.Clear((uint)(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit));
         _silkGLContext.Enable(EnableCap.DepthTest);
 
-        _silkGLContext.Viewport(0, 0, (uint)_viewportWidth, (uint)_viewportHeight); // TODO: Move me to constants
+        _silkGLContext.Viewport(0, 0, (uint)_viewportWidth, (uint)_viewportHeight);
 
         _shader.Use();
-
-        // Projections;
-        _cameraDirection = Vector3.Normalize(_camera.Position3D.AsVector3() - _camera.Target.AsVector3());
-
-        _modelMatrix = Matrix4x4.CreateRotationZ(0.0f) * Matrix4x4.CreateRotationY(0.0f) * Matrix4x4.CreateRotationX(0.0f); // Rotation
-        _viewMatrix = Matrix4x4.CreateLookAt(_camera.Position3D.AsVector3(), _cameraDirection, _cameraUp); // Camera position
-        _projectionMatrix = Matrix4x4.CreatePerspectiveFieldOfView(_camera.Zoom, _aspectRatio, 0.1f, 100.0f); // Zoom
 
         // Setting shader parameters (common)
         _shader.SetUniform2f("resolution", new Vector2(_viewportWidth, _viewportHeight));
 
         // Setting shader parameters (vertices)
-        _shader.SetUniform4f("uModel", _modelMatrix);
-        _shader.SetUniform4f("uView", _viewMatrix);
-        _shader.SetUniform4f("uProjection", _projectionMatrix);
+        _shader.SetUniform4f("uModel", _camera.ModelMatrix);
+        _shader.SetUniform4f("uView", _camera.ViewMatrix);
+        _shader.SetUniform4f("uProjection", _camera.ProjectionMatrix);
 
         // Setting shader parameters (fragments)
         _shader.SetUniform1i("ourTexture", 0);
@@ -237,7 +199,7 @@ public class DesktopRendererControl : OpenGlControlBase
         _viewportWidth = (float)Bounds.Width * _scaling;
         _viewportHeight = (float)Bounds.Height * _scaling;
 
-        _aspectRatio = _viewportWidth / _viewportHeight;
+        _camera.AspectRatio = _viewportWidth / _viewportHeight;
     }
 
     /// <summary>
@@ -303,18 +265,11 @@ public class DesktopRendererControl : OpenGlControlBase
     /// </summary>
     private Tuple<PlanarPoint3D, PlanarPoint3D> CastRayFromScreen(float x, float y)
     {
-        var viewProjection = _modelMatrix * _viewMatrix * _projectionMatrix;
-        Matrix4x4 invertedViewProjection;
-        if (!Matrix4x4.Invert(viewProjection, out invertedViewProjection))
-        {
-            throw new InvalidOperationException("Failed to invert view projection!");
-        }
-
         var normalizedDeviceX = x / _viewportWidth * 2.0f - 1.0f;
         var normalizedDeviceY = y / _viewportHeight * 2.0f - 1.0f;
         
-        var nearPoint = invertedViewProjection.TransformPerspectively(new Vector3(normalizedDeviceX, normalizedDeviceY, 0.0f));
-        var farPoint = invertedViewProjection.TransformPerspectively(new Vector3(normalizedDeviceX, normalizedDeviceY, 1.0f));
+        var nearPoint = _camera.BackProjectionMatrix.TransformPerspectively(new Vector3(normalizedDeviceX, normalizedDeviceY, 0.0f));
+        var farPoint = _camera.BackProjectionMatrix.TransformPerspectively(new Vector3(normalizedDeviceX, normalizedDeviceY, 1.0f));
 
         return new Tuple<PlanarPoint3D, PlanarPoint3D>(nearPoint.AsPlanarPoint3D(), farPoint.AsPlanarPoint3D());
     }
