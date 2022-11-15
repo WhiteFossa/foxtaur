@@ -41,15 +41,19 @@ public class Ray
 
     public List<PlanarPoint3D> Intersect(Sphere sphere)
     {
-        var a = 1.0f + (float)Math.Pow((Begin.Y - End.Y) / (Begin.X - End.X), 2) + (float)Math.Pow((Begin.Z - End.Z) / (Begin.X - End.X), 2);
+        var bxex = Begin.X - End.X;
+        var byey = Begin.Y - End.Y;
+        var bzez = Begin.Z - End.Z;
+        
+        var a = 1.0f + (float)Math.Pow(byey / bxex, 2) + (float)Math.Pow(bzez / bxex, 2);
 
         var b = 2 * sphere.Center.X
-                + 2 * ((Begin.Y - End.Y) / (Begin.X - End.X)) * ((Begin.X * End.Y - End.X * Begin.Y) / (Begin.X - End.X) - sphere.Center.Y)
-                + 2 * ((Begin.Z - End.Z) / (Begin.X - End.X)) * ((Begin.X * End.Z - End.X * Begin.Z) / (Begin.X - End.X) - sphere.Center.Z);
+                + 2 * (byey / bxex) * ((Begin.X * End.Y - End.X * Begin.Y) / bxex - sphere.Center.Y)
+                + 2 * (bzez / bxex) * ((Begin.X * End.Z - End.X * Begin.Z) / bxex - sphere.Center.Z);
 
         var c = (float)Math.Pow(sphere.Center.X, 2)
-                + (float)Math.Pow(((Begin.X * End.Y - End.X * Begin.Y) / (Begin.X - End.X) - sphere.Center.Y), 2)
-                + (float)Math.Pow(((Begin.X * End.Z - End.X * Begin.Z) / (Begin.X - End.X) - sphere.Center.Z), 2)
+                + (float)Math.Pow(((Begin.X * End.Y - End.X * Begin.Y) / bxex - sphere.Center.Y), 2)
+                + (float)Math.Pow(((Begin.X * End.Z - End.X * Begin.Z) / bxex - sphere.Center.Z), 2)
                 - sphere.Radius;
 
         var d = (float)Math.Pow(b, 2) - 4 * a * c;
@@ -62,11 +66,11 @@ public class Ray
         var x1 = (-1.0f * b + (float)Math.Sqrt(d)) / (2.0f * a);
         var x2 = (-1.0f * b - (float)Math.Sqrt(d)) / (2.0f * a);
 
-        var y1 = GetYForSphereIntersection(x1);
-        var y2 = GetYForSphereIntersection(x2);
+        var y1 = GetYForSphereIntersection(x1, bxex, byey);
+        var y2 = GetYForSphereIntersection(x2, bxex, byey);
         
-        var z1 = GetZForSphereIntersection(x1);
-        var z2 = GetZForSphereIntersection(x2);
+        var z1 = GetZForSphereIntersection(x1, bxex, bzez);
+        var z2 = GetZForSphereIntersection(x2, bxex, bzez);
 
         return new List<PlanarPoint3D>()
         {
@@ -75,13 +79,13 @@ public class Ray
         };
     }
 
-    private float GetYForSphereIntersection(float x)
+    private float GetYForSphereIntersection(float x, float bxex, float byey)
     {
-        return ((Begin.Y - End.Y) / (Begin.X - End.X)) * x + ((Begin.X * End.Y - End.X * Begin.Y) / (Begin.X - End.X));
+        return byey / bxex * x + (Begin.X * End.Y - End.X * Begin.Y) / bxex;
     }
     
-    private float GetZForSphereIntersection(float x)
+    private float GetZForSphereIntersection(float x, float bxex, float bzez)
     {
-        return ((Begin.Z - End.Z) / (Begin.X - End.X)) * x + ((Begin.X * End.Z - End.X * Begin.Z) / (Begin.X - End.X));
+        return bzez / bxex * x + (Begin.X * End.Z - End.X * Begin.Z) / bxex;
     }
 }
