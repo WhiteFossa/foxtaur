@@ -4,7 +4,9 @@ using Avalonia;
 using Avalonia.ReactiveUI;
 using Foxtaur.Desktop.Controls.Renderer.Abstractions;
 using Foxtaur.Desktop.Controls.Renderer.Implementations;
+using Foxtaur.LibRenderer.Services.Abstractions.Camera;
 using Foxtaur.LibRenderer.Services.Abstractions.CoordinateProviders;
+using Foxtaur.LibRenderer.Services.Implementations.Camera;
 using Foxtaur.LibRenderer.Services.Implementations.CoordinateProviders;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -60,6 +62,7 @@ namespace Foxtaur.Desktop
 
             services.AddSingleton<ISphereCoordinatesProvider, SphereCoordinatesProvider>();
             services.AddSingleton<IEarthGenerator, EarthGenerator>();
+            services.AddSingleton<ICamera, Camera>();
 
             return services;
         }

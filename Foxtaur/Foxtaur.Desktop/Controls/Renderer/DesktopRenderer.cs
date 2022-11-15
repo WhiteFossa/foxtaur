@@ -13,6 +13,8 @@ using System.Drawing;
 using System.Numerics;
 using Foxtaur.LibRenderer.Helpers;
 using Foxtaur.LibRenderer.Models;
+using Foxtaur.LibRenderer.Services.Abstractions.Camera;
+using Foxtaur.LibRenderer.Services.Implementations.Camera;
 
 namespace Foxtaur.Desktop.Controls.Renderer;
 
@@ -53,7 +55,7 @@ public class DesktopRendererControl : OpenGlControlBase
     /// <summary>
     /// Camera
     /// </summary>
-    private readonly Camera _camera;
+    private readonly ICamera _camera = Program.Di.GetService<ICamera>();
 
     /// <summary>
     /// Camera position
@@ -128,13 +130,10 @@ public class DesktopRendererControl : OpenGlControlBase
         _earthMesh = _earthGenerator.GenerateFullEarth((float)Math.PI / 90.0f);
         
         // Creating camera
-        _camera = new Camera
-        {
-            Lat = 0.0f,
-            Lon = -0.5f,
-            H = RendererConstants.CameraOrbitHeight,
-            Zoom = RendererConstants.CameraMaxZoom
-        };
+        _camera.Lat = 0.0f;
+        _camera.Lat = 0.0f;
+        _camera.H = RendererConstants.CameraOrbitHeight;
+        _camera.Zoom = RendererConstants.CameraMaxZoom;
 
         // Targetting camera
         _cameraTarget = new Vector3(0.0f, 0.0f, 0.0f);
@@ -315,7 +314,7 @@ public class DesktopRendererControl : OpenGlControlBase
     /// </summary>
     private Tuple<PlanarPoint3D, PlanarPoint3D> CastRayFromScreen(float x, float y)
     {
-        var viewProjection = _viewMatrix * _projectionMatrix;
+        var viewProjection = _modelMatrix * _viewMatrix * _projectionMatrix;
         Matrix4x4 invertedViewProjection;
         if (!Matrix4x4.Invert(viewProjection, out invertedViewProjection))
         {
@@ -328,7 +327,7 @@ public class DesktopRendererControl : OpenGlControlBase
         var nearPoint = invertedViewProjection.TransformPerspectively(new Vector3(normalizedDeviceX, normalizedDeviceY, 0.0f));
         var farPoint = invertedViewProjection.TransformPerspectively(new Vector3(normalizedDeviceX, normalizedDeviceY, 1.0f));
 
-        return new Tuple<PlanarPoint3D, PlanarPoint3D>(nearPoint.ToPlanarPoint3D(), farPoint.ToPlanarPoint3D());
+        return new Tuple<PlanarPoint3D, PlanarPoint3D>(nearPoint.AsPlanarPoint3D(), farPoint.AsPlanarPoint3D());
     }
 
     /// <summary>
