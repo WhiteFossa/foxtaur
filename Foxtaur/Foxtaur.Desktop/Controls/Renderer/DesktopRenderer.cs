@@ -65,8 +65,7 @@ public class DesktopRendererControl : OpenGlControlBase
     /// </summary>
     private bool _isMouseLeftButtonPressed = false;
 
-    private PlanarPoint3D _rayStart;
-    private PlanarPoint3D _rayEnd;
+    private Ray _debugRay;
     
     // DI stuff
     private ICoordinatesProvider _sphereCoordinatesProvider = Program.Di.GetService<ISphereCoordinatesProvider>();
@@ -160,9 +159,9 @@ public class DesktopRendererControl : OpenGlControlBase
         _earthMesh.Dispose();
 
         // Debug vector
-        if (_rayStart != null && _rayEnd != null)
+        if (_debugRay != null)
         {
-            DrawDebugVector(_silkGLContext, _rayStart, _rayEnd);
+            DrawDebugVector(_silkGLContext, _debugRay.Begin, _debugRay.End);
         }
 
         // Rotate camera (debug)
@@ -254,24 +253,7 @@ public class DesktopRendererControl : OpenGlControlBase
         var x = (float)e.GetCurrentPoint(this).Position.X * _scaling;
         var y = (float)e.GetCurrentPoint(this).Position.Y * _scaling;
 
-        var ray = CastRayFromScreen(x, y);
-
-        _rayStart = ray.Item1;
-        _rayEnd = ray.Item2;
-    }
-
-    /// <summary>
-    /// Cast ray from the screen
-    /// </summary>
-    private Tuple<PlanarPoint3D, PlanarPoint3D> CastRayFromScreen(float x, float y)
-    {
-        var normalizedDeviceX = x / _viewportWidth * 2.0f - 1.0f;
-        var normalizedDeviceY = y / _viewportHeight * 2.0f - 1.0f;
-        
-        var nearPoint = _camera.BackProjectionMatrix.TransformPerspectively(new Vector3(normalizedDeviceX, normalizedDeviceY, 0.0f));
-        var farPoint = _camera.BackProjectionMatrix.TransformPerspectively(new Vector3(normalizedDeviceX, normalizedDeviceY, 1.0f));
-
-        return new Tuple<PlanarPoint3D, PlanarPoint3D>(nearPoint.AsPlanarPoint3D(), farPoint.AsPlanarPoint3D());
+        _debugRay = Ray.CreateByScreenRaycasting(_camera, x, y, _viewportWidth, _viewportHeight);
     }
 
     /// <summary>
