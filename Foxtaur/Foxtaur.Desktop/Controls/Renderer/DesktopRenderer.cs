@@ -2,15 +2,16 @@ using Avalonia.Input;
 using Avalonia.OpenGL;
 using Avalonia.OpenGL.Controls;
 using Avalonia.Threading;
-using Foxtaur.Desktop.Controls.Renderer.Abstractions;
 using Foxtaur.LibRenderer.Constants;
 using Foxtaur.LibRenderer.Services.Abstractions.CoordinateProviders;
 using Microsoft.Extensions.DependencyInjection;
 using NLog;
 using Silk.NET.OpenGL;
 using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Numerics;
+using Foxtaur.Desktop.Controls.Renderer.Abstractions.Earth;
 using Foxtaur.LibRenderer.Helpers;
 using Foxtaur.LibRenderer.Models;
 using Foxtaur.LibRenderer.Services.Abstractions.Camera;
@@ -51,12 +52,25 @@ public class DesktopRendererControl : OpenGlControlBase
     /// Camera
     /// </summary>
     private readonly ICamera _camera = Program.Di.GetService<ICamera>();
+
+    #region Earth
+
+    /// <summary>
+    /// Earth sphere (for raycasting)
+    /// </summary>
+    private Sphere _earthSphere;
     
     /// <summary>
-    /// Earth
+    /// Earth mesh
     /// </summary>
     private Mesh _earthMesh;
+    
+    /// <summary>
+    /// Earth texture
+    /// </summary>
     private Texture _earthTexture;
+
+    #endregion
 
     private Texture _redDebugTexture;
 
@@ -66,31 +80,24 @@ public class DesktopRendererControl : OpenGlControlBase
     private bool _isMouseLeftButtonPressed = false;
 
     private Ray _debugRay;
+    private List<PlanarPoint3D> _intersections;
     
     // DI stuff
     private ICoordinatesProvider _sphereCoordinatesProvider = Program.Di.GetService<ISphereCoordinatesProvider>();
     private IEarthGenerator _earthGenerator = Program.Di.GetService<IEarthGenerator>();
-
-    /// <summary>
-    /// Static constructor
-    /// </summary>
-    static DesktopRendererControl()
-    {
-        // Change of this fields require re-rendering
-        //AffectsRender<DesktopRendererControl>(YawProperty, PitchProperty, RollProperty, DiscoProperty);
-    }
-
+    
     /// <summary>
     /// Constructor
     /// </summary>
     public DesktopRendererControl()
     {
         // Generating the Earth
+        _earthSphere = _earthGenerator.GenerateEarthSphere();
         _earthMesh = _earthGenerator.GenerateFullEarth((float)Math.PI / 90.0f);
         
         // Creating camera
         _camera.Lat = 0.0f;
-        _camera.Lat = 0.0f;
+        _camera.Lon = 0.0f;
         _camera.H = RendererConstants.CameraOrbitHeight;
         _camera.Zoom = RendererConstants.CameraMinZoom;
 
@@ -150,7 +157,7 @@ public class DesktopRendererControl : OpenGlControlBase
         _shader.SetUniform1i("ourTexture", 0);
         _earthTexture.Bind();
 
-        //_silkGLContext.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Line);
+        _silkGLContext.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Line);
 
         // Earth
         _earthMesh.GenerateBuffers(_silkGLContext);
@@ -159,10 +166,15 @@ public class DesktopRendererControl : OpenGlControlBase
         _earthMesh.Dispose();
 
         // Debug vector
-        if (_debugRay != null)
+        if (_intersections != null && _intersections.Count == 2)
+        {
+            DrawDebugVector(_silkGLContext, _intersections[0], _intersections[1]);
+        }
+
+        /*if (_debugRay != null)
         {
             DrawDebugVector(_silkGLContext, _debugRay.Begin, _debugRay.End);
-        }
+        }*/
 
         // Rotate camera (debug)
         if (!_isMouseLeftButtonPressed)
@@ -254,6 +266,13 @@ public class DesktopRendererControl : OpenGlControlBase
         var y = (float)e.GetCurrentPoint(this).Position.Y * _scaling;
 
         _debugRay = Ray.CreateByScreenRaycasting(_camera, x, y, _viewportWidth, _viewportHeight);
+
+        _intersections = _debugRay.Intersect(_earthSphere);
+
+        if (_intersections.Count == 2)
+        {
+            int a = 10;   
+        }
     }
 
     /// <summary>

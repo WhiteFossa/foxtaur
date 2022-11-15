@@ -2,8 +2,9 @@
 using System.IO;
 using Avalonia;
 using Avalonia.ReactiveUI;
-using Foxtaur.Desktop.Controls.Renderer.Abstractions;
+using Foxtaur.Desktop.Controls.Renderer.Abstractions.Earth;
 using Foxtaur.Desktop.Controls.Renderer.Implementations;
+using Foxtaur.Desktop.Controls.Renderer.Implementations.Earth;
 using Foxtaur.LibRenderer.Services.Abstractions.Camera;
 using Foxtaur.LibRenderer.Services.Abstractions.CoordinateProviders;
 using Foxtaur.LibRenderer.Services.Implementations.Camera;

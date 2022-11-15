@@ -1,10 +1,10 @@
 using System;
-using Foxtaur.Desktop.Controls.Renderer.Abstractions;
+using Foxtaur.Desktop.Controls.Renderer.Abstractions.Earth;
 using Foxtaur.LibRenderer.Constants;
 using Foxtaur.LibRenderer.Models;
 using Foxtaur.LibRenderer.Services.Abstractions.CoordinateProviders;
 
-namespace Foxtaur.Desktop.Controls.Renderer.Implementations;
+namespace Foxtaur.Desktop.Controls.Renderer.Implementations.Earth;
 
 public class EarthGenerator : IEarthGenerator
 {
@@ -63,6 +63,11 @@ public class EarthGenerator : IEarthGenerator
         }
 
         return earthMesh;
+    }
+
+    public Sphere GenerateEarthSphere()
+    {
+        return new Sphere(new PlanarPoint3D(0.0f, 0.0f, 0.0f), RendererConstants.EarthRadius);
     }
 
     /// <summary>

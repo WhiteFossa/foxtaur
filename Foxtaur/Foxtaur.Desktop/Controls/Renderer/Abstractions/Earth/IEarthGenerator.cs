@@ -1,4 +1,6 @@
-namespace Foxtaur.Desktop.Controls.Renderer.Abstractions;
+using Foxtaur.LibRenderer.Models;
+
+namespace Foxtaur.Desktop.Controls.Renderer.Abstractions.Earth;
 
 /// <summary>
 /// Interface for Earth surface generation
@@ -10,4 +12,9 @@ public interface IEarthGenerator
     /// </summary>
     /// <param name="gridStep">Grid step in radians</param>
     public Mesh GenerateFullEarth(float gridStep);
+
+    /// <summary>
+    /// Generate Earth sphere (for raycasting)
+    /// </summary>
+    public Sphere GenerateEarthSphere();
 }

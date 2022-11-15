@@ -251,7 +251,7 @@ public class Camera : ICamera
         ProjectionMatrix = Matrix4x4.CreatePerspectiveFieldOfView(Zoom, AspectRatio, 0.1f, 100.0f); // Zoom
         
         // Back-projection matrix (for raycasting)
-        var forwardProjection = ModelMatrix * ViewMatrix * ProjectionMatrix;
+        var forwardProjection = ViewMatrix * ProjectionMatrix;
 
         Matrix4x4 backProjection;
         if (!Matrix4x4.Invert(forwardProjection, out backProjection))
