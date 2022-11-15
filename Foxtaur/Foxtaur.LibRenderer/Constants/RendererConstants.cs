@@ -43,12 +43,12 @@ public static class RendererConstants
     /// <summary>
     /// Camera zoom must be greater than this
     /// </summary>
-    public const float CameraMinZoom = 0.0f;
+    public const float CameraMaxZoom = 0.0f;
 
     /// <summary>
     /// Camera zoom must be lesser than this
     /// </summary>
-    public const float CameraMaxZoom = (float)Math.PI / 2.0f;
+    public const float CameraMinZoom = (float)Math.PI / 2.0f;
 
     /// <summary>
     /// Camera zoom in multiplier

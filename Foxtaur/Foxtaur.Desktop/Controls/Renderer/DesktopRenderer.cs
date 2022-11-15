@@ -58,11 +58,6 @@ public class DesktopRendererControl : OpenGlControlBase
     private readonly ICamera _camera = Program.Di.GetService<ICamera>();
 
     /// <summary>
-    /// Camera position
-    /// </summary>
-    private Vector3 _cameraPosition;
-
-    /// <summary>
     /// Camera target
     /// </summary>
     private Vector3 _cameraTarget;
@@ -133,7 +128,7 @@ public class DesktopRendererControl : OpenGlControlBase
         _camera.Lat = 0.0f;
         _camera.Lat = 0.0f;
         _camera.H = RendererConstants.CameraOrbitHeight;
-        _camera.Zoom = RendererConstants.CameraMaxZoom;
+        _camera.Zoom = RendererConstants.CameraMinZoom;
 
         // Targetting camera
         _cameraTarget = new Vector3(0.0f, 0.0f, 0.0f);
@@ -180,12 +175,11 @@ public class DesktopRendererControl : OpenGlControlBase
 
         _shader.Use();
 
-        // Projections
-        _cameraPosition = _camera.GetCameraPositionAsVector();
-        _cameraDirection = Vector3.Normalize(_cameraPosition - _cameraTarget);
+        // Projections;
+        _cameraDirection = Vector3.Normalize(_camera.Position3D.AsVector3() - _cameraTarget);
 
         _modelMatrix = Matrix4x4.CreateRotationZ(0.0f) * Matrix4x4.CreateRotationY(0.0f) * Matrix4x4.CreateRotationX(0.0f); // Rotation
-        _viewMatrix = Matrix4x4.CreateLookAt(_cameraPosition, _cameraDirection, _cameraUp); // Camera position
+        _viewMatrix = Matrix4x4.CreateLookAt(_camera.Position3D.AsVector3(), _cameraDirection, _cameraUp); // Camera position
         _projectionMatrix = Matrix4x4.CreatePerspectiveFieldOfView(_camera.Zoom, _aspectRatio, 0.1f, 100.0f); // Zoom
 
         // Setting shader parameters (common)
@@ -336,11 +330,11 @@ public class DesktopRendererControl : OpenGlControlBase
     private unsafe void DrawDebugVector(GL silkGlContext, PlanarPoint3D startPoint, PlanarPoint3D endPoint)
     {
         var mesh = new Mesh();
-        mesh.AddVertex(new PlanarPoint3D(startPoint.X - 0.1f, startPoint.Y, startPoint.Z), new PlanarPoint2D(0, 0));
-        mesh.AddVertex(new PlanarPoint3D(startPoint.X + 0.1f, startPoint.Y, startPoint.Z), new PlanarPoint2D(0, 1));
+        mesh.AddVertex(new PlanarPoint3D(startPoint.X - 0.01f, startPoint.Y, startPoint.Z), new PlanarPoint2D(0, 0));
+        mesh.AddVertex(new PlanarPoint3D(startPoint.X + 0.01f, startPoint.Y, startPoint.Z), new PlanarPoint2D(0, 1));
         
-        mesh.AddVertex(new PlanarPoint3D(endPoint.X - 0.1f, endPoint.Y, endPoint.Z), new PlanarPoint2D(1, 0));
-        mesh.AddVertex(new PlanarPoint3D(endPoint.X + 0.1f, endPoint.Y, endPoint.Z), new PlanarPoint2D(1, 1));
+        mesh.AddVertex(new PlanarPoint3D(endPoint.X - 0.01f, endPoint.Y, endPoint.Z), new PlanarPoint2D(1, 0));
+        mesh.AddVertex(new PlanarPoint3D(endPoint.X + 0.01f, endPoint.Y, endPoint.Z), new PlanarPoint2D(1, 1));
         
         mesh.AddIndex(0);
         mesh.AddIndex(1);

@@ -24,20 +24,14 @@ public interface ICamera
     float H { get; set; }
 
     /// <summary>
+    /// Camera position for given geo coordinates
+    /// </summary>
+    PlanarPoint3D Position3D { get; }
+
+    /// <summary>
     /// Camera zoom (in radians)
     /// </summary>
     float Zoom { get; set; }
-
-    /// <summary>
-    /// Get camera position in 3D space
-    /// </summary>
-    PlanarPoint3D GetCameraPosition();
-
-    /// <summary>
-    /// Get camera position in 3D space (as Vector3)
-    /// </summary>
-    /// <returns></returns>
-    Vector3 GetCameraPositionAsVector();
 
     /// <summary>
     /// Zoom in
