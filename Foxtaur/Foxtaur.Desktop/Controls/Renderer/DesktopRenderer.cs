@@ -74,17 +74,27 @@ public class DesktopRendererControl : OpenGlControlBase
 
     private Texture _redDebugTexture;
 
+    #region Camera
+
     /// <summary>
     /// True if mouse left button pressed and not released yet
     /// </summary>
     private bool _isMouseLeftButtonPressed = false;
 
-    private GeoPoint _clickGeoPoint;
+    /// <summary>
+    /// Mouse was pressed in this location
+    /// </summary>
+    private GeoPoint _pressGeoPoint;
 
-    // DI stuff
+    #endregion
+
+    #region DI
+
     private ICoordinatesProvider _sphereCoordinatesProvider = Program.Di.GetService<ISphereCoordinatesProvider>();
     private IEarthGenerator _earthGenerator = Program.Di.GetService<IEarthGenerator>();
     
+    #endregion
+
     /// <summary>
     /// Constructor
     /// </summary>
@@ -228,21 +238,11 @@ public class DesktopRendererControl : OpenGlControlBase
             _isMouseLeftButtonPressed = true;   
         }
         
-        var x = (float)e.GetCurrentPoint(this).Position.X * _scaling;
-        var y = (float)e.GetCurrentPoint(this).Position.Y * _scaling;
-        
-        var cameraRay = Ray.CreateByScreenRaycasting(_camera, x, y, _viewportWidth, _viewportHeight);
-
-        var intersections = cameraRay.Intersect(_earthSphere);
-        if (intersections.Count < 2)
+        var pressGeoPoint = GetMouseGeoCoordinates((float)e.GetCurrentPoint(this).Position.X, (float)e.GetCurrentPoint(this).Position.Y);
+        if (pressGeoPoint != null)
         {
-            // Miss, don't touch the camera
-            return;
+            _pressGeoPoint = pressGeoPoint;
         }
-        
-        // Closest to camera intersection
-        var closestIntersection = _camera.Position3D.GetClosesPoint(intersections);
-        _clickGeoPoint = _sphereCoordinatesProvider.Planar3DToGeo(closestIntersection);
     }
     
     /// <summary>
@@ -266,29 +266,39 @@ public class DesktopRendererControl : OpenGlControlBase
             return;
         }
         
-        var x = (float)e.GetCurrentPoint(this).Position.X * _scaling;
-        var y = (float)e.GetCurrentPoint(this).Position.Y * _scaling;
+        var newGeoPoint = GetMouseGeoCoordinates((float)e.GetCurrentPoint(this).Position.X, (float)e.GetCurrentPoint(this).Position.Y);
+        if (newGeoPoint != null)
+        {
+            var latDelta = GeoPoint.SumLatitudesWithWrap(newGeoPoint.Lat, -1.0f * _pressGeoPoint.Lat);
+            var lonDelta = GeoPoint.SumLongitudesWithWrap(newGeoPoint.Lon, -1.0f * _pressGeoPoint.Lon);
+
+            _camera.Lat = GeoPoint.SumLatitudesWithWrap(_camera.Lat, -1.0f * latDelta);
+            _camera.Lon = GeoPoint.SumLongitudesWithWrap(_camera.Lon, -1.0f * lonDelta);
+        }
+    }
+
+    /// <summary>
+    /// Get mouse geographical coordinates (they might be null if mouse outside the Earth)
+    /// </summary>
+    private GeoPoint GetMouseGeoCoordinates(float screenX, float screenY)
+    {
+        var x = screenX * _scaling;
+        var y = screenY * _scaling;
         
         var cameraRay = Ray.CreateByScreenRaycasting(_camera, x, y, _viewportWidth, _viewportHeight);
 
         var intersections = cameraRay.Intersect(_earthSphere);
         if (intersections.Count < 2)
         {
-            // Miss, don't touch the camera
-            return;
+            // Miss
+            return null;
         }
         
         // Closest to camera intersection
         var closestIntersection = _camera.Position3D.GetClosesPoint(intersections);
-        var newGeoPoint = _sphereCoordinatesProvider.Planar3DToGeo(closestIntersection);
-
-        var latDelta = GeoPoint.SumLatitudesWithWrap(newGeoPoint.Lat, -1.0f * _clickGeoPoint.Lat);
-        var lonDelta = GeoPoint.SumLongitudesWithWrap(newGeoPoint.Lon, -1.0f * _clickGeoPoint.Lon);
-
-        _camera.Lat = GeoPoint.SumLatitudesWithWrap(_camera.Lat, -1.0f * latDelta);
-        _camera.Lon = GeoPoint.SumLongitudesWithWrap(_camera.Lon, -1.0f * lonDelta);
+        return _sphereCoordinatesProvider.Planar3DToGeo(closestIntersection);
     }
-
+    
     /// <summary>
     /// Draw debug vector
     /// </summary>
