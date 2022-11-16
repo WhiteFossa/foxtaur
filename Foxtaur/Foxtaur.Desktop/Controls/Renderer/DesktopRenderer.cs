@@ -79,8 +79,7 @@ public class DesktopRendererControl : OpenGlControlBase
     /// </summary>
     private bool _isMouseLeftButtonPressed = false;
 
-    private Ray _debugRay;
-    private List<PlanarPoint3D> _intersections;
+    private PlanarPoint3D _debugPoint;
     
     // DI stuff
     private ICoordinatesProvider _sphereCoordinatesProvider = Program.Di.GetService<ISphereCoordinatesProvider>();
@@ -166,15 +165,10 @@ public class DesktopRendererControl : OpenGlControlBase
         _earthMesh.Dispose();
 
         // Debug vector
-        if (_intersections != null && _intersections.Count == 2)
+        if (_debugPoint != null)
         {
-            DrawDebugVector(_silkGLContext, _intersections[0], _intersections[1]);
+            DrawDebugVector(_silkGLContext, new PlanarPoint3D(0, 0, 0), _debugPoint);
         }
-
-        /*if (_debugRay != null)
-        {
-            DrawDebugVector(_silkGLContext, _debugRay.Begin, _debugRay.End);
-        }*/
 
         // Rotate camera (debug)
         if (!_isMouseLeftButtonPressed)
@@ -264,15 +258,28 @@ public class DesktopRendererControl : OpenGlControlBase
         
         var x = (float)e.GetCurrentPoint(this).Position.X * _scaling;
         var y = (float)e.GetCurrentPoint(this).Position.Y * _scaling;
+        
+        MoveCameraByDragging(x, y);
+    }
 
-        _debugRay = Ray.CreateByScreenRaycasting(_camera, x, y, _viewportWidth, _viewportHeight);
+    /// <summary>
+    /// Drag camera to a new position
+    /// </summary>
+    private void MoveCameraByDragging(float screenX, float screenY)
+    {
+        var cameraRay = Ray.CreateByScreenRaycasting(_camera, screenX, screenY, _viewportWidth, _viewportHeight);
 
-        _intersections = _debugRay.Intersect(_earthSphere);
-
-        if (_intersections.Count == 2)
+        var intersections = cameraRay.Intersect(_earthSphere);
+        if (intersections.Count < 2)
         {
-            int a = 10;   
+            // Miss, don't touch the camera
+            return;
         }
+        
+        // Closest to camera intersection
+        var closestIntersection = _camera.Position3D.GetClosesPoint(intersections);
+
+        _debugPoint = closestIntersection;
     }
 
     /// <summary>
