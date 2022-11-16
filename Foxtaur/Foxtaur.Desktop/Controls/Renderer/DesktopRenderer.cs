@@ -79,6 +79,8 @@ public class DesktopRendererControl : OpenGlControlBase
     /// </summary>
     private bool _isMouseLeftButtonPressed = false;
 
+    private GeoPoint _clickGeoPoint;
+
     // DI stuff
     private ICoordinatesProvider _sphereCoordinatesProvider = Program.Di.GetService<ISphereCoordinatesProvider>();
     private IEarthGenerator _earthGenerator = Program.Di.GetService<IEarthGenerator>();
@@ -225,6 +227,22 @@ public class DesktopRendererControl : OpenGlControlBase
         {
             _isMouseLeftButtonPressed = true;   
         }
+        
+        var x = (float)e.GetCurrentPoint(this).Position.X * _scaling;
+        var y = (float)e.GetCurrentPoint(this).Position.Y * _scaling;
+        
+        var cameraRay = Ray.CreateByScreenRaycasting(_camera, x, y, _viewportWidth, _viewportHeight);
+
+        var intersections = cameraRay.Intersect(_earthSphere);
+        if (intersections.Count < 2)
+        {
+            // Miss, don't touch the camera
+            return;
+        }
+        
+        // Closest to camera intersection
+        var closestIntersection = _camera.Position3D.GetClosesPoint(intersections);
+        _clickGeoPoint = _sphereCoordinatesProvider.Planar3DToGeo(closestIntersection);
     }
     
     /// <summary>
@@ -236,11 +254,6 @@ public class DesktopRendererControl : OpenGlControlBase
         {
             _isMouseLeftButtonPressed = false;   
         }
-        
-        var x = (float)e.GetCurrentPoint(this).Position.X * _scaling;
-        var y = (float)e.GetCurrentPoint(this).Position.Y * _scaling;
-        
-        MoveCameraByDragging(x, y);
     }
     
     /// <summary>
@@ -252,14 +265,11 @@ public class DesktopRendererControl : OpenGlControlBase
         {
             return;
         }
-    }
-
-    /// <summary>
-    /// Drag camera to a new position
-    /// </summary>
-    private void MoveCameraByDragging(float screenX, float screenY)
-    {
-        var cameraRay = Ray.CreateByScreenRaycasting(_camera, screenX, screenY, _viewportWidth, _viewportHeight);
+        
+        var x = (float)e.GetCurrentPoint(this).Position.X * _scaling;
+        var y = (float)e.GetCurrentPoint(this).Position.Y * _scaling;
+        
+        var cameraRay = Ray.CreateByScreenRaycasting(_camera, x, y, _viewportWidth, _viewportHeight);
 
         var intersections = cameraRay.Intersect(_earthSphere);
         if (intersections.Count < 2)
@@ -270,11 +280,13 @@ public class DesktopRendererControl : OpenGlControlBase
         
         // Closest to camera intersection
         var closestIntersection = _camera.Position3D.GetClosesPoint(intersections);
-        var closestIntersectionGeo = _sphereCoordinatesProvider.Planar3DToGeo(closestIntersection);
+        var newGeoPoint = _sphereCoordinatesProvider.Planar3DToGeo(closestIntersection);
 
-        // Moving camera
-        _camera.Lat = closestIntersectionGeo.Lat;
-        _camera.Lon = closestIntersectionGeo.Lon;
+        var latDelta = GeoPoint.SumLatitudesWithWrap(newGeoPoint.Lat, -1.0f * _clickGeoPoint.Lat);
+        var lonDelta = GeoPoint.SumLongitudesWithWrap(newGeoPoint.Lon, -1.0f * _clickGeoPoint.Lon);
+
+        _camera.Lat = GeoPoint.SumLatitudesWithWrap(_camera.Lat, -1.0f * latDelta);
+        _camera.Lon = GeoPoint.SumLongitudesWithWrap(_camera.Lon, -1.0f * lonDelta);
     }
 
     /// <summary>

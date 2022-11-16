@@ -8,17 +8,17 @@ namespace Foxtaur.LibRenderer.Models;
 public class GeoPoint
 {
     /// <summary>
-    ///     Latitude
+    /// Latitude
     /// </summary>
     public float Lat { get; }
 
     /// <summary>
-    ///     Longitude
+    /// Longitude
     /// </summary>
     public float Lon { get; }
 
     /// <summary>
-    ///     Height
+    /// Height
     /// </summary>
     public float H { get; }
 
@@ -37,5 +37,40 @@ public class GeoPoint
         Lat = lat;
         Lon = lon;
         H = h;
+    }
+
+    /// <summary>
+    /// Add lat + delta, wrap over the Earth
+    /// </summary>
+    public static float SumLatitudesWithWrap(float lat, float delta)
+    {
+        var result = lat + delta;
+
+        if (result > RendererConstants.MaxLat)
+        {
+            result = 2 * RendererConstants.MaxLat - result;
+        }
+        else if (result < RendererConstants.MinLat)
+        {
+            result = result + 2 * RendererConstants.MaxLat;
+        }
+
+        return result;
+    }
+
+    public static float SumLongitudesWithWrap(float lon, float delta)
+    {
+        var result = lon + delta;
+
+        if (result > RendererConstants.MaxLon)
+        {
+            result += 2 * RendererConstants.MinLon;
+        }
+        else if (result < RendererConstants.MinLon)
+        {
+            result += 2 * RendererConstants.MaxLon;
+        }
+
+        return result;
     }
 }
