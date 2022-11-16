@@ -44,16 +44,19 @@ public class Ray
         var bxex = Begin.X - End.X;
         var byey = Begin.Y - End.Y;
         var bzez = Begin.Z - End.Z;
+
+        var bxeyexby = Begin.X * End.Y - End.X * Begin.Y;
+        var bxezexbz = Begin.X * End.Z - End.X * Begin.Z;
         
         var a = 1.0f + (float)Math.Pow(byey / bxex, 2) + (float)Math.Pow(bzez / bxex, 2);
 
-        var b = 2 * sphere.Center.X
-                + 2 * (byey / bxex) * ((Begin.X * End.Y - End.X * Begin.Y) / bxex - sphere.Center.Y)
-                + 2 * (bzez / bxex) * ((Begin.X * End.Z - End.X * Begin.Z) / bxex - sphere.Center.Z);
+        var b = 2.0f * (sphere.Center.X
+                + byey / bxex * (bxeyexby / bxex - sphere.Center.Y)
+                + bzez / bxex * (bxezexbz / bxex - sphere.Center.Z));
 
         var c = (float)Math.Pow(sphere.Center.X, 2)
-                + (float)Math.Pow(((Begin.X * End.Y - End.X * Begin.Y) / bxex - sphere.Center.Y), 2)
-                + (float)Math.Pow(((Begin.X * End.Z - End.X * Begin.Z) / bxex - sphere.Center.Z), 2)
+                + (float)Math.Pow(bxeyexby / bxex - sphere.Center.Y, 2)
+                + (float)Math.Pow(bxezexbz / bxex - sphere.Center.Z, 2)
                 - sphere.Radius;
 
         var d = (float)Math.Pow(b, 2) - 4 * a * c;
@@ -66,11 +69,11 @@ public class Ray
         var x1 = (-1.0f * b + (float)Math.Sqrt(d)) / (2.0f * a);
         var x2 = (-1.0f * b - (float)Math.Sqrt(d)) / (2.0f * a);
 
-        var y1 = GetYForSphereIntersection(x1, bxex, byey);
-        var y2 = GetYForSphereIntersection(x2, bxex, byey);
+        var y1 = GetYForSphereIntersection(x1, bxex, byey, bxeyexby);
+        var y2 = GetYForSphereIntersection(x2, bxex, byey, bxeyexby);
         
-        var z1 = GetZForSphereIntersection(x1, bxex, bzez);
-        var z2 = GetZForSphereIntersection(x2, bxex, bzez);
+        var z1 = GetZForSphereIntersection(x1, bxex, bzez, bxezexbz);
+        var z2 = GetZForSphereIntersection(x2, bxex, bzez, bxezexbz);
 
         return new List<PlanarPoint3D>()
         {
@@ -79,13 +82,13 @@ public class Ray
         };
     }
 
-    private float GetYForSphereIntersection(float x, float bxex, float byey)
+    private float GetYForSphereIntersection(float x, float bxex, float byey, float bxeyexby)
     {
-        return byey / bxex * x + (Begin.X * End.Y - End.X * Begin.Y) / bxex;
+        return byey / bxex * x + bxeyexby / bxex;
     }
     
-    private float GetZForSphereIntersection(float x, float bxex, float bzez)
+    private float GetZForSphereIntersection(float x, float bxex, float bzez, float bxezexbz)
     {
-        return bzez / bxex * x + (Begin.X * End.Z - End.X * Begin.Z) / bxex;
+        return bzez / bxex * x + bxezexbz / bxex;
     }
 }
