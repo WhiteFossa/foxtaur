@@ -79,8 +79,6 @@ public class DesktopRendererControl : OpenGlControlBase
     /// </summary>
     private bool _isMouseLeftButtonPressed = false;
 
-    private PlanarPoint3D _debugPoint;
-    
     // DI stuff
     private ICoordinatesProvider _sphereCoordinatesProvider = Program.Di.GetService<ISphereCoordinatesProvider>();
     private IEarthGenerator _earthGenerator = Program.Di.GetService<IEarthGenerator>();
@@ -156,21 +154,15 @@ public class DesktopRendererControl : OpenGlControlBase
         _shader.SetUniform1i("ourTexture", 0);
         _earthTexture.Bind();
 
-        _silkGLContext.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Line);
+        //_silkGLContext.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Line);
 
         // Earth
         _earthMesh.GenerateBuffers(_silkGLContext);
         _earthMesh.BindBuffers();
         _silkGLContext.DrawElements(PrimitiveType.Triangles, (uint)_earthMesh.Indices.Count, DrawElementsType.UnsignedInt, null);
         _earthMesh.Dispose();
-
-        // Debug vector
-        if (_debugPoint != null)
-        {
-            DrawDebugVector(_silkGLContext, new PlanarPoint3D(0, 0, 0), _debugPoint);
-        }
-
-        // Rotate camera (debug)
+        
+        /*// Rotate camera (debug)
         if (!_isMouseLeftButtonPressed)
         {
             _camera.Lon += (float)Math.PI / 200.0f;
@@ -178,7 +170,7 @@ public class DesktopRendererControl : OpenGlControlBase
             {
                 _camera.Lon -= 2.0f * (float)Math.PI;
             }
-        }
+        }*/
 
         Dispatcher.UIThread.Post(InvalidateVisual, DispatcherPriority.Background);
     }
@@ -244,6 +236,11 @@ public class DesktopRendererControl : OpenGlControlBase
         {
             _isMouseLeftButtonPressed = false;   
         }
+        
+        var x = (float)e.GetCurrentPoint(this).Position.X * _scaling;
+        var y = (float)e.GetCurrentPoint(this).Position.Y * _scaling;
+        
+        MoveCameraByDragging(x, y);
     }
     
     /// <summary>
@@ -255,11 +252,6 @@ public class DesktopRendererControl : OpenGlControlBase
         {
             return;
         }
-        
-        var x = (float)e.GetCurrentPoint(this).Position.X * _scaling;
-        var y = (float)e.GetCurrentPoint(this).Position.Y * _scaling;
-        
-        MoveCameraByDragging(x, y);
     }
 
     /// <summary>
@@ -278,8 +270,11 @@ public class DesktopRendererControl : OpenGlControlBase
         
         // Closest to camera intersection
         var closestIntersection = _camera.Position3D.GetClosesPoint(intersections);
+        var closestIntersectionGeo = _sphereCoordinatesProvider.Planar3DToGeo(closestIntersection);
 
-        _debugPoint = closestIntersection;
+        // Moving camera
+        _camera.Lat = closestIntersectionGeo.Lat;
+        _camera.Lon = closestIntersectionGeo.Lon;
     }
 
     /// <summary>

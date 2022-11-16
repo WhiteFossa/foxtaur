@@ -29,6 +29,11 @@ public class SphereCoordinatesProvider : ISphereCoordinatesProvider
 
     public GeoPoint Planar3DToGeo(PlanarPoint3D planar3d)
     {
-        throw new NotImplementedException();
+        var h = planar3d.DistanceTo(new PlanarPoint3D(0, 0, 0));
+        
+        var lat = (float)Math.Asin(planar3d.Y / h);
+        var lon = (float)Math.Atan2(-1.0f * planar3d.Z, planar3d.X);
+
+        return new GeoPoint(lat, lon, h);
     }
 }
