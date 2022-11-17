@@ -102,7 +102,7 @@ public class DesktopRendererControl : OpenGlControlBase
     {
         // Generating the Earth
         _earthSphere = _earthGenerator.GenerateEarthSphere();
-        _earthMesh = _earthGenerator.GenerateFullEarth((float)Math.PI / 90.0f);
+        _earthMesh = _earthGenerator.GenerateFullEarth((float)Math.PI / 900.0f);
         
         // Creating camera
         _camera.Lat = 0.0f;
@@ -235,13 +235,28 @@ public class DesktopRendererControl : OpenGlControlBase
     {
         if (e.GetCurrentPoint(this).Properties.IsLeftButtonPressed)
         {
-            _isMouseLeftButtonPressed = true;   
+            // Left click - dragging the camera
+            _isMouseLeftButtonPressed = true;
+            
+            var pressGeoPoint = GetMouseGeoCoordinates((float)e.GetCurrentPoint(this).Position.X, (float)e.GetCurrentPoint(this).Position.Y);
+            if (pressGeoPoint != null)
+            {
+                _pressGeoPoint = pressGeoPoint;
+            }
         }
-        
-        var pressGeoPoint = GetMouseGeoCoordinates((float)e.GetCurrentPoint(this).Position.X, (float)e.GetCurrentPoint(this).Position.Y);
-        if (pressGeoPoint != null)
+
+        if (e.GetCurrentPoint(this).Properties.IsMiddleButtonPressed)
         {
-            _pressGeoPoint = pressGeoPoint;
+            // Middle click - surface mode
+            _camera.H = RendererConstants.EarthRadius + 0.001f;
+            
+            var targetVector = new Vector3(_camera.Target.X - _camera.Position3D.X, _camera.Target.Y - _camera.Position3D.Y, _camera.Target.Z - _camera.Position3D.Z);
+
+            var rotation = Matrix4x4.CreateRotationZ((float)Math.PI / 2.0f);
+            
+            targetVector = Vector3.Transform(targetVector, rotation);
+
+            _camera.Target = new PlanarPoint3D(targetVector.X + _camera.Position3D.X, targetVector.Y + _camera.Position3D.Y, targetVector.Z + _camera.Position3D.Z);
         }
     }
     

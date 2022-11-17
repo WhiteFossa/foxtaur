@@ -35,7 +35,7 @@ public class Ray
         
         var nearPoint = camera.BackProjectionMatrix.TransformPerspectively(new Vector3(normalizedDeviceX, normalizedDeviceY, 0.0f));
         var farPoint = camera.BackProjectionMatrix.TransformPerspectively(new Vector3(normalizedDeviceX, normalizedDeviceY, 1.0f));
-
+        
         return new Ray(nearPoint.AsPlanarPoint3D(), farPoint.AsPlanarPoint3D());
     }
 
