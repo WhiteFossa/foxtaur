@@ -1,5 +1,6 @@
 using System.Numerics;
 using Foxtaur.LibRenderer.Models;
+using MathNet.Numerics.LinearAlgebra;
 using NLog;
 
 namespace Foxtaur.LibRenderer.Helpers;
@@ -49,5 +50,43 @@ public static class RendererHelper
     public static Vector3 AsVector3(this PlanarPoint3D point)
     {
         return new Vector3(point.X, point.Y, point.Z);
+    }
+
+    /// <summary>
+    /// Rotate around direction to angle
+    /// </summary>
+    public static Vector3 RotateAround(this Vector3 toRotate, Vector3 direction, float a)
+    {
+        var nd = Vector3.Normalize(direction);
+
+        var cosa = Math.Cos(a);
+        var oneMinusCosa = 1 - cosa;
+        var sina = Math.Sin(a);
+
+        var m11 = (float)(cosa + oneMinusCosa * Math.Pow(nd.X, 2));
+        var m12 = (float)(oneMinusCosa * nd.X * nd.Y - sina * nd.Z);
+        var m13 = (float)(oneMinusCosa * nd.X * nd.Z + sina * nd.Y);
+        
+        var m21 = (float)(oneMinusCosa * nd.Y * nd.X + sina * nd.Z);
+        var m22 = (float)(cosa + oneMinusCosa * Math.Pow(nd.Y, 2));
+        var m23 = (float)(oneMinusCosa * nd.Y * nd.Z - sina * nd.X);
+        
+        var m31 = (float)(oneMinusCosa * nd.Z * nd.X - sina * nd.Y);
+        var m32 = (float)(oneMinusCosa * nd.Z * nd.Y + sina * nd.X);
+        var m33 = (float)(cosa + oneMinusCosa * Math.Pow(nd.Z, 2));
+        
+        var rotation = Matrix<float>.Build.DenseOfArray(
+            new float[,]
+            {
+                { m11, m12, m13 },
+                { m21, m22, m23 },
+                { m31, m32, m33 }
+            });
+
+        var toRotateMathNet = MathNet.Numerics.LinearAlgebra.Vector<float>.Build.Dense(new float[] { toRotate.X, toRotate.Y, toRotate.Z });
+
+        var rotated = rotation * toRotateMathNet;
+        
+        return new Vector3(rotated[0], rotated[1], rotated[2]);
     }
 }
