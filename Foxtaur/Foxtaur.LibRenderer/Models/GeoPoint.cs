@@ -62,15 +62,16 @@ public class GeoPoint
     {
         var result = lon + delta;
 
-        if (result > RendererConstants.MaxLon)
+        while (result > (float)Math.PI)
         {
-            result += 2 * RendererConstants.MinLon;
-        }
-        else if (result < RendererConstants.MinLon)
-        {
-            result += 2 * RendererConstants.MaxLon;
+            result -= 2.0f * (float)Math.PI;
         }
 
+        while (result < (float)Math.PI)
+        {
+            result += 2.0f * (float)Math.PI;
+        }
+        
         return result;
     }
 }
