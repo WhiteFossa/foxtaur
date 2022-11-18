@@ -41,12 +41,7 @@ public class Camera : ICamera
     /// Camera zoom
     /// </summary>
     private float _zoom;
-
-    /// <summary>
-    /// Camera direction
-    /// </summary>
-    private Vector3 _direction = new Vector3(0, 0, 0);
-
+    
     /// <summary>
     /// Camera up vector
     /// </summary>
@@ -115,7 +110,6 @@ public class Camera : ICamera
         {
             _position = value;
             
-            CalculateCameraDirection();
             CalculateMatrices();
         }
     }
@@ -131,7 +125,6 @@ public class Camera : ICamera
         {
             _target = value;
             
-            CalculateCameraDirection();
             CalculateMatrices();
         }
     }
@@ -229,11 +222,6 @@ public class Camera : ICamera
         Position3D = _sphereCoordinatesProvider.GeoToPlanar3D(new GeoPoint(Lat, Lon, H));
     }
 
-    private void CalculateCameraDirection()
-    {
-        _direction = Vector3.Normalize(_position.AsVector3() - _target.AsVector3());
-    }
-
     /// <summary>
     /// Call on next changes:
     /// - Position3D
@@ -244,11 +232,9 @@ public class Camera : ICamera
     /// </summary>
     private void CalculateMatrices()
     {
-        var direction = Vector3.Normalize(Position3D.AsVector3() - Target.AsVector3());
-
         ModelMatrix = Matrix4x4.CreateRotationZ(0.0f) * Matrix4x4.CreateRotationY(0.0f) * Matrix4x4.CreateRotationX(0.0f); // Rotation
-        ViewMatrix = Matrix4x4.CreateLookAt(Position3D.AsVector3(), direction, Up); // Camera position
-        ProjectionMatrix = Matrix4x4.CreatePerspectiveFieldOfView(Zoom, AspectRatio, 0.0001f, 100.0f); // Zoom
+        ViewMatrix = Matrix4x4.CreateLookAt(Position3D.AsVector3(), Target.AsVector3(), Up); // Camera position
+        ProjectionMatrix = Matrix4x4.CreatePerspectiveFieldOfView(Zoom, AspectRatio, 0.1f, 100.0f); // Zoom
         
         // Back-projection matrix (for raycasting)
         var forwardProjection = ViewMatrix * ProjectionMatrix;

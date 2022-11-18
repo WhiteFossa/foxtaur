@@ -95,6 +95,8 @@ public class DesktopRendererControl : OpenGlControlBase
     /// </summary>
     private bool _isSurfaceMode = false;
 
+    private float tmpRot = 0.0f;
+
     #region DI
 
     private ICoordinatesProvider _sphereCoordinatesProvider = Program.Di.GetService<ISphereCoordinatesProvider>();
@@ -163,29 +165,18 @@ public class DesktopRendererControl : OpenGlControlBase
 
         if (_isSurfaceMode)
         {
-            // Debugging stuff
-            _camera.Lon = 0.0f;
-
-            var cameraPosition = _sphereCoordinatesProvider.GeoToPlanar3D(new GeoPoint(_camera.Lat, _camera.Lon, _camera.H));
+            tmpRot += 0.01f;
             
-            // Nadir
-            var nadirVector = new Ray(cameraPosition, new PlanarPoint3D(0, 0, 0));
-            DrawDebugVectorRed(_silkGLContext, nadirVector.Begin, nadirVector.End);
+            while (tmpRot > 2 * Math.PI)
+            {
+                tmpRot -= 2.0f * (float)Math.PI;
+            }
 
-            // North vector
-            //var northPole = _sphereCoordinatesProvider.GeoToPlanar3D(new GeoPoint((float)Math.PI / 2.0f, 0.0f, RendererConstants.EarthRadius));
-            //var northVector = new Ray(_camera.Position3D, northPole);
-            //DrawDebugVector(_silkGLContext, northVector.Begin, northVector.End);
+            _camera.H = RendererConstants.EarthRadius + 0.1f;
             
-            // Target vector
-            var targetVector = new Vector3(nadirVector.End.X - nadirVector.Begin.X, nadirVector.End.Y - nadirVector.Begin.Y, nadirVector.End.Z - nadirVector.Begin.Z);
-            targetVector = Vector3.Transform(targetVector, Matrix4x4.CreateRotationX((float)Math.PI / 2.0f - _camera.Lat));
-
-            var targetRay = new Ray(cameraPosition, new PlanarPoint3D(cameraPosition.X + targetVector.X, cameraPosition.Y + targetVector.Y, cameraPosition.Z + targetVector.Z));
-            DrawDebugVectorBlue(_silkGLContext, targetRay.Begin, targetRay.End);
-
-            _camera.Target = targetRay.End;
-            //_camera.Up = new Vector3(cameraPosition.X * -1.0f, cameraPosition.Y * -1.0f, cameraPosition.Z * -1.0f);
+            var targetVector = new Vector3(0 - _camera.Position3D.X, 0 - _camera.Position3D.Y, 0 - _camera.Position3D.Z);
+            targetVector = Vector3.Transform(targetVector, Matrix4x4.CreateRotationX(0));
+            _camera.Target = new PlanarPoint3D(targetVector.X + _camera.Position3D.X, targetVector.Y + _camera.Position3D.Y, targetVector.Z + _camera.Position3D.Z);
         }
 
         _shader.Use();
@@ -276,7 +267,7 @@ public class DesktopRendererControl : OpenGlControlBase
             // Middle click - surface mode
             if (!_isSurfaceMode)
             {
-                _camera.H = RendererConstants.EarthRadius + 0.00001f;
+                _camera.H = RendererConstants.EarthRadius + 0.0001f;
             
                 _isSurfaceMode = true;    
             }
