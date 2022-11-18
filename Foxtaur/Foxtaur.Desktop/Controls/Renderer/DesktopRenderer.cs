@@ -95,7 +95,7 @@ public class DesktopRendererControl : OpenGlControlBase
     /// </summary>
     private bool _isSurfaceMode = false;
 
-    private float tmpRot = 0.0f;
+    private float tmpRot = 0;
 
     #region DI
 
@@ -111,7 +111,7 @@ public class DesktopRendererControl : OpenGlControlBase
     {
         // Generating the Earth
         _earthSphere = _earthGenerator.GenerateEarthSphere();
-        _earthMesh = _earthGenerator.GenerateFullEarth((float)Math.PI / 900.0f);
+        _earthMesh = _earthGenerator.GenerateFullEarth((float)Math.PI / 90.0f);
         
         // Creating camera
         _camera.Lat = 0.0f;
@@ -166,17 +166,22 @@ public class DesktopRendererControl : OpenGlControlBase
         if (_isSurfaceMode)
         {
             tmpRot += 0.01f;
-            
-            while (tmpRot > 2 * Math.PI)
+            if (tmpRot > 2 * Math.PI)
             {
                 tmpRot -= 2.0f * (float)Math.PI;
             }
-
-            _camera.H = RendererConstants.EarthRadius + 0.1f;
             
+            _camera.H = RendererConstants.EarthRadius + 0.1f;
+
+            // Target
             var targetVector = new Vector3(0 - _camera.Position3D.X, 0 - _camera.Position3D.Y, 0 - _camera.Position3D.Z);
-            targetVector = Vector3.Transform(targetVector, Matrix4x4.CreateRotationX(0));
+            targetVector = Vector3.Transform(targetVector, Matrix4x4.CreateRotationX((float)Math.PI / 2.0f - _camera.Lat));
+            targetVector = Vector3.Transform(targetVector, Matrix4x4.CreateRotationY(tmpRot));
             _camera.Target = new PlanarPoint3D(targetVector.X + _camera.Position3D.X, targetVector.Y + _camera.Position3D.Y, targetVector.Z + _camera.Position3D.Z);
+            
+            // Up
+            var nadirVector = new Vector3(0, 0, 0) - _camera.Position3D.AsVector3();
+            _camera.Up = nadirVector;
         }
 
         _shader.Use();
