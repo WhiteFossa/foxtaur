@@ -16,6 +16,7 @@ using Foxtaur.LibRenderer.Helpers;
 using Foxtaur.LibRenderer.Models;
 using Foxtaur.LibRenderer.Services.Abstractions.Camera;
 using Foxtaur.LibRenderer.Services.Implementations.Camera;
+using Plane = Foxtaur.LibRenderer.Models.Plane;
 
 namespace Foxtaur.Desktop.Controls.Renderer;
 
@@ -73,6 +74,7 @@ public class DesktopRendererControl : OpenGlControlBase
     #endregion
 
     private Texture _redDebugTexture;
+    private Texture _blueDebugTexture;
 
     #region Camera
 
@@ -87,6 +89,11 @@ public class DesktopRendererControl : OpenGlControlBase
     private GeoPoint _pressGeoPoint;
 
     #endregion
+
+    /// <summary>
+    /// Surface walk mode
+    /// </summary>
+    private bool _isSurfaceMode = false;
 
     #region DI
 
@@ -136,7 +143,9 @@ public class DesktopRendererControl : OpenGlControlBase
         
         // Loading textures
         _earthTexture = new Texture(_silkGLContext, @"Resources/Textures/Basemaps/HYP_50M_SR_W_SMALL.jpeg");
+        //_earthTexture = new Texture(_silkGLContext, @"Resources/Textures/davydovo.png");
         _redDebugTexture = new Texture(_silkGLContext, @"Resources/Textures/debugVector.png");
+        _blueDebugTexture = new Texture(_silkGLContext, @"Resources/Textures/debugVectorBlue.png");
     }
 
     /// <summary>
@@ -152,6 +161,33 @@ public class DesktopRendererControl : OpenGlControlBase
 
         _silkGLContext.Viewport(0, 0, (uint)_viewportWidth, (uint)_viewportHeight);
 
+        if (_isSurfaceMode)
+        {
+            // Debugging stuff
+            _camera.Lon = 0.0f;
+
+            var cameraPosition = _sphereCoordinatesProvider.GeoToPlanar3D(new GeoPoint(_camera.Lat, _camera.Lon, _camera.H));
+            
+            // Nadir
+            var nadirVector = new Ray(cameraPosition, new PlanarPoint3D(0, 0, 0));
+            DrawDebugVectorRed(_silkGLContext, nadirVector.Begin, nadirVector.End);
+
+            // North vector
+            //var northPole = _sphereCoordinatesProvider.GeoToPlanar3D(new GeoPoint((float)Math.PI / 2.0f, 0.0f, RendererConstants.EarthRadius));
+            //var northVector = new Ray(_camera.Position3D, northPole);
+            //DrawDebugVector(_silkGLContext, northVector.Begin, northVector.End);
+            
+            // Target vector
+            var targetVector = new Vector3(nadirVector.End.X - nadirVector.Begin.X, nadirVector.End.Y - nadirVector.Begin.Y, nadirVector.End.Z - nadirVector.Begin.Z);
+            targetVector = Vector3.Transform(targetVector, Matrix4x4.CreateRotationX((float)Math.PI / 2.0f - _camera.Lat));
+
+            var targetRay = new Ray(cameraPosition, new PlanarPoint3D(cameraPosition.X + targetVector.X, cameraPosition.Y + targetVector.Y, cameraPosition.Z + targetVector.Z));
+            DrawDebugVectorBlue(_silkGLContext, targetRay.Begin, targetRay.End);
+
+            _camera.Target = targetRay.End;
+            //_camera.Up = new Vector3(cameraPosition.X * -1.0f, cameraPosition.Y * -1.0f, cameraPosition.Z * -1.0f);
+        }
+
         _shader.Use();
 
         // Setting shader parameters (common)
@@ -164,25 +200,15 @@ public class DesktopRendererControl : OpenGlControlBase
 
         // Setting shader parameters (fragments)
         _shader.SetUniform1i("ourTexture", 0);
-        _earthTexture.Bind();
 
         //_silkGLContext.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Line);
-
+        
         // Earth
         _earthMesh.GenerateBuffers(_silkGLContext);
         _earthMesh.BindBuffers();
+        _earthTexture.Bind();
         _silkGLContext.DrawElements(PrimitiveType.Triangles, (uint)_earthMesh.Indices.Count, DrawElementsType.UnsignedInt, null);
         _earthMesh.Dispose();
-        
-        /*// Rotate camera (debug)
-        if (!_isMouseLeftButtonPressed)
-        {
-            _camera.Lon += (float)Math.PI / 200.0f;
-            if (_camera.Lon > Math.PI)
-            {
-                _camera.Lon -= 2.0f * (float)Math.PI;
-            }
-        }*/
 
         Dispatcher.UIThread.Post(InvalidateVisual, DispatcherPriority.Background);
     }
@@ -248,15 +274,20 @@ public class DesktopRendererControl : OpenGlControlBase
         if (e.GetCurrentPoint(this).Properties.IsMiddleButtonPressed)
         {
             // Middle click - surface mode
-            _camera.H = RendererConstants.EarthRadius + 0.001f;
+            if (!_isSurfaceMode)
+            {
+                _camera.H = RendererConstants.EarthRadius + 0.00001f;
             
-            var targetVector = new Vector3(_camera.Target.X - _camera.Position3D.X, _camera.Target.Y - _camera.Position3D.Y, _camera.Target.Z - _camera.Position3D.Z);
+                _isSurfaceMode = true;    
+            }
+            else
+            {
+                _camera.H = RendererConstants.CameraOrbitHeight;
+                _camera.Target = new PlanarPoint3D(0, 0, 0);
+                _camera.Up = new Vector3(0.0f, -1.0f, 0.0f);
 
-            var rotation = Matrix4x4.CreateRotationZ((float)Math.PI / 2.0f);
-            
-            targetVector = Vector3.Transform(targetVector, rotation);
-
-            _camera.Target = new PlanarPoint3D(targetVector.X + _camera.Position3D.X, targetVector.Y + _camera.Position3D.Y, targetVector.Z + _camera.Position3D.Z);
+                _isSurfaceMode = false;
+            }
         }
     }
     
@@ -314,17 +345,14 @@ public class DesktopRendererControl : OpenGlControlBase
         return _sphereCoordinatesProvider.Planar3DToGeo(closestIntersection);
     }
     
-    /// <summary>
-    /// Draw debug vector
-    /// </summary>
-    private unsafe void DrawDebugVector(GL silkGlContext, PlanarPoint3D startPoint, PlanarPoint3D endPoint)
+    private unsafe void DrawDebugVectorRed(GL silkGlContext, PlanarPoint3D startPoint, PlanarPoint3D endPoint)
     {
         var mesh = new Mesh();
-        mesh.AddVertex(new PlanarPoint3D(startPoint.X - 0.01f, startPoint.Y, startPoint.Z), new PlanarPoint2D(0, 0));
-        mesh.AddVertex(new PlanarPoint3D(startPoint.X + 0.01f, startPoint.Y, startPoint.Z), new PlanarPoint2D(0, 1));
-        
-        mesh.AddVertex(new PlanarPoint3D(endPoint.X - 0.01f, endPoint.Y, endPoint.Z), new PlanarPoint2D(1, 0));
-        mesh.AddVertex(new PlanarPoint3D(endPoint.X + 0.01f, endPoint.Y, endPoint.Z), new PlanarPoint2D(1, 1));
+        mesh.AddVertex(new PlanarPoint3D(startPoint.X - 0.01f, startPoint.Y - 0.01f, startPoint.Z - 0.01f), new PlanarPoint2D(0, 0));
+        mesh.AddVertex(new PlanarPoint3D(startPoint.X + 0.01f, startPoint.Y + 0.01f, startPoint.Z + 0.01f), new PlanarPoint2D(0, 1));
+
+        mesh.AddVertex(new PlanarPoint3D(endPoint.X - 0.01f, endPoint.Y - 0.01f, endPoint.Z - 0.01f), new PlanarPoint2D(1, 0));
+        mesh.AddVertex(new PlanarPoint3D(endPoint.X + 0.01f, endPoint.Y + 0.01f, endPoint.Z + 0.01f), new PlanarPoint2D(1, 1));
         
         mesh.AddIndex(0);
         mesh.AddIndex(1);
@@ -340,7 +368,34 @@ public class DesktopRendererControl : OpenGlControlBase
         
         _redDebugTexture.Bind();
         silkGlContext.DrawElements(PrimitiveType.Triangles, (uint)mesh.Indices.Count, DrawElementsType.UnsignedInt, null);
+
+        mesh.Dispose();
+    }
+    
+    private unsafe void DrawDebugVectorBlue(GL silkGlContext, PlanarPoint3D startPoint, PlanarPoint3D endPoint)
+    {
+        var mesh = new Mesh();
+        mesh.AddVertex(new PlanarPoint3D(startPoint.X - 0.01f, startPoint.Y - 0.01f, startPoint.Z - 0.01f), new PlanarPoint2D(0, 0));
+        mesh.AddVertex(new PlanarPoint3D(startPoint.X + 0.01f, startPoint.Y + 0.01f, startPoint.Z + 0.01f), new PlanarPoint2D(0, 1));
+
+        mesh.AddVertex(new PlanarPoint3D(endPoint.X - 0.01f, endPoint.Y - 0.01f, endPoint.Z - 0.01f), new PlanarPoint2D(1, 0));
+        mesh.AddVertex(new PlanarPoint3D(endPoint.X + 0.01f, endPoint.Y + 0.01f, endPoint.Z + 0.01f), new PlanarPoint2D(1, 1));
         
+        mesh.AddIndex(0);
+        mesh.AddIndex(1);
+        mesh.AddIndex(2);
+        
+        mesh.AddIndex(2);
+        mesh.AddIndex(3);
+        mesh.AddIndex(1);
+        
+        mesh.GenerateBuffers(silkGlContext);
+        
+        mesh.BindBuffers();
+        
+        _blueDebugTexture.Bind();
+        silkGlContext.DrawElements(PrimitiveType.Triangles, (uint)mesh.Indices.Count, DrawElementsType.UnsignedInt, null);
+
         mesh.Dispose();
     }
 }

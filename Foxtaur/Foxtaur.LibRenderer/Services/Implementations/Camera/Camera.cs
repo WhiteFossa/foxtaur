@@ -185,7 +185,7 @@ public class Camera : ICamera
         }
     }
 
-    private Vector3 Up
+    public Vector3 Up
     {
         get
         {

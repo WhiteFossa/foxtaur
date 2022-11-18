@@ -12,7 +12,7 @@ public interface ICamera
     /// Camera latitude
     /// </summary>
     float Lat { get; set; }
-    
+
     /// <summary>
     /// Camera longitude
     /// </summary>
@@ -62,6 +62,11 @@ public interface ICamera
     /// Screen aspect ratio
     /// </summary>
     float AspectRatio { get; set; }
+
+    /// <summary>
+    /// Camera up vector
+    /// </summary>
+    Vector3 Up { get; set; }
 
     /// <summary>
     /// Zoom in
