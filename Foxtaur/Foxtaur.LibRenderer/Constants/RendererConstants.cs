@@ -1,3 +1,5 @@
+using System.Numerics;
+
 namespace Foxtaur.LibRenderer.Constants;
 
 /// <summary>
@@ -64,4 +66,14 @@ public static class RendererConstants
     /// Camera orbit height
     /// </summary>
     public const float CameraOrbitHeight = 2.0f * EarthRadius;
+
+    /// <summary>
+    /// Camera height for surface walk mode
+    /// </summary>
+    public const float SurfaceModeCameraOrbitHeight = EarthRadius + 0.0001f;
+    
+    /// <summary>
+    /// Earth center coordinates
+    /// </summary>
+    public static Vector3 EarthCenter = new Vector3(0.0f, 0.0f, 0.0f);
 }

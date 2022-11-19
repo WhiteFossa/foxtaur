@@ -79,10 +79,20 @@ public class DesktopRendererControl : OpenGlControlBase
     #region Camera
 
     /// <summary>
-    /// True if mouse left button pressed and not released yet
+    /// True if we are dragging the Earth by mouse
     /// </summary>
-    private bool _isMouseLeftButtonPressed = false;
+    private bool _earthDragMode = false;
 
+    /// <summary>
+    /// Mouse X at press moment
+    /// </summary>
+    private float _pressX;
+
+    /// <summary>
+    /// Mouse Y at press moment
+    /// </summary>
+    private float _pressY;
+    
     /// <summary>
     /// Mouse was pressed in this location
     /// </summary>
@@ -90,10 +100,33 @@ public class DesktopRendererControl : OpenGlControlBase
 
     #endregion
 
+    #region Surface walk
+
     /// <summary>
     /// Surface walk mode
     /// </summary>
     private bool _isSurfaceMode = false;
+
+    /// <summary>
+    /// Latitudal view angle (head movement)
+    /// </summary>
+    private float _surfaceWalkLatViewAngle = 0.0f;
+    
+    private float _surfaceWalkLatViewAnglePress;
+
+    /// <summary>
+    /// Longitudal view angle (head movement)
+    /// </summary>
+    private float _surfaceWalkLonViewAngle = 0.0f;
+    
+    private float _surfaceWalkLonViewAnglePress;
+
+    /// <summary>
+    /// If true, then we are rotating the head
+    /// </summary>
+    private bool _rotateHeadMode = false;
+    
+    #endregion
     
     #region DI
 
@@ -118,7 +151,7 @@ public class DesktopRendererControl : OpenGlControlBase
         _camera.Zoom = RendererConstants.CameraMinZoom;
 
         // Targetting camera
-        _camera.Target= new Vector3(0.0f, 0.0f, 0.0f).AsPlanarPoint3D();
+        _camera.Target= RendererConstants.EarthCenter.AsPlanarPoint3D();
 
         // Setting-up input events
         PointerWheelChanged += OnWheel;
@@ -164,13 +197,20 @@ public class DesktopRendererControl : OpenGlControlBase
         if (_isSurfaceMode)
         {
             // Up
-            var nadirVector = new Vector3(0, 0, 0) - _camera.Position3D.AsVector3();
+            var nadirVector = RendererConstants.EarthCenter - _camera.Position3D.AsVector3();
             _camera.Up = nadirVector;
             
             // Target
-            var targetVector = new Vector3(0 - _camera.Position3D.X, 0 - _camera.Position3D.Y, 0 - _camera.Position3D.Z);
+            var targetVector = nadirVector;
+            
+            // Latitudal view
             targetVector = Vector3.Transform(targetVector, Matrix4x4.CreateRotationX((float)Math.PI / 2.0f - _camera.Lat));
+            targetVector = Vector3.Transform(targetVector, Matrix4x4.CreateRotationX(_surfaceWalkLatViewAngle));
+            
+            // Longitudal view
             targetVector = targetVector.RotateAround(nadirVector, _camera.Lon);
+            targetVector = targetVector.RotateAround(nadirVector, _surfaceWalkLonViewAngle);
+            
             _camera.Target = new PlanarPoint3D(targetVector.X + _camera.Position3D.X, targetVector.Y + _camera.Position3D.Y, targetVector.Z + _camera.Position3D.Z);
         }
 
@@ -245,15 +285,24 @@ public class DesktopRendererControl : OpenGlControlBase
     /// </summary>
     private void OnMousePressed(object? sender, PointerPressedEventArgs e)
     {
+        var x = (float)e.GetCurrentPoint(this).Position.X * _scaling;
+        var y = (float)e.GetCurrentPoint(this).Position.Y * _scaling;
+
+        _pressX = x;
+        _pressY = y;
+        
+        var pressGeoPoint = GetMouseGeoCoordinates(x, y);
+        if (pressGeoPoint != null)
+        {
+            _pressGeoPoint = pressGeoPoint;
+        }
+        
         if (e.GetCurrentPoint(this).Properties.IsLeftButtonPressed)
         {
             // Left click - dragging the camera
-            _isMouseLeftButtonPressed = true;
-            
-            var pressGeoPoint = GetMouseGeoCoordinates((float)e.GetCurrentPoint(this).Position.X, (float)e.GetCurrentPoint(this).Position.Y);
             if (pressGeoPoint != null)
             {
-                _pressGeoPoint = pressGeoPoint;
+                _earthDragMode = true;
             }
         }
 
@@ -262,17 +311,28 @@ public class DesktopRendererControl : OpenGlControlBase
             // Middle click - surface mode
             if (!_isSurfaceMode)
             {
-                _camera.H = RendererConstants.EarthRadius + 0.001f;
+                _camera.H = RendererConstants.SurfaceModeCameraOrbitHeight;
             
                 _isSurfaceMode = true;    
             }
             else
             {
                 _camera.H = RendererConstants.CameraOrbitHeight;
-                _camera.Target = new PlanarPoint3D(0, 0, 0);
+                _camera.Target = RendererConstants.EarthCenter.AsPlanarPoint3D();
                 _camera.Up = new Vector3(0.0f, -1.0f, 0.0f);
 
                 _isSurfaceMode = false;
+            }
+        }
+
+        if (e.GetCurrentPoint(this).Properties.IsRightButtonPressed)
+        {
+            // Right click - head rotation mode (only in surface mode)
+            if (_isSurfaceMode)
+            {
+                _surfaceWalkLatViewAnglePress = _surfaceWalkLatViewAngle;
+                _surfaceWalkLonViewAnglePress = _surfaceWalkLonViewAngle;
+                _rotateHeadMode = true;
             }
         }
     }
@@ -284,7 +344,12 @@ public class DesktopRendererControl : OpenGlControlBase
     {
         if (!e.GetCurrentPoint(this).Properties.IsLeftButtonPressed)
         {
-            _isMouseLeftButtonPressed = false;   
+            _earthDragMode = false;   
+        }
+
+        if (!e.GetCurrentPoint(this).Properties.IsRightButtonPressed)
+        {
+            _rotateHeadMode = false;
         }
     }
     
@@ -293,30 +358,58 @@ public class DesktopRendererControl : OpenGlControlBase
     /// </summary>
     private void OnMouseMoved(object? sender, PointerEventArgs e)
     {
-        if (!_isMouseLeftButtonPressed)
+        var x = (float)e.GetCurrentPoint(this).Position.X * _scaling;
+        var y = (float)e.GetCurrentPoint(this).Position.Y * _scaling;
+        
+        var dx = x - _pressX;
+        var dy = y - _pressY;
+        
+        if (_earthDragMode)
         {
-            return;
+            // Earth drag
+            var newGeoPoint = GetMouseGeoCoordinates(x, y);
+            if (newGeoPoint != null)
+            {
+                var latDelta = GeoPoint.SumLatitudesWithWrap(newGeoPoint.Lat, -1.0f * _pressGeoPoint.Lat);
+                var lonDelta = GeoPoint.SumLongitudesWithWrap(newGeoPoint.Lon, -1.0f * _pressGeoPoint.Lon);
+
+                _camera.Lat = GeoPoint.SumLatitudesWithWrap(_camera.Lat, -1.0f * latDelta);
+                _camera.Lon = GeoPoint.SumLongitudesWithWrap(_camera.Lon, -1.0f * lonDelta);
+            }    
+        }
+
+        if (_isSurfaceMode && _rotateHeadMode)
+        {
+            _surfaceWalkLatViewAngle = 0.001f * dy + _surfaceWalkLatViewAnglePress;
+            _surfaceWalkLonViewAngle = 0.001f * dx + _surfaceWalkLonViewAnglePress;
+
+            if (_surfaceWalkLatViewAngle > (float)Math.PI / 2.0f)
+            {
+                _surfaceWalkLatViewAngle = (float)Math.PI / 2.0f;
+            }
+            else if (_surfaceWalkLatViewAngle < (float)Math.PI / -2.0f)
+            {
+                _surfaceWalkLatViewAngle = (float)Math.PI / -2.0f;
+            }
+
+            while (_surfaceWalkLonViewAngle > (float)Math.PI)
+            {
+                _surfaceWalkLonViewAngle -= 2.0f * (float)Math.PI;
+            }
+            
+            while (_surfaceWalkLonViewAngle < -1.0f * (float)Math.PI)
+            {
+                _surfaceWalkLonViewAngle += 2.0f * (float)Math.PI;
+            }
         }
         
-        var newGeoPoint = GetMouseGeoCoordinates((float)e.GetCurrentPoint(this).Position.X, (float)e.GetCurrentPoint(this).Position.Y);
-        if (newGeoPoint != null)
-        {
-            var latDelta = GeoPoint.SumLatitudesWithWrap(newGeoPoint.Lat, -1.0f * _pressGeoPoint.Lat);
-            var lonDelta = GeoPoint.SumLongitudesWithWrap(newGeoPoint.Lon, -1.0f * _pressGeoPoint.Lon);
-
-            _camera.Lat = GeoPoint.SumLatitudesWithWrap(_camera.Lat, -1.0f * latDelta);
-            _camera.Lon = GeoPoint.SumLongitudesWithWrap(_camera.Lon, -1.0f * lonDelta);
-        }
     }
 
     /// <summary>
     /// Get mouse geographical coordinates (they might be null if mouse outside the Earth)
     /// </summary>
-    private GeoPoint GetMouseGeoCoordinates(float screenX, float screenY)
+    private GeoPoint GetMouseGeoCoordinates(float x, float y)
     {
-        var x = screenX * _scaling;
-        var y = screenY * _scaling;
-        
         var cameraRay = Ray.CreateByScreenRaycasting(_camera, x, y, _viewportWidth, _viewportHeight);
 
         var intersections = cameraRay.Intersect(_earthSphere);
