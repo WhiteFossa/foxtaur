@@ -178,7 +178,7 @@ public class DesktopRendererControl : OpenGlControlBase
         _shader = new Shader(_silkGLContext, @"Resources/Shaders/shader.vert", @"Resources/Shaders/shader.frag");
         
         // Loading textures
-        _earthTexture = new Texture(_silkGLContext, @"Resources/Textures/Basemaps/HYP_50M_SR_W.jpeg");
+        //_earthTexture = new Texture(_silkGLContext, @"Resources/Textures/Basemaps/HYP_50M_SR_W.jpeg");
         _earthTexture = new Texture(_silkGLContext, @"Resources/Textures/davydovo.png");
     }
 
@@ -210,7 +210,7 @@ public class DesktopRendererControl : OpenGlControlBase
             var targetVector = nadirVector.RotateAround(nadirNorthPerpVector, (float)Math.PI / 2.0f);
             
             // Latitudal view
-            targetVector = targetVector.RotateAround(nadirNorthPerpVector, _surfaceRunLonViewAngle);
+            targetVector = targetVector.RotateAround(nadirNorthPerpVector, _surfaceRunLatViewAngle);
 
             // Longitudal view
             targetVector = targetVector.RotateAround(nadirVector, _surfaceRunLonViewAngle);
