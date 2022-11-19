@@ -1,10 +1,10 @@
 using System;
-using Foxtaur.Desktop.Controls.Renderer.Abstractions.Earth;
+using Foxtaur.Desktop.Controls.Renderer.Abstractions.Generators.Earth;
 using Foxtaur.LibRenderer.Constants;
 using Foxtaur.LibRenderer.Models;
 using Foxtaur.LibRenderer.Services.Abstractions.CoordinateProviders;
 
-namespace Foxtaur.Desktop.Controls.Renderer.Implementations.Earth;
+namespace Foxtaur.Desktop.Controls.Renderer.Implementations.Generators.Earth;
 
 public class EarthGenerator : IEarthGenerator
 {

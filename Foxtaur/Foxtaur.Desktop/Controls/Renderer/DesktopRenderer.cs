@@ -11,7 +11,7 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Numerics;
-using Foxtaur.Desktop.Controls.Renderer.Abstractions.Earth;
+using Foxtaur.Desktop.Controls.Renderer.Abstractions.Generators.Earth;
 using Foxtaur.LibRenderer.Helpers;
 using Foxtaur.LibRenderer.Models;
 using Foxtaur.LibRenderer.Services.Abstractions.Camera;
@@ -72,10 +72,7 @@ public class DesktopRendererControl : OpenGlControlBase
     private Texture _earthTexture;
 
     #endregion
-
-    private Texture _redDebugTexture;
-    private Texture _blueDebugTexture;
-
+    
     #region Camera
 
     /// <summary>
@@ -100,26 +97,32 @@ public class DesktopRendererControl : OpenGlControlBase
 
     #endregion
 
-    #region Surface walk
+    #region Surface run
 
     /// <summary>
-    /// Surface walk mode
+    /// Surface run mode
     /// </summary>
-    private bool _isSurfaceMode = false;
+    private bool _isSurfaceRunMode = false;
 
     /// <summary>
     /// Latitudal view angle (head movement)
     /// </summary>
-    private float _surfaceWalkLatViewAngle = 0.0f;
+    private float _surfaceRunLatViewAngle = 0.0f;
     
-    private float _surfaceWalkLatViewAnglePress;
+    /// <summary>
+    /// Latitudal view angle (head movement started)
+    /// </summary>
+    private float _surfaceRunLatViewAnglePress;
 
     /// <summary>
     /// Longitudal view angle (head movement)
     /// </summary>
-    private float _surfaceWalkLonViewAngle = 0.0f;
+    private float _surfaceRunLonViewAngle = 0.0f;
     
-    private float _surfaceWalkLonViewAnglePress;
+    /// <summary>
+    /// Laongitudal view angle (head movement started)
+    /// </summary>
+    private float _surfaceRunLonViewAnglePress;
 
     /// <summary>
     /// If true, then we are rotating the head
@@ -175,10 +178,8 @@ public class DesktopRendererControl : OpenGlControlBase
         _shader = new Shader(_silkGLContext, @"Resources/Shaders/shader.vert", @"Resources/Shaders/shader.frag");
         
         // Loading textures
-        _earthTexture = new Texture(_silkGLContext, @"Resources/Textures/Basemaps/HYP_50M_SR_W.jpeg");
+        _earthTexture = new Texture(_silkGLContext, @"Resources/Textures/Basemaps/HYP_50M_SR_W_SMALL.jpeg");
         //_earthTexture = new Texture(_silkGLContext, @"Resources/Textures/davydovo.png");
-        _redDebugTexture = new Texture(_silkGLContext, @"Resources/Textures/debugVector.png");
-        _blueDebugTexture = new Texture(_silkGLContext, @"Resources/Textures/debugVectorBlue.png");
     }
 
     /// <summary>
@@ -194,8 +195,10 @@ public class DesktopRendererControl : OpenGlControlBase
 
         _silkGLContext.Viewport(0, 0, (uint)_viewportWidth, (uint)_viewportHeight);
 
-        if (_isSurfaceMode)
+        if (_isSurfaceRunMode)
         {
+            LimitSurfaceRunViewAngles();
+            
             // Up
             var nadirVector = RendererConstants.EarthCenter - _camera.Position3D.AsVector3();
             _camera.Up = nadirVector;
@@ -205,11 +208,11 @@ public class DesktopRendererControl : OpenGlControlBase
             
             // Latitudal view
             targetVector = Vector3.Transform(targetVector, Matrix4x4.CreateRotationX((float)Math.PI / 2.0f - _camera.Lat));
-            targetVector = Vector3.Transform(targetVector, Matrix4x4.CreateRotationX(_surfaceWalkLatViewAngle));
+            targetVector = Vector3.Transform(targetVector, Matrix4x4.CreateRotationX(_surfaceRunLatViewAngle));
             
             // Longitudal view
             targetVector = targetVector.RotateAround(nadirVector, _camera.Lon);
-            targetVector = targetVector.RotateAround(nadirVector, _surfaceWalkLonViewAngle);
+            targetVector = targetVector.RotateAround(nadirVector, _surfaceRunLonViewAngle);
             
             _camera.Target = new PlanarPoint3D(targetVector.X + _camera.Position3D.X, targetVector.Y + _camera.Position3D.Y, targetVector.Z + _camera.Position3D.Z);
         }
@@ -309,11 +312,11 @@ public class DesktopRendererControl : OpenGlControlBase
         if (e.GetCurrentPoint(this).Properties.IsMiddleButtonPressed)
         {
             // Middle click - surface mode
-            if (!_isSurfaceMode)
+            if (!_isSurfaceRunMode)
             {
                 _camera.H = RendererConstants.SurfaceModeCameraOrbitHeight;
             
-                _isSurfaceMode = true;    
+                _isSurfaceRunMode = true;    
             }
             else
             {
@@ -321,17 +324,17 @@ public class DesktopRendererControl : OpenGlControlBase
                 _camera.Target = RendererConstants.EarthCenter.AsPlanarPoint3D();
                 _camera.Up = new Vector3(0.0f, -1.0f, 0.0f);
 
-                _isSurfaceMode = false;
+                _isSurfaceRunMode = false;
             }
         }
 
         if (e.GetCurrentPoint(this).Properties.IsRightButtonPressed)
         {
             // Right click - head rotation mode (only in surface mode)
-            if (_isSurfaceMode)
+            if (_isSurfaceRunMode)
             {
-                _surfaceWalkLatViewAnglePress = _surfaceWalkLatViewAngle;
-                _surfaceWalkLonViewAnglePress = _surfaceWalkLonViewAngle;
+                _surfaceRunLatViewAnglePress = _surfaceRunLatViewAngle;
+                _surfaceRunLonViewAnglePress = _surfaceRunLonViewAngle;
                 _rotateHeadMode = true;
             }
         }
@@ -378,31 +381,34 @@ public class DesktopRendererControl : OpenGlControlBase
             }    
         }
 
-        if (_isSurfaceMode && _rotateHeadMode)
+        if (_isSurfaceRunMode && _rotateHeadMode)
         {
-            _surfaceWalkLatViewAngle = 0.001f * dy + _surfaceWalkLatViewAnglePress;
-            _surfaceWalkLonViewAngle = 0.001f * dx + _surfaceWalkLonViewAnglePress;
-
-            if (_surfaceWalkLatViewAngle > (float)Math.PI / 2.0f)
-            {
-                _surfaceWalkLatViewAngle = (float)Math.PI / 2.0f;
-            }
-            else if (_surfaceWalkLatViewAngle < (float)Math.PI / -2.0f)
-            {
-                _surfaceWalkLatViewAngle = (float)Math.PI / -2.0f;
-            }
-
-            while (_surfaceWalkLonViewAngle > (float)Math.PI)
-            {
-                _surfaceWalkLonViewAngle -= 2.0f * (float)Math.PI;
-            }
-            
-            while (_surfaceWalkLonViewAngle < -1.0f * (float)Math.PI)
-            {
-                _surfaceWalkLonViewAngle += 2.0f * (float)Math.PI;
-            }
+            _surfaceRunLatViewAngle = RendererConstants.SurfaceRunHeadRotationSpeedLat * dy + _surfaceRunLatViewAnglePress;
+            _surfaceRunLonViewAngle = RendererConstants.SurfaceRunHeadRotationSpeedLon * 2.0f * dx + _surfaceRunLonViewAnglePress; // 2.0f because lat is [-Pi; Pi], but lon is [-2 * Pi; 2 * Pi]
         }
         
+    }
+
+    private void LimitSurfaceRunViewAngles()
+    {
+        if (_surfaceRunLatViewAngle > (float)Math.PI / 2.0f)
+        {
+            _surfaceRunLatViewAngle = (float)Math.PI / 2.0f;
+        }
+        else if (_surfaceRunLatViewAngle < (float)Math.PI / -2.0f)
+        {
+            _surfaceRunLatViewAngle = (float)Math.PI / -2.0f;
+        }
+
+        while (_surfaceRunLonViewAngle > (float)Math.PI)
+        {
+            _surfaceRunLonViewAngle -= 2.0f * (float)Math.PI;
+        }
+            
+        while (_surfaceRunLonViewAngle < -1.0f * (float)Math.PI)
+        {
+            _surfaceRunLonViewAngle += 2.0f * (float)Math.PI;
+        }
     }
 
     /// <summary>
@@ -422,59 +428,5 @@ public class DesktopRendererControl : OpenGlControlBase
         // Closest to camera intersection
         var closestIntersection = _camera.Position3D.GetClosesPoint(intersections);
         return _sphereCoordinatesProvider.Planar3DToGeo(closestIntersection);
-    }
-    
-    private unsafe void DrawDebugVectorRed(GL silkGlContext, PlanarPoint3D startPoint, PlanarPoint3D endPoint)
-    {
-        var mesh = new Mesh();
-        mesh.AddVertex(new PlanarPoint3D(startPoint.X - 0.01f, startPoint.Y - 0.01f, startPoint.Z - 0.01f), new PlanarPoint2D(0, 0));
-        mesh.AddVertex(new PlanarPoint3D(startPoint.X + 0.01f, startPoint.Y + 0.01f, startPoint.Z + 0.01f), new PlanarPoint2D(0, 1));
-
-        mesh.AddVertex(new PlanarPoint3D(endPoint.X - 0.01f, endPoint.Y - 0.01f, endPoint.Z - 0.01f), new PlanarPoint2D(1, 0));
-        mesh.AddVertex(new PlanarPoint3D(endPoint.X + 0.01f, endPoint.Y + 0.01f, endPoint.Z + 0.01f), new PlanarPoint2D(1, 1));
-        
-        mesh.AddIndex(0);
-        mesh.AddIndex(1);
-        mesh.AddIndex(2);
-        
-        mesh.AddIndex(2);
-        mesh.AddIndex(3);
-        mesh.AddIndex(1);
-        
-        mesh.GenerateBuffers(silkGlContext);
-        
-        mesh.BindBuffers();
-        
-        _redDebugTexture.Bind();
-        silkGlContext.DrawElements(PrimitiveType.Triangles, (uint)mesh.Indices.Count, DrawElementsType.UnsignedInt, null);
-
-        mesh.Dispose();
-    }
-    
-    private unsafe void DrawDebugVectorBlue(GL silkGlContext, PlanarPoint3D startPoint, PlanarPoint3D endPoint)
-    {
-        var mesh = new Mesh();
-        mesh.AddVertex(new PlanarPoint3D(startPoint.X - 0.01f, startPoint.Y - 0.01f, startPoint.Z - 0.01f), new PlanarPoint2D(0, 0));
-        mesh.AddVertex(new PlanarPoint3D(startPoint.X + 0.01f, startPoint.Y + 0.01f, startPoint.Z + 0.01f), new PlanarPoint2D(0, 1));
-
-        mesh.AddVertex(new PlanarPoint3D(endPoint.X - 0.01f, endPoint.Y - 0.01f, endPoint.Z - 0.01f), new PlanarPoint2D(1, 0));
-        mesh.AddVertex(new PlanarPoint3D(endPoint.X + 0.01f, endPoint.Y + 0.01f, endPoint.Z + 0.01f), new PlanarPoint2D(1, 1));
-        
-        mesh.AddIndex(0);
-        mesh.AddIndex(1);
-        mesh.AddIndex(2);
-        
-        mesh.AddIndex(2);
-        mesh.AddIndex(3);
-        mesh.AddIndex(1);
-        
-        mesh.GenerateBuffers(silkGlContext);
-        
-        mesh.BindBuffers();
-        
-        _blueDebugTexture.Bind();
-        silkGlContext.DrawElements(PrimitiveType.Triangles, (uint)mesh.Indices.Count, DrawElementsType.UnsignedInt, null);
-
-        mesh.Dispose();
     }
 }

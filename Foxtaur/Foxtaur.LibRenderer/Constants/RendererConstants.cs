@@ -70,10 +70,20 @@ public static class RendererConstants
     /// <summary>
     /// Camera height for surface walk mode
     /// </summary>
-    public const float SurfaceModeCameraOrbitHeight = EarthRadius + 0.0001f;
+    public const float SurfaceModeCameraOrbitHeight = EarthRadius + 0.001f * EarthRadius;
     
     /// <summary>
     /// Earth center coordinates
     /// </summary>
     public static Vector3 EarthCenter = new Vector3(0.0f, 0.0f, 0.0f);
+
+    /// <summary>
+    /// Head rotation speed (latitudal) in surface run mode
+    /// </summary>
+    public const float SurfaceRunHeadRotationSpeedLat = 0.0005f;
+    
+    /// <summary>
+    /// Head rotation speed (longitudal) in surface run mode
+    /// </summary>
+    public const float SurfaceRunHeadRotationSpeedLon = 0.0005f;
 }
