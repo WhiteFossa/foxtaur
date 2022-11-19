@@ -70,7 +70,7 @@ public static class RendererConstants
     /// <summary>
     /// Camera height for surface walk mode
     /// </summary>
-    public const float SurfaceModeCameraOrbitHeight = EarthRadius + 0.001f * EarthRadius;
+    public const float SurfaceModeCameraOrbitHeight = EarthRadius + 0.1f * EarthRadius;
     
     /// <summary>
     /// Earth center coordinates

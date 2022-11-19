@@ -67,7 +67,7 @@ public class GeoPoint
             result -= 2.0f * (float)Math.PI;
         }
 
-        while (result < (float)Math.PI)
+        while (result < -1.0f * (float)Math.PI)
         {
             result += 2.0f * (float)Math.PI;
         }

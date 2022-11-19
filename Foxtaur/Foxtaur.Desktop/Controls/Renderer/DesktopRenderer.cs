@@ -178,8 +178,8 @@ public class DesktopRendererControl : OpenGlControlBase
         _shader = new Shader(_silkGLContext, @"Resources/Shaders/shader.vert", @"Resources/Shaders/shader.frag");
         
         // Loading textures
-        _earthTexture = new Texture(_silkGLContext, @"Resources/Textures/Basemaps/HYP_50M_SR_W_SMALL.jpeg");
-        //_earthTexture = new Texture(_silkGLContext, @"Resources/Textures/davydovo.png");
+        _earthTexture = new Texture(_silkGLContext, @"Resources/Textures/Basemaps/HYP_50M_SR_W.jpeg");
+        _earthTexture = new Texture(_silkGLContext, @"Resources/Textures/davydovo.png");
     }
 
     /// <summary>
@@ -198,20 +198,21 @@ public class DesktopRendererControl : OpenGlControlBase
         if (_isSurfaceRunMode)
         {
             LimitSurfaceRunViewAngles();
-            
+
             // Up
             var nadirVector = RendererConstants.EarthCenter - _camera.Position3D.AsVector3();
             _camera.Up = nadirVector;
             
             // Target
-            var targetVector = nadirVector;
+            var toNorthVector = _sphereCoordinatesProvider.GeoToPlanar3D(new GeoPoint((float)Math.PI / 2.0f, 0, RendererConstants.EarthRadius)).AsVector3() - _camera.Position3D.AsVector3();
+            var nadirNorthPerpVector = Vector3.Cross(nadirVector, toNorthVector); // Perpendicular to nadir vector and north vector
+            
+            var targetVector = nadirVector.RotateAround(nadirNorthPerpVector, (float)Math.PI / 2.0f);
             
             // Latitudal view
-            targetVector = Vector3.Transform(targetVector, Matrix4x4.CreateRotationX((float)Math.PI / 2.0f - _camera.Lat));
-            targetVector = Vector3.Transform(targetVector, Matrix4x4.CreateRotationX(_surfaceRunLatViewAngle));
-            
+            targetVector = targetVector.RotateAround(nadirNorthPerpVector, _surfaceRunLonViewAngle);
+
             // Longitudal view
-            targetVector = targetVector.RotateAround(nadirVector, _camera.Lon);
             targetVector = targetVector.RotateAround(nadirVector, _surfaceRunLonViewAngle);
             
             _camera.Target = new PlanarPoint3D(targetVector.X + _camera.Position3D.X, targetVector.Y + _camera.Position3D.Y, targetVector.Z + _camera.Position3D.Z);
