@@ -78,13 +78,17 @@ public class Mesh : IDisposable
     /// </summary>
     public void BindBuffers(GL silkGl)
     {
+        _ = silkGl ?? throw new ArgumentNullException(nameof(silkGl));
+        
         // Vertices array
         VerticesArrayObject = new VertexArrayObject<float, uint>(silkGl, VerticesBufferObject, ElementsBufferObject);
         
         //Telling the VAO object how to lay out the attribute pointers
         VerticesArrayObject.VertexAttributePointer(VerticesPositionLocation, VertexCoordsSize, VertexAttribPointerType.Float, VertexSize, 0);
         VerticesArrayObject.VertexAttributePointer(VerticesTextureCoordsLocation, TextureCoordsSize, VertexAttribPointerType.Float, VertexSize, VertexCoordsSize);
-        
+     
+        VerticesBufferObject.Bind();
+        ElementsBufferObject.Bind();
         VerticesArrayObject.Bind();
     }
 
