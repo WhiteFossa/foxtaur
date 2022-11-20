@@ -1,4 +1,5 @@
 using System;
+using ImageMagick;
 using Silk.NET.OpenGL;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
@@ -21,27 +22,21 @@ public class Texture : IDisposable
 
         _handle = this._silkGl.GenTexture();
         Bind();
-
-        //Loading an image using imagesharp.
-        using (var img = Image.Load<Rgba32>(path))
+        
+        using (var img = new MagickImage(path))
         {
-            //Reserve enough memory from the gpu for the whole image
-            _silkGl.TexImage2D(TextureTarget.Texture2D, 0, InternalFormat.Rgba8, (uint)img.Width, (uint)img.Height, 0,
-                PixelFormat.Rgba, PixelType.UnsignedByte, null);
-
-            img.ProcessPixelRows(accessor =>
+            fixed (void* pixels = img.GetPixels().ToByteArray(PixelMapping.RGBA))
             {
-                //ImageSharp 2 does not store images in contiguous memory by default, so we must send the image row by row
-                for (int y = 0; y < accessor.Height; y++)
-                {
-                    fixed (void* data = accessor.GetRowSpan(y))
-                    {
-                        //Loading the actual image.
-                        _silkGl.TexSubImage2D(TextureTarget.Texture2D, 0, 0, y, (uint)accessor.Width, 1,
-                            PixelFormat.Rgba, PixelType.UnsignedByte, data);
-                    }
-                }
-            });
+                _silkGl.TexImage2D(TextureTarget.Texture2D,
+                    0,
+                    InternalFormat.Rgba8,
+                    (uint)img.Width,
+                    (uint)img.Height,
+                    0,
+                    PixelFormat.Rgba,
+                    PixelType.UnsignedByte,
+                    pixels);    
+            }
         }
 
         SetParameters();
