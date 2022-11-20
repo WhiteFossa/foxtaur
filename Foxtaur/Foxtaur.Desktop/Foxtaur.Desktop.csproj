@@ -9,8 +9,6 @@
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     </PropertyGroup>
     <ItemGroup>
-        <Folder Include="Controls\Renderer\Abstractions\Generators" />
-        <Folder Include="Controls\Renderer\Implementations\Generators" />
         <Folder Include="Models\" />
         <AvaloniaResource Include="Assets\**" />
         <None Remove=".gitignore" />
@@ -25,6 +23,15 @@
         </None>
         <None Update="Resources\Textures\Basemaps\NE2_50M_SR_W.jpeg">
           <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
+        <None Update="Resources\Textures\ProtoUI.png">
+          <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
+        <None Update="Resources\Shaders\ui_shader.vert">
+          <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </None>
+        <None Update="Resources\Shaders\ui_shader.frag">
+          <CopyToOutputDirectory>Always</CopyToOutputDirectory>
         </None>
     </ItemGroup>
     <ItemGroup>

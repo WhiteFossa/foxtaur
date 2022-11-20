@@ -20,5 +20,4 @@ public class Sphere
         Center = cener;
         Radius = radius;
     }
-
 }

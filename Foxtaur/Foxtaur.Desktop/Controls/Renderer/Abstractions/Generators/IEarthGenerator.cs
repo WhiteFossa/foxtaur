@@ -1,6 +1,6 @@
 using Foxtaur.LibRenderer.Models;
 
-namespace Foxtaur.Desktop.Controls.Renderer.Abstractions.Generators.Earth;
+namespace Foxtaur.Desktop.Controls.Renderer.Abstractions.Generators;
 
 /// <summary>
 /// Interface for Earth surface generation

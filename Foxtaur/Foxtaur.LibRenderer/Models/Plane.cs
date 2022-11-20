@@ -38,7 +38,7 @@ public class Plane
             { p2.X, p2.Y, p2.Z },
             { p3.X, p3.Y, p3.Z }
         });
-        
+
         var r = Vector<float>.Build.Dense(new float[] { -1.0f, -1.0f, -1.0f });
 
         var s = p.Solve(r);
@@ -47,5 +47,4 @@ public class Plane
         B = s[1];
         C = s[2];
     }
-
 }

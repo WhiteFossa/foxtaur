@@ -27,7 +27,7 @@ public interface ICamera
     /// Camera position for given geo coordinates
     /// </summary>
     PlanarPoint3D Position3D { get; }
-    
+
     /// <summary>
     /// Point where camera looking
     /// </summary>

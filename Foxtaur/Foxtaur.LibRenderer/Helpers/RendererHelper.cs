@@ -66,15 +66,15 @@ public static class RendererHelper
         var m11 = (float)(cosa + oneMinusCosa * Math.Pow(nd.X, 2));
         var m12 = (float)(oneMinusCosa * nd.X * nd.Y - sina * nd.Z);
         var m13 = (float)(oneMinusCosa * nd.X * nd.Z + sina * nd.Y);
-        
+
         var m21 = (float)(oneMinusCosa * nd.Y * nd.X + sina * nd.Z);
         var m22 = (float)(cosa + oneMinusCosa * Math.Pow(nd.Y, 2));
         var m23 = (float)(oneMinusCosa * nd.Y * nd.Z - sina * nd.X);
-        
+
         var m31 = (float)(oneMinusCosa * nd.Z * nd.X - sina * nd.Y);
         var m32 = (float)(oneMinusCosa * nd.Z * nd.Y + sina * nd.X);
         var m33 = (float)(cosa + oneMinusCosa * Math.Pow(nd.Z, 2));
-        
+
         var rotation = Matrix<float>.Build.DenseOfArray(
             new float[,]
             {
@@ -83,10 +83,12 @@ public static class RendererHelper
                 { m31, m32, m33 }
             });
 
-        var toRotateMathNet = MathNet.Numerics.LinearAlgebra.Vector<float>.Build.Dense(new float[] { toRotate.X, toRotate.Y, toRotate.Z });
+        var toRotateMathNet =
+            MathNet.Numerics.LinearAlgebra.Vector<float>.Build.Dense(new float[]
+                { toRotate.X, toRotate.Y, toRotate.Z });
 
         var rotated = rotation * toRotateMathNet;
-        
+
         return new Vector3(rotated[0], rotated[1], rotated[2]);
     }
 }

@@ -21,8 +21,9 @@ public class PlanarPoint3D : PlanarPoint2D
     public float DistanceTo(PlanarPoint3D point)
     {
         _ = point ?? throw new ArgumentNullException(nameof(point));
-        
-        return (float)Math.Sqrt((float)Math.Pow(point.X - X, 2) + (float)Math.Pow(point.Y - Y, 2) + (float)Math.Pow(point.Z - Z, 2));
+
+        return (float)Math.Sqrt((float)Math.Pow(point.X - X, 2) + (float)Math.Pow(point.Y - Y, 2) +
+                                (float)Math.Pow(point.Z - Z, 2));
     }
 
     /// <summary>

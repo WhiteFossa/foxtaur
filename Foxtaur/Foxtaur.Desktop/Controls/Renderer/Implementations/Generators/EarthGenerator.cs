@@ -1,10 +1,10 @@
 using System;
-using Foxtaur.Desktop.Controls.Renderer.Abstractions.Generators.Earth;
+using Foxtaur.Desktop.Controls.Renderer.Abstractions.Generators;
 using Foxtaur.LibRenderer.Constants;
 using Foxtaur.LibRenderer.Models;
 using Foxtaur.LibRenderer.Services.Abstractions.CoordinateProviders;
 
-namespace Foxtaur.Desktop.Controls.Renderer.Implementations.Generators.Earth;
+namespace Foxtaur.Desktop.Controls.Renderer.Implementations.Generators;
 
 public class EarthGenerator : IEarthGenerator
 {
@@ -48,8 +48,7 @@ public class EarthGenerator : IEarthGenerator
             }
 
             // Two last triangles of a stripe
-            var lastPair = GenerateAndAddPointsPair(earthMesh, lat, -1.0f * (float)Math.PI, latNorther,
-                -1.0f * (float)Math.PI);
+            var lastPair = GenerateAndAddPointsPair(earthMesh, lat, -1.0f * (float)Math.PI, latNorther, -1.0f * (float)Math.PI);
             var i3last0 = lastPair.Item1;
             var i3last1 = lastPair.Item2;
 

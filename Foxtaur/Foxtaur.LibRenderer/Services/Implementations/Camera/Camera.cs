@@ -21,7 +21,7 @@ public class Camera : ICamera
     /// Camera longitude
     /// </summary>
     private float _lon;
-    
+
     /// <summary>
     /// Camera height
     /// </summary>
@@ -36,12 +36,12 @@ public class Camera : ICamera
     /// Camera target
     /// </summary>
     private PlanarPoint3D _target = new PlanarPoint3D(0, 0, 0);
-    
+
     /// <summary>
     /// Camera zoom
     /// </summary>
     private float _zoom;
-    
+
     /// <summary>
     /// Camera up vector
     /// </summary>
@@ -54,30 +54,24 @@ public class Camera : ICamera
 
     public float Lat
     {
-        get
-        {
-            return _lat;
-        }
+        get { return _lat; }
 
         set
         {
             _lat = value;
-            
+
             CalculateCameraPosition();
         }
     }
-    
+
     public float Lon
     {
-        get
-        {
-            return _lon;
-        }
+        get { return _lon; }
 
         set
         {
             _lon = value;
-            
+
             CalculateCameraPosition();
         }
     }
@@ -94,47 +88,38 @@ public class Camera : ICamera
             }
 
             _h = value;
-            
+
             CalculateCameraPosition();
         }
     }
 
     public PlanarPoint3D Position3D
     {
-        get
-        {
-            return _position;
-        }
+        get { return _position; }
 
         set
         {
             _position = value;
-            
+
             CalculateMatrices();
         }
     }
 
     public PlanarPoint3D Target
     {
-        get
-        {
-            return _target;
-        }
+        get { return _target; }
 
         set
         {
             _target = value;
-            
+
             CalculateMatrices();
         }
     }
 
     public float Zoom
     {
-        get
-        {
-            return _zoom;
-        }
+        get { return _zoom; }
 
         set
         {
@@ -150,7 +135,7 @@ public class Camera : ICamera
             {
                 _zoom = value;
             }
-            
+
             CalculateMatrices();
         }
     }
@@ -165,10 +150,7 @@ public class Camera : ICamera
 
     public float AspectRatio
     {
-        get
-        {
-            return _aspectRatio;
-        }
+        get { return _aspectRatio; }
 
         set
         {
@@ -180,19 +162,16 @@ public class Camera : ICamera
 
     public Vector3 Up
     {
-        get
-        {
-            return _up;
-        }
+        get { return _up; }
 
         set
         {
             _up = value;
-            
+
             CalculateMatrices();
         }
     }
-    
+
     public Camera(ISphereCoordinatesProvider sphereCoordinatesProvider)
     {
         _sphereCoordinatesProvider = sphereCoordinatesProvider;
@@ -202,7 +181,7 @@ public class Camera : ICamera
         AspectRatio = 1.0f;
         Up = new Vector3(0.0f, -1.0f, 0.0f);
         Zoom = RendererConstants.CameraMinZoom;
-        
+
         CalculateCameraPosition();
         CalculateMatrices();
     }
@@ -232,10 +211,11 @@ public class Camera : ICamera
     /// </summary>
     private void CalculateMatrices()
     {
-        ModelMatrix = Matrix4x4.CreateRotationZ(0.0f) * Matrix4x4.CreateRotationY(0.0f) * Matrix4x4.CreateRotationX(0.0f); // Rotation
+        ModelMatrix = Matrix4x4.CreateRotationZ(0.0f) * Matrix4x4.CreateRotationY(0.0f) *
+                      Matrix4x4.CreateRotationX(0.0f); // Rotation
         ViewMatrix = Matrix4x4.CreateLookAt(Position3D.AsVector3(), Target.AsVector3(), Up); // Camera position
         ProjectionMatrix = Matrix4x4.CreatePerspectiveFieldOfView(Zoom, AspectRatio, 0.0001f, 100.0f); // Zoom
-        
+
         // Back-projection matrix (for raycasting)
         var forwardProjection = ViewMatrix * ProjectionMatrix;
 

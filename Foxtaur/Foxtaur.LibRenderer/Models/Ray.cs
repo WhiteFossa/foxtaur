@@ -28,14 +28,17 @@ public class Ray
     /// <summary>
     /// Casts ray from screen to 3D space
     /// </summary>
-    public static Ray CreateByScreenRaycasting(ICamera camera, float screenX, float screenY, float viewportWidth, float viewportHeight)
+    public static Ray CreateByScreenRaycasting(ICamera camera, float screenX, float screenY, float viewportWidth,
+        float viewportHeight)
     {
         var normalizedDeviceX = screenX / viewportWidth * 2.0f - 1.0f;
         var normalizedDeviceY = screenY / viewportHeight * 2.0f - 1.0f;
-        
-        var nearPoint = camera.BackProjectionMatrix.TransformPerspectively(new Vector3(normalizedDeviceX, normalizedDeviceY, 0.0f));
-        var farPoint = camera.BackProjectionMatrix.TransformPerspectively(new Vector3(normalizedDeviceX, normalizedDeviceY, 1.0f));
-        
+
+        var nearPoint =
+            camera.BackProjectionMatrix.TransformPerspectively(new Vector3(normalizedDeviceX, normalizedDeviceY, 0.0f));
+        var farPoint =
+            camera.BackProjectionMatrix.TransformPerspectively(new Vector3(normalizedDeviceX, normalizedDeviceY, 1.0f));
+
         return new Ray(nearPoint.AsPlanarPoint3D(), farPoint.AsPlanarPoint3D());
     }
 
@@ -47,12 +50,12 @@ public class Ray
 
         var bxeyexby = Begin.X * End.Y - End.X * Begin.Y;
         var bxezexbz = Begin.X * End.Z - End.X * Begin.Z;
-        
+
         var a = 1.0f + (float)Math.Pow(byey / bxex, 2) + (float)Math.Pow(bzez / bxex, 2);
 
         var b = 2.0f * (sphere.Center.X
-                + byey / bxex * (bxeyexby / bxex - sphere.Center.Y)
-                + bzez / bxex * (bxezexbz / bxex - sphere.Center.Z));
+                        + byey / bxex * (bxeyexby / bxex - sphere.Center.Y)
+                        + bzez / bxex * (bxezexbz / bxex - sphere.Center.Z));
 
         var c = (float)Math.Pow(sphere.Center.X, 2)
                 + (float)Math.Pow(bxeyexby / bxex - sphere.Center.Y, 2)
@@ -71,7 +74,7 @@ public class Ray
 
         var y1 = GetYForSphereIntersection(x1, bxex, byey, bxeyexby);
         var y2 = GetYForSphereIntersection(x2, bxex, byey, bxeyexby);
-        
+
         var z1 = GetZForSphereIntersection(x1, bxex, bzez, bxezexbz);
         var z2 = GetZForSphereIntersection(x2, bxex, bzez, bxezexbz);
 
@@ -86,7 +89,7 @@ public class Ray
     {
         return byey / bxex * x + bxeyexby / bxex;
     }
-    
+
     private float GetZForSphereIntersection(float x, float bxex, float bzez, float bxezexbz)
     {
         return bzez / bxex * x + bxezexbz / bxex;

@@ -71,7 +71,7 @@ public class GeoPoint
         {
             result += 2.0f * (float)Math.PI;
         }
-        
+
         return result;
     }
 }

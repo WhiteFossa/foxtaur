@@ -1,22 +1,19 @@
+using System;
+using System.Drawing;
+using System.Numerics;
 using Avalonia.Input;
 using Avalonia.OpenGL;
 using Avalonia.OpenGL.Controls;
 using Avalonia.Threading;
+using Foxtaur.Desktop.Controls.Renderer.Abstractions.Generators;
 using Foxtaur.LibRenderer.Constants;
+using Foxtaur.LibRenderer.Helpers;
+using Foxtaur.LibRenderer.Models;
+using Foxtaur.LibRenderer.Services.Abstractions.Camera;
 using Foxtaur.LibRenderer.Services.Abstractions.CoordinateProviders;
 using Microsoft.Extensions.DependencyInjection;
 using NLog;
 using Silk.NET.OpenGL;
-using System;
-using System.Collections.Generic;
-using System.Drawing;
-using System.Numerics;
-using Foxtaur.Desktop.Controls.Renderer.Abstractions.Generators.Earth;
-using Foxtaur.LibRenderer.Helpers;
-using Foxtaur.LibRenderer.Models;
-using Foxtaur.LibRenderer.Services.Abstractions.Camera;
-using Foxtaur.LibRenderer.Services.Implementations.Camera;
-using Plane = Foxtaur.LibRenderer.Models.Plane;
 
 namespace Foxtaur.Desktop.Controls.Renderer;
 
@@ -60,19 +57,19 @@ public class DesktopRendererControl : OpenGlControlBase
     /// Earth sphere (for raycasting)
     /// </summary>
     private Sphere _earthSphere;
-    
+
     /// <summary>
     /// Earth mesh
     /// </summary>
     private Mesh _earthMesh;
-    
+
     /// <summary>
     /// Earth texture
     /// </summary>
     private Texture _earthTexture;
 
     #endregion
-    
+
     #region Camera
 
     /// <summary>
@@ -89,7 +86,7 @@ public class DesktopRendererControl : OpenGlControlBase
     /// Mouse Y at press moment
     /// </summary>
     private float _pressY;
-    
+
     /// <summary>
     /// Mouse was pressed in this location
     /// </summary>
@@ -108,7 +105,7 @@ public class DesktopRendererControl : OpenGlControlBase
     /// Latitudal view angle (head movement)
     /// </summary>
     private float _surfaceRunLatViewAngle = 0.0f;
-    
+
     /// <summary>
     /// Latitudal view angle (head movement started)
     /// </summary>
@@ -118,7 +115,7 @@ public class DesktopRendererControl : OpenGlControlBase
     /// Longitudal view angle (head movement)
     /// </summary>
     private float _surfaceRunLonViewAngle = 0.0f;
-    
+
     /// <summary>
     /// Laongitudal view angle (head movement started)
     /// </summary>
@@ -128,14 +125,34 @@ public class DesktopRendererControl : OpenGlControlBase
     /// If true, then we are rotating the head
     /// </summary>
     private bool _rotateHeadMode = false;
+
+    #endregion
+
+    #region UI
+
+    /// <summary>
+    /// Rectangle mesh for UI
+    /// </summary>
+    private Mesh _uiMesh;
+
+    /// <summary>
+    /// Draw UI into this texture
+    /// </summary>
+    private Texture _uiTexture;
+
+    /// <summary>
+    /// Shader for UI
+    /// </summary>
+    private Shader _uiShader;
     
     #endregion
-    
+
     #region DI
 
     private ICoordinatesProvider _sphereCoordinatesProvider = Program.Di.GetService<ISphereCoordinatesProvider>();
     private IEarthGenerator _earthGenerator = Program.Di.GetService<IEarthGenerator>();
-    
+    private IRectangleGenerator _rectangleGenerator = Program.Di.GetService<IRectangleGenerator>();
+
     #endregion
 
     /// <summary>
@@ -146,6 +163,13 @@ public class DesktopRendererControl : OpenGlControlBase
         // Generating the Earth
         _earthSphere = _earthGenerator.GenerateEarthSphere();
         _earthMesh = _earthGenerator.GenerateFullEarth((float)Math.PI / 900.0f);
+
+        // Generating UI
+        _uiMesh = _rectangleGenerator.GenerateRectangle(
+            new PlanarPoint3D(-1.0f, 1.0f, 0.0f),
+            new PlanarPoint2D(-1.0f, 1.0f),
+            new PlanarPoint3D(1.0f, -1.0f, 0.0f),
+            new PlanarPoint2D(1.0f, -1.0f));
         
         // Creating camera
         _camera.Lat = 0.0f;
@@ -154,7 +178,7 @@ public class DesktopRendererControl : OpenGlControlBase
         _camera.Zoom = RendererConstants.CameraMinZoom;
 
         // Targetting camera
-        _camera.Target= RendererConstants.EarthCenter.AsPlanarPoint3D();
+        _camera.Target = RendererConstants.EarthCenter.AsPlanarPoint3D();
 
         // Setting-up input events
         PointerWheelChanged += OnWheel;
@@ -176,10 +200,13 @@ public class DesktopRendererControl : OpenGlControlBase
 
         // Loading shaders
         _shader = new Shader(_silkGLContext, @"Resources/Shaders/shader.vert", @"Resources/Shaders/shader.frag");
+        _uiShader = new Shader(_silkGLContext, @"Resources/Shaders/ui_shader.vert", @"Resources/Shaders/ui_shader.frag");
         
         // Loading textures
-        //_earthTexture = new Texture(_silkGLContext, @"Resources/Textures/Basemaps/NE2_50M_SR_W.jpeg");
-        _earthTexture = new Texture(_silkGLContext, @"Resources/Textures/davydovo.png");
+        _earthTexture = new Texture(_silkGLContext, @"Resources/Textures/Basemaps/NE2_50M_SR_W.jpeg");
+        //_earthTexture = new Texture(_silkGLContext, @"Resources/Textures/davydovo.png");
+
+        _uiTexture = new Texture(_silkGLContext, @"Resources/Textures/ProtoUI.png");
     }
 
     /// <summary>
@@ -198,25 +225,7 @@ public class DesktopRendererControl : OpenGlControlBase
         // Surface mode camera positioning
         if (_isSurfaceRunMode)
         {
-            LimitSurfaceRunViewAngles();
-
-            // Up
-            var nadirVector = RendererConstants.EarthCenter - _camera.Position3D.AsVector3();
-            _camera.Up = nadirVector;
-            
-            // Target
-            var toNorthVector = _sphereCoordinatesProvider.GeoToPlanar3D(new GeoPoint((float)Math.PI / 2.0f, 0, RendererConstants.EarthRadius)).AsVector3() - _camera.Position3D.AsVector3();
-            var nadirNorthPerpVector = Vector3.Cross(nadirVector, toNorthVector); // Perpendicular to nadir vector and north vector
-            
-            var targetVector = nadirVector.RotateAround(nadirNorthPerpVector, (float)Math.PI / 2.0f);
-            
-            // Latitudal view
-            targetVector = targetVector.RotateAround(nadirNorthPerpVector, _surfaceRunLatViewAngle);
-
-            // Longitudal view
-            targetVector = targetVector.RotateAround(nadirVector, _surfaceRunLonViewAngle);
-            
-            _camera.Target = new PlanarPoint3D(targetVector.X + _camera.Position3D.X, targetVector.Y + _camera.Position3D.Y, targetVector.Z + _camera.Position3D.Z);
+            SurfaceRunPositionCamera();
         }
 
         _shader.Use();
@@ -233,7 +242,7 @@ public class DesktopRendererControl : OpenGlControlBase
         _shader.SetUniform1i("ourTexture", 0);
 
         //_silkGLContext.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Line);
-        
+
         // Earth
         _earthMesh.GenerateBuffers(_silkGLContext);
         _earthMesh.BindBuffers();
@@ -241,6 +250,17 @@ public class DesktopRendererControl : OpenGlControlBase
         _silkGLContext.DrawElements(PrimitiveType.Triangles, (uint)_earthMesh.Indices.Count, DrawElementsType.UnsignedInt, null);
         _earthMesh.Dispose();
 
+        // UI
+        _silkGLContext.Disable(EnableCap.DepthTest);
+        _uiShader.Use();
+        _uiShader.SetUniform1i("ourTexture", 0);
+        
+        _uiMesh.GenerateBuffers(_silkGLContext);
+        _uiMesh.BindBuffers();
+        _uiTexture.Bind();
+        _silkGLContext.DrawElements(PrimitiveType.Triangles, (uint)_uiMesh.Indices.Count, DrawElementsType.UnsignedInt, null);
+        _uiMesh.Dispose();
+        
         Dispatcher.UIThread.Post(InvalidateVisual, DispatcherPriority.Background);
     }
 
@@ -250,8 +270,10 @@ public class DesktopRendererControl : OpenGlControlBase
     protected override void OnOpenGlDeinit(GlInterface gl, int fb)
     {
         _earthTexture.Dispose();
+        _uiTexture.Dispose();
 
         _shader.Dispose();
+        _uiShader.Dispose();
         base.OnOpenGlDeinit(gl, fb);
     }
 
@@ -266,6 +288,32 @@ public class DesktopRendererControl : OpenGlControlBase
         _viewportHeight = (float)Bounds.Height * _scaling;
 
         _camera.AspectRatio = _viewportWidth / _viewportHeight;
+    }
+
+    /// <summary>
+    /// Position camera during surface run
+    /// </summary>
+    private void SurfaceRunPositionCamera()
+    {
+        LimitSurfaceRunViewAngles();
+
+        // Up
+        var nadirVector = RendererConstants.EarthCenter - _camera.Position3D.AsVector3();
+        _camera.Up = nadirVector;
+
+        // Target
+        var toNorthVector = _sphereCoordinatesProvider.GeoToPlanar3D(new GeoPoint((float)Math.PI / 2.0f, 0, RendererConstants.EarthRadius)).AsVector3() - _camera.Position3D.AsVector3();
+        var nadirNorthPerpVector = Vector3.Cross(nadirVector, toNorthVector); // Perpendicular to nadir vector and north vector
+
+        var targetVector = nadirVector.RotateAround(nadirNorthPerpVector, (float)Math.PI / 2.0f);
+
+        // Latitudal view
+        targetVector = targetVector.RotateAround(nadirNorthPerpVector, _surfaceRunLatViewAngle);
+
+        // Longitudal view
+        targetVector = targetVector.RotateAround(nadirVector, _surfaceRunLonViewAngle);
+
+        _camera.Target = new PlanarPoint3D(targetVector.X + _camera.Position3D.X, targetVector.Y + _camera.Position3D.Y, targetVector.Z + _camera.Position3D.Z);
     }
 
     /// <summary>
@@ -295,13 +343,13 @@ public class DesktopRendererControl : OpenGlControlBase
 
         _pressX = x;
         _pressY = y;
-        
+
         var pressGeoPoint = GetMouseGeoCoordinates(x, y);
         if (pressGeoPoint != null)
         {
             _pressGeoPoint = pressGeoPoint;
         }
-        
+
         if (e.GetCurrentPoint(this).Properties.IsLeftButtonPressed)
         {
             // Left click - dragging the camera
@@ -317,8 +365,8 @@ public class DesktopRendererControl : OpenGlControlBase
             if (!_isSurfaceRunMode)
             {
                 _camera.H = RendererConstants.SurfaceModeCameraOrbitHeight;
-            
-                _isSurfaceRunMode = true;    
+
+                _isSurfaceRunMode = true;
             }
             else
             {
@@ -341,7 +389,7 @@ public class DesktopRendererControl : OpenGlControlBase
             }
         }
     }
-    
+
     /// <summary>
     /// Mouse released event
     /// </summary>
@@ -349,7 +397,7 @@ public class DesktopRendererControl : OpenGlControlBase
     {
         if (!e.GetCurrentPoint(this).Properties.IsLeftButtonPressed)
         {
-            _earthDragMode = false;   
+            _earthDragMode = false;
         }
 
         if (!e.GetCurrentPoint(this).Properties.IsRightButtonPressed)
@@ -357,7 +405,7 @@ public class DesktopRendererControl : OpenGlControlBase
             _rotateHeadMode = false;
         }
     }
-    
+
     /// <summary>
     /// Mouse move event
     /// </summary>
@@ -365,10 +413,10 @@ public class DesktopRendererControl : OpenGlControlBase
     {
         var x = (float)e.GetCurrentPoint(this).Position.X * _scaling;
         var y = (float)e.GetCurrentPoint(this).Position.Y * _scaling;
-        
+
         var dx = x - _pressX;
         var dy = y - _pressY;
-        
+
         if (_earthDragMode)
         {
             // Earth drag
@@ -380,15 +428,16 @@ public class DesktopRendererControl : OpenGlControlBase
 
                 _camera.Lat = GeoPoint.SumLatitudesWithWrap(_camera.Lat, -1.0f * latDelta);
                 _camera.Lon = GeoPoint.SumLongitudesWithWrap(_camera.Lon, -1.0f * lonDelta);
-            }    
+            }
         }
 
         if (_isSurfaceRunMode && _rotateHeadMode)
         {
-            _surfaceRunLatViewAngle = RendererConstants.SurfaceRunHeadRotationSpeedLat * dy + _surfaceRunLatViewAnglePress;
-            _surfaceRunLonViewAngle = RendererConstants.SurfaceRunHeadRotationSpeedLon * 2.0f * dx + _surfaceRunLonViewAnglePress; // 2.0f because lat is [-Pi; Pi], but lon is [-2 * Pi; 2 * Pi]
+            _surfaceRunLatViewAngle =
+                RendererConstants.SurfaceRunHeadRotationSpeedLat * dy + _surfaceRunLatViewAnglePress;
+            _surfaceRunLonViewAngle = RendererConstants.SurfaceRunHeadRotationSpeedLon * 2.0f * dx +
+                                      _surfaceRunLonViewAnglePress; // 2.0f because lat is [-Pi; Pi], but lon is [-2 * Pi; 2 * Pi]
         }
-        
     }
 
     private void LimitSurfaceRunViewAngles()
@@ -406,7 +455,7 @@ public class DesktopRendererControl : OpenGlControlBase
         {
             _surfaceRunLonViewAngle -= 2.0f * (float)Math.PI;
         }
-            
+
         while (_surfaceRunLonViewAngle < -1.0f * (float)Math.PI)
         {
             _surfaceRunLonViewAngle += 2.0f * (float)Math.PI;
@@ -426,7 +475,7 @@ public class DesktopRendererControl : OpenGlControlBase
             // Miss
             return null;
         }
-        
+
         // Closest to camera intersection
         var closestIntersection = _camera.Position3D.GetClosesPoint(intersections);
         return _sphereCoordinatesProvider.Planar3DToGeo(closestIntersection);
