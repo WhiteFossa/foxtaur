@@ -1,7 +1,5 @@
 using Foxtaur.LibRenderer.Models;
-using SixLabors.Fonts;
-using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.PixelFormats;
+using ImageMagick;
 
 namespace Foxtaur.LibRenderer.Services.Abstractions.Drawers;
 
@@ -11,12 +9,7 @@ namespace Foxtaur.LibRenderer.Services.Abstractions.Drawers;
 public interface ITextDrawer
 {
     /// <summary>
-    /// Load font from file
-    /// </summary>
-    Font LoadFontFromFile(string path, int size, FontStyle style);
-    
-    /// <summary>
     /// Draw given text on an image
     /// </summary>
-    void DrawText(Image<Rgba32> image, Font font, Color color, PlanarPoint2D origin, string text);
+    void DrawText(MagickImage image, int size, MagickColor color, PlanarPoint2D origin, string text);
 }
