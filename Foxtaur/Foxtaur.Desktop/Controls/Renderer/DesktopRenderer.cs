@@ -1,5 +1,7 @@
 using System;
+using System.Diagnostics;
 using System.Numerics;
+using System.Timers;
 using Avalonia.Input;
 using Avalonia.OpenGL;
 using Avalonia.OpenGL.Controls;
@@ -156,6 +158,25 @@ public class DesktopRendererControl : OpenGlControlBase
     
     #endregion
 
+    #region Debug
+
+    /// <summary>
+    /// FPS timer
+    /// </summary>
+    private Timer _fpsTimer;
+
+    /// <summary>
+    /// Times drawn since last OnFpsTimer
+    /// </summary>
+    private int _framesDrawn = 0;
+
+    /// <summary>
+    /// FPS
+    /// </summary>
+    private float _fps = 0;
+
+    #endregion
+
     #region DI
 
     private ICoordinatesProvider _sphereCoordinatesProvider = Program.Di.GetService<ISphereCoordinatesProvider>();
@@ -211,6 +232,10 @@ public class DesktopRendererControl : OpenGlControlBase
 
         _silkGLContext = GL.GetApi(gl.GetProcAddress);
 
+        // Generating buffers
+        _earthMesh.GenerateBuffers(_silkGLContext);
+        _uiMesh.GenerateBuffers(_silkGLContext);
+        
         // Loading shaders
         _shader = new Shader(_silkGLContext, @"Resources/Shaders/shader.vert", @"Resources/Shaders/shader.frag");
         _uiShader = new Shader(_silkGLContext, @"Resources/Shaders/ui_shader.vert", @"Resources/Shaders/ui_shader.frag");
@@ -218,6 +243,17 @@ public class DesktopRendererControl : OpenGlControlBase
         // Loading textures
         _earthTexture = new Texture(_silkGLContext, @"Resources/Textures/Basemaps/NE2_50M_SR_W.jpeg");
         //_earthTexture = new Texture(_silkGLContext, @"Resources/Textures/davydovo.png");
+
+        _fpsTimer = new Timer(1000);
+        _fpsTimer.Elapsed += OnFpsTimer;
+        _fpsTimer.AutoReset = true;
+        _fpsTimer.Enabled = true;
+    }
+
+    private void OnFpsTimer(object? sender, ElapsedEventArgs e)
+    {
+        _fps = _framesDrawn * (1000 / (float)_fpsTimer.Interval);
+        _framesDrawn = 0;
     }
 
     /// <summary>
@@ -259,37 +295,51 @@ public class DesktopRendererControl : OpenGlControlBase
         //_silkGLContext.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Line);
 
         // Earth
-        _earthMesh.GenerateBuffers(_silkGLContext);
-        _earthMesh.BindBuffers();
+        _earthMesh.BindBuffers(_silkGLContext);
         _earthTexture.Bind();
         _silkGLContext.DrawElements(PrimitiveType.Triangles, (uint)_earthMesh.Indices.Count, DrawElementsType.UnsignedInt, null);
-        _earthMesh.Dispose();
-
-        // UI
-        var uiImage = new Image<Rgba32>((int)_viewportWidth, (int)_viewportHeight);
         
-        uiImage.Mutate(x => x.DrawPolygon(new Pen(SixLabors.ImageSharp.Color.Blue, 1), new PointF[]
-        {
-            new PointF(0, 0),
-            new PointF(uiImage.Width - 1, 0),
-            new PointF(uiImage.Width - 1, uiImage.Height - 1),
-            new PointF(0, uiImage.Height - 1)
-        }));
+        // UI
+        _logger.Error($"------------ UI START ------------");
+        var stopwatch = new Stopwatch();
+        stopwatch.Start();
+        var last = new TimeSpan(0);
+        
+        var uiImage = new Image<Rgba32>((int)_viewportWidth, (int)_viewportHeight);
+        _logger.Error($"Image created: { stopwatch.Elapsed - last }");
+        last = stopwatch.Elapsed;
         
         // UI - Draw it here
-        _textDrawer.DrawText(uiImage, _uiFontRegular, SixLabors.ImageSharp.Color.Firebrick, new PlanarPoint2D(1, 1), "Just a test");
+        _textDrawer.DrawText(uiImage, _uiFontRegular, SixLabors.ImageSharp.Color.Firebrick, new PlanarPoint2D(1, 1), $"FPS: { _fps }");
+        _logger.Error($"UI drawn: { stopwatch.Elapsed - last }");
+        last = stopwatch.Elapsed;
         
-        var uiTexture = new Texture(_silkGLContext, uiImage);
         _silkGLContext.Disable(EnableCap.DepthTest);
         _uiShader.Use();
         _uiShader.SetUniform1i("ourTexture", 0);
         
-        _uiMesh.GenerateBuffers(_silkGLContext);
-        _uiMesh.BindBuffers();
+        _uiMesh.BindBuffers(_silkGLContext);
+        
+        _logger.Error($"Buffer bounds: { stopwatch.Elapsed - last }");
+        last = stopwatch.Elapsed;
+        
+        var uiTexture = new Texture(_silkGLContext, uiImage);
+        _logger.Error($"Texture created: { stopwatch.Elapsed - last }");
+        last = stopwatch.Elapsed;
+        
         uiTexture.Bind();
+        _logger.Error($"Texture bound: { stopwatch.Elapsed - last }");
+        last = stopwatch.Elapsed;
+        
         _silkGLContext.DrawElements(PrimitiveType.Triangles, (uint)_uiMesh.Indices.Count, DrawElementsType.UnsignedInt, null);
-        _uiMesh.Dispose();
+        _logger.Error($"UI drawn: { stopwatch.Elapsed - last }");
+        last = stopwatch.Elapsed;
+        
         uiTexture.Dispose();
+        _logger.Error($"UI disposed: { stopwatch.Elapsed - last }");
+        stopwatch.Stop();
+
+        _framesDrawn++;
         
         Dispatcher.UIThread.Post(InvalidateVisual, DispatcherPriority.Background);
     }
@@ -299,10 +349,14 @@ public class DesktopRendererControl : OpenGlControlBase
     /// </summary>
     protected override void OnOpenGlDeinit(GlInterface gl, int fb)
     {
+        _earthMesh.Dispose();
         _earthTexture.Dispose();
 
+        _uiMesh.Dispose();
+        
         _shader.Dispose();
         _uiShader.Dispose();
+        
         base.OnOpenGlDeinit(gl, fb);
     }
 

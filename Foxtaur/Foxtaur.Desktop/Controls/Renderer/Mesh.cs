@@ -71,24 +71,20 @@ public class Mesh : IDisposable
 
         // Object for indices
         ElementsBufferObject = new BufferObject<uint>(silkGl, Indices.ToArray(), BufferTargetARB.ElementArrayBuffer);
-
-        // Vertices array
-        VerticesArrayObject = new VertexArrayObject<float, uint>(silkGl, VerticesBufferObject, ElementsBufferObject);
-
-        //Telling the VAO object how to lay out the attribute pointers
-        VerticesArrayObject.VertexAttributePointer(VerticesPositionLocation, VertexCoordsSize,
-            VertexAttribPointerType.Float, VertexSize, 0);
-        VerticesArrayObject.VertexAttributePointer(VerticesTextureCoordsLocation, TextureCoordsSize,
-            VertexAttribPointerType.Float, VertexSize, VertexCoordsSize);
     }
 
     /// <summary>
     /// Bind buffers (into GL context)
     /// </summary>
-    public void BindBuffers()
+    public void BindBuffers(GL silkGl)
     {
-        ElementsBufferObject.Bind();
-        VerticesBufferObject.Bind();
+        // Vertices array
+        VerticesArrayObject = new VertexArrayObject<float, uint>(silkGl, VerticesBufferObject, ElementsBufferObject);
+        
+        //Telling the VAO object how to lay out the attribute pointers
+        VerticesArrayObject.VertexAttributePointer(VerticesPositionLocation, VertexCoordsSize, VertexAttribPointerType.Float, VertexSize, 0);
+        VerticesArrayObject.VertexAttributePointer(VerticesTextureCoordsLocation, TextureCoordsSize, VertexAttribPointerType.Float, VertexSize, VertexCoordsSize);
+        
         VerticesArrayObject.Bind();
     }
 
