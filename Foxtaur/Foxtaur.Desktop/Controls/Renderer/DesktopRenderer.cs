@@ -219,6 +219,10 @@ public class DesktopRendererControl : OpenGlControlBase
         _silkGLContext.ClearColor(Color.Black);
         _silkGLContext.Clear((uint)(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit));
         _silkGLContext.Enable(EnableCap.DepthTest);
+        
+        // Blending
+        _silkGLContext.Enable(EnableCap.Blend);
+        _silkGLContext.BlendFunc(GLEnum.SrcAlpha, GLEnum.OneMinusSrcAlpha);
 
         _silkGLContext.Viewport(0, 0, (uint)_viewportWidth, (uint)_viewportHeight);
 
