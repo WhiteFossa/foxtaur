@@ -36,12 +36,12 @@ public class DesktopRendererControl : OpenGlControlBase
     /// <summary>
     /// Viewport width
     /// </summary>
-    private float _viewportWidth;
+    private int _viewportWidth;
 
     /// <summary>
     /// Viewport height
     /// </summary>
-    private float _viewportHeight;
+    private int _viewportHeight;
 
     /// <summary>
     /// Silk.NET OpenGL context
@@ -143,7 +143,7 @@ public class DesktopRendererControl : OpenGlControlBase
     /// Shader for UI
     /// </summary>
     private Shader _uiShader;
-    
+
     #endregion
 
     #region Debug
@@ -285,10 +285,10 @@ public class DesktopRendererControl : OpenGlControlBase
         _silkGLContext.DrawElements(PrimitiveType.Triangles, (uint)_earthMesh.Indices.Count, DrawElementsType.UnsignedInt, null);
         
         // UI
-        var uiImage = new MagickImage(MagickColors.Transparent, (int)_viewportWidth, (int)_viewportHeight);
-        
+        var uiImage = new MagickImage(MagickColors.Transparent, _viewportWidth, _viewportHeight);
+
         // UI - Draw it here
-        _textDrawer.DrawText(uiImage, 72, MagickColors.Red,  new PlanarPoint2D(1, 72), $"FPS: { _fps }");
+        _textDrawer.DrawText(uiImage, 72, MagickColors.Red,  new PlanarPoint2D(0, 72), $"FPS: { _fps }");
 
         _silkGLContext.Disable(EnableCap.DepthTest);
         _uiShader.Use();
@@ -331,10 +331,10 @@ public class DesktopRendererControl : OpenGlControlBase
     {
         _scaling = (float)VisualRoot.RenderScaling;
 
-        _viewportWidth = (float)Bounds.Width * _scaling;
-        _viewportHeight = (float)Bounds.Height * _scaling;
+        _viewportWidth = (int)(Bounds.Width * _scaling);
+        _viewportHeight = (int)(Bounds.Height * _scaling);
 
-        _camera.AspectRatio = _viewportWidth / _viewportHeight;
+        _camera.AspectRatio = (float)_viewportWidth / (float)_viewportHeight;
     }
 
     /// <summary>
