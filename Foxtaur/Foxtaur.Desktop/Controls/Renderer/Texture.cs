@@ -1,8 +1,6 @@
 using System;
 using ImageMagick;
 using Silk.NET.OpenGL;
-using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.PixelFormats;
 
 namespace Foxtaur.Desktop.Controls.Renderer;
 
@@ -42,30 +40,25 @@ public class Texture : IDisposable
         SetParameters();
     }
     
-    public unsafe Texture(GL silkGl, Image<Rgba32> image)
+    public unsafe Texture(GL silkGl, MagickImage image)
     {
         _silkGl = silkGl ?? throw new ArgumentNullException(nameof(silkGl));
         
         _handle = this._silkGl.GenTexture();
         Bind();
         
-        //Reserve enough memory from the gpu for the whole image
-        _silkGl.TexImage2D(TextureTarget.Texture2D, 0, InternalFormat.Rgba8, (uint)image.Width, (uint)image.Height, 0, PixelFormat.Rgba, PixelType.UnsignedByte, null);
-
-        image.ProcessPixelRows(accessor =>
+        fixed (void* pixels = image.GetPixels().ToByteArray(PixelMapping.RGBA))
         {
-            //ImageSharp 2 does not store images in contiguous memory by default, so we must send the image row by row
-            for (int y = 0; y < accessor.Height; y++)
-            {
-                fixed (void* data = accessor.GetRowSpan(y))
-                {
-                    //Loading the actual image.
-                    _silkGl.TexSubImage2D(TextureTarget.Texture2D, 0, 0, y, (uint)accessor.Width, 1,
-                        PixelFormat.Rgba, PixelType.UnsignedByte, data);
-                }
-            }
-        });
-        
+            _silkGl.TexImage2D(TextureTarget.Texture2D,
+                0,
+                InternalFormat.Rgba8,
+                (uint)image.Width,
+                (uint)image.Height,
+                0,
+                PixelFormat.Rgba,
+                PixelType.UnsignedByte,
+                pixels);    
+        }
 
         SetParameters();
     }

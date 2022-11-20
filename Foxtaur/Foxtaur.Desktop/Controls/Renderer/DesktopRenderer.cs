@@ -13,14 +13,10 @@ using Foxtaur.LibRenderer.Models;
 using Foxtaur.LibRenderer.Services.Abstractions.Camera;
 using Foxtaur.LibRenderer.Services.Abstractions.CoordinateProviders;
 using Foxtaur.LibRenderer.Services.Abstractions.Drawers;
+using ImageMagick;
 using Microsoft.Extensions.DependencyInjection;
 using NLog;
 using Silk.NET.OpenGL;
-using SixLabors.Fonts;
-using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.Drawing.Processing;
-using SixLabors.ImageSharp.PixelFormats;
-using SixLabors.ImageSharp.Processing;
 using Color = System.Drawing.Color;
 
 namespace Foxtaur.Desktop.Controls.Renderer;
@@ -147,14 +143,6 @@ public class DesktopRendererControl : OpenGlControlBase
     /// Shader for UI
     /// </summary>
     private Shader _uiShader;
-
-    /// <summary>
-    /// Regular UI font
-    /// </summary>
-    private Font _uiFontRegular;
-
-    // UI image, draw UI on it
-    private Image<Rgba32> _uiImage;
     
     #endregion
 
@@ -191,9 +179,6 @@ public class DesktopRendererControl : OpenGlControlBase
     /// </summary>
     public DesktopRendererControl()
     {
-        // Loading fonts
-        _uiFontRegular = _textDrawer.LoadFontFromFile(@"Resources/Fonts/OpenSans-Regular.ttf", 200, FontStyle.Regular);
-        
         // Generating the Earth
         _earthSphere = _earthGenerator.GenerateEarthSphere();
         _earthMesh = _earthGenerator.GenerateFullEarth((float)Math.PI / 900.0f);
@@ -300,45 +285,24 @@ public class DesktopRendererControl : OpenGlControlBase
         _silkGLContext.DrawElements(PrimitiveType.Triangles, (uint)_earthMesh.Indices.Count, DrawElementsType.UnsignedInt, null);
         
         // UI
-        _logger.Error($"------------ UI START ------------");
-        var stopwatch = new Stopwatch();
-        stopwatch.Start();
-        var last = new TimeSpan(0);
-        
-        var uiImage = new Image<Rgba32>((int)_viewportWidth, (int)_viewportHeight);
-        _logger.Error($"Image created: { stopwatch.Elapsed - last }");
-        last = stopwatch.Elapsed;
+        var uiImage = new MagickImage(MagickColors.Transparent, (int)_viewportWidth, (int)_viewportHeight);
         
         // UI - Draw it here
-        _textDrawer.DrawText(uiImage, _uiFontRegular, SixLabors.ImageSharp.Color.Firebrick, new PlanarPoint2D(1, 1), $"FPS: { _fps }");
-        _logger.Error($"UI drawn: { stopwatch.Elapsed - last }");
-        last = stopwatch.Elapsed;
-        
+        _textDrawer.DrawText(uiImage, 72, MagickColors.Red,  new PlanarPoint2D(1, 72), $"FPS: { _fps }");
+
         _silkGLContext.Disable(EnableCap.DepthTest);
         _uiShader.Use();
         _uiShader.SetUniform1i("ourTexture", 0);
         
         _uiMesh.BindBuffers(_silkGLContext);
         
-        _logger.Error($"Buffer bounds: { stopwatch.Elapsed - last }");
-        last = stopwatch.Elapsed;
-        
         var uiTexture = new Texture(_silkGLContext, uiImage);
-        _logger.Error($"Texture created: { stopwatch.Elapsed - last }");
-        last = stopwatch.Elapsed;
-        
         uiTexture.Bind();
-        _logger.Error($"Texture bound: { stopwatch.Elapsed - last }");
-        last = stopwatch.Elapsed;
         
         _silkGLContext.DrawElements(PrimitiveType.Triangles, (uint)_uiMesh.Indices.Count, DrawElementsType.UnsignedInt, null);
-        _logger.Error($"UI drawn: { stopwatch.Elapsed - last }");
-        last = stopwatch.Elapsed;
         
         uiTexture.Dispose();
-        _logger.Error($"UI disposed: { stopwatch.Elapsed - last }");
-        stopwatch.Stop();
-
+        
         _framesDrawn++;
         
         Dispatcher.UIThread.Post(InvalidateVisual, DispatcherPriority.Background);
