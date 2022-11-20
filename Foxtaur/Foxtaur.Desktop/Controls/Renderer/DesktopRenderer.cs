@@ -1,5 +1,4 @@
 using System;
-using System.Drawing;
 using System.Numerics;
 using Avalonia.Input;
 using Avalonia.OpenGL;
@@ -11,9 +10,16 @@ using Foxtaur.LibRenderer.Helpers;
 using Foxtaur.LibRenderer.Models;
 using Foxtaur.LibRenderer.Services.Abstractions.Camera;
 using Foxtaur.LibRenderer.Services.Abstractions.CoordinateProviders;
+using Foxtaur.LibRenderer.Services.Abstractions.Drawers;
 using Microsoft.Extensions.DependencyInjection;
 using NLog;
 using Silk.NET.OpenGL;
+using SixLabors.Fonts;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Drawing.Processing;
+using SixLabors.ImageSharp.PixelFormats;
+using SixLabors.ImageSharp.Processing;
+using Color = System.Drawing.Color;
 
 namespace Foxtaur.Desktop.Controls.Renderer;
 
@@ -134,16 +140,19 @@ public class DesktopRendererControl : OpenGlControlBase
     /// Rectangle mesh for UI
     /// </summary>
     private Mesh _uiMesh;
-
-    /// <summary>
-    /// Draw UI into this texture
-    /// </summary>
-    private Texture _uiTexture;
-
+    
     /// <summary>
     /// Shader for UI
     /// </summary>
     private Shader _uiShader;
+
+    /// <summary>
+    /// Regular UI font
+    /// </summary>
+    private Font _uiFontRegular;
+
+    // UI image, draw UI on it
+    private Image<Rgba32> _uiImage;
     
     #endregion
 
@@ -152,6 +161,7 @@ public class DesktopRendererControl : OpenGlControlBase
     private ICoordinatesProvider _sphereCoordinatesProvider = Program.Di.GetService<ISphereCoordinatesProvider>();
     private IEarthGenerator _earthGenerator = Program.Di.GetService<IEarthGenerator>();
     private IRectangleGenerator _rectangleGenerator = Program.Di.GetService<IRectangleGenerator>();
+    private ITextDrawer _textDrawer = Program.Di.GetService<ITextDrawer>();
 
     #endregion
 
@@ -160,16 +170,19 @@ public class DesktopRendererControl : OpenGlControlBase
     /// </summary>
     public DesktopRendererControl()
     {
+        // Loading fonts
+        _uiFontRegular = _textDrawer.LoadFontFromFile(@"Resources/Fonts/OpenSans-Regular.ttf", 200, FontStyle.Regular);
+        
         // Generating the Earth
         _earthSphere = _earthGenerator.GenerateEarthSphere();
         _earthMesh = _earthGenerator.GenerateFullEarth((float)Math.PI / 900.0f);
 
         // Generating UI
         _uiMesh = _rectangleGenerator.GenerateRectangle(
-            new PlanarPoint3D(-1.0f, 1.0f, 0.0f),
-            new PlanarPoint2D(-1.0f, 1.0f),
-            new PlanarPoint3D(1.0f, -1.0f, 0.0f),
-            new PlanarPoint2D(1.0f, -1.0f));
+            new PlanarPoint3D(0.0f, 1.0f, 0.0f),
+            new PlanarPoint2D(0.0f, 1.0f),
+            new PlanarPoint3D(1.0f, 0.0f, 0.0f),
+            new PlanarPoint2D(1.0f, 0.0f));
         
         // Creating camera
         _camera.Lat = 0.0f;
@@ -205,8 +218,6 @@ public class DesktopRendererControl : OpenGlControlBase
         // Loading textures
         _earthTexture = new Texture(_silkGLContext, @"Resources/Textures/Basemaps/NE2_50M_SR_W.jpeg");
         //_earthTexture = new Texture(_silkGLContext, @"Resources/Textures/davydovo.png");
-
-        _uiTexture = new Texture(_silkGLContext, @"Resources/Textures/ProtoUI.png");
     }
 
     /// <summary>
@@ -255,15 +266,30 @@ public class DesktopRendererControl : OpenGlControlBase
         _earthMesh.Dispose();
 
         // UI
+        var uiImage = new Image<Rgba32>((int)_viewportWidth, (int)_viewportHeight);
+        
+        uiImage.Mutate(x => x.DrawPolygon(new Pen(SixLabors.ImageSharp.Color.Blue, 1), new PointF[]
+        {
+            new PointF(0, 0),
+            new PointF(uiImage.Width - 1, 0),
+            new PointF(uiImage.Width - 1, uiImage.Height - 1),
+            new PointF(0, uiImage.Height - 1)
+        }));
+        
+        // UI - Draw it here
+        _textDrawer.DrawText(uiImage, _uiFontRegular, SixLabors.ImageSharp.Color.Firebrick, new PlanarPoint2D(1, 1), "Just a test");
+        
+        var uiTexture = new Texture(_silkGLContext, uiImage);
         _silkGLContext.Disable(EnableCap.DepthTest);
         _uiShader.Use();
         _uiShader.SetUniform1i("ourTexture", 0);
         
         _uiMesh.GenerateBuffers(_silkGLContext);
         _uiMesh.BindBuffers();
-        _uiTexture.Bind();
+        uiTexture.Bind();
         _silkGLContext.DrawElements(PrimitiveType.Triangles, (uint)_uiMesh.Indices.Count, DrawElementsType.UnsignedInt, null);
         _uiMesh.Dispose();
+        uiTexture.Dispose();
         
         Dispatcher.UIThread.Post(InvalidateVisual, DispatcherPriority.Background);
     }
@@ -274,7 +300,6 @@ public class DesktopRendererControl : OpenGlControlBase
     protected override void OnOpenGlDeinit(GlInterface gl, int fb)
     {
         _earthTexture.Dispose();
-        _uiTexture.Dispose();
 
         _shader.Dispose();
         _uiShader.Dispose();

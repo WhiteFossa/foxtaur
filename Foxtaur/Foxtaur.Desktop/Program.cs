@@ -6,8 +6,10 @@ using Foxtaur.Desktop.Controls.Renderer.Abstractions.Generators;
 using Foxtaur.Desktop.Controls.Renderer.Implementations.Generators;
 using Foxtaur.LibRenderer.Services.Abstractions.Camera;
 using Foxtaur.LibRenderer.Services.Abstractions.CoordinateProviders;
+using Foxtaur.LibRenderer.Services.Abstractions.Drawers;
 using Foxtaur.LibRenderer.Services.Implementations.Camera;
 using Foxtaur.LibRenderer.Services.Implementations.CoordinateProviders;
+using Foxtaur.LibRenderer.Services.Implementations.Drawers;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using NLog;
@@ -64,6 +66,7 @@ namespace Foxtaur.Desktop
             services.AddSingleton<IEarthGenerator, EarthGenerator>();
             services.AddSingleton<ICamera, Camera>();
             services.AddSingleton<IRectangleGenerator, RectangleGenerator>();
+            services.AddSingleton<ITextDrawer, TextDrawer>();
 
             return services;
         }
