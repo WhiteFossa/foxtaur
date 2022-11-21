@@ -191,8 +191,7 @@ public class DesktopRendererControl : OpenGlControlBase
 
         // UI
         _uiData = new UiData();
-        _uiData.MarkForRegeneration();
-        
+
         // Setting-up input events
         PointerWheelChanged += OnWheel;
         PointerPressed += OnMousePressed;
@@ -222,7 +221,7 @@ public class DesktopRendererControl : OpenGlControlBase
         //_earthTexture = new Texture(_silkGLContext, @"Resources/Textures/davydovo.png");
         
         // UI
-        _ui.Initialize(_silkGlContext);
+        _ui.Initialize(_silkGlContext, _viewportWidth, _viewportHeight, _uiData);
         
         _fpsTimer = new Timer(1000);
         _fpsTimer.Elapsed += OnFpsTimer;

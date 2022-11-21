@@ -36,9 +36,10 @@ public class Ui : IUi
         _rectangleGenerator = rectangleGenerator;
     }
 
-    public void Initialize(GL silkGlContext)
+    public void Initialize(GL silkGlContext, int uiWidth, int uiHeight, UiData data)
     {
         _ = silkGlContext ?? throw new ArgumentNullException(nameof(silkGlContext));
+        _ = data ?? throw new ArgumentNullException(nameof(data));
         
         _uiMesh = _rectangleGenerator.GenerateRectangle(
             new PlanarPoint3D(0.0f, 1.0f, 0.0f),
@@ -49,11 +50,14 @@ public class Ui : IUi
         _uiMesh.GenerateBuffers(silkGlContext);
         
         _uiShader = new Shader(silkGlContext, @"Resources/Shaders/ui_shader.vert", @"Resources/Shaders/ui_shader.frag");
+        
+        // Initial generation
+        GenerateUi(silkGlContext, uiWidth, uiHeight, data);
     }
 
     public void DeInitialize()
     {
-        DisposeUiTexture();
+        _uiTexture.Dispose();
         _uiMesh.Dispose();
         _uiShader.Dispose();
     }
@@ -61,6 +65,7 @@ public class Ui : IUi
     public void GenerateUi(GL silkGlContext, int uiWidth, int uiHeight, UiData data)
     {
         _ = silkGlContext ?? throw new ArgumentNullException(nameof(silkGlContext));
+        _ = data ?? throw new ArgumentNullException(nameof(data));
 
         using (var uiImage = new MagickImage(MagickColors.Transparent, uiWidth, uiHeight))
         {
@@ -85,11 +90,5 @@ public class Ui : IUi
         _uiMesh.BindBuffers(silkGlContext);
         _uiTexture.Bind();
         silkGlContext.DrawElements(PrimitiveType.Triangles, (uint)_uiMesh.Indices.Count, DrawElementsType.UnsignedInt, null);
-    }
-
-    private void DisposeUiTexture()
-    {
-        _uiTexture.Dispose();
-        _uiTexture = null;
     }
 }

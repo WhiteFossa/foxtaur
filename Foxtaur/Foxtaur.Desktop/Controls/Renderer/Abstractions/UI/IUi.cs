@@ -11,7 +11,7 @@ public interface IUi
     /// <summary>
     /// Initialize UI
     /// </summary>
-    void Initialize(GL silkGlContext);
+    void Initialize(GL silkGlContext, int uiWidth, int uiHeight, UiData data);
 
     /// <summary>
     /// De-initialize UI
