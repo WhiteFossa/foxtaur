@@ -113,7 +113,10 @@ public class Ui : IUi
         using (var uiBottomPanelImage = new MagickImage(RendererConstants.UiPanelsBackgroundColor, uiWidth, RendererConstants.UiBottomPanelHeight))
         {
             // Mouse coordinates
-            var mouseCoordsText = $"Latitude: { data.MouseLat.ToDegreesString() }, Longitude: { data.MouseLon.ToDegreesString() }";
+            var latText = data.IsMouseInEarth ? data.MouseLat.ToLatString() : "N/A";
+            var lonText = data.IsMouseInEarth ? data.MouseLon.ToLonString() : "N/A";
+            var mouseCoordsText = $"Latitude: { latText }, Longitude: { lonText }";
+            
             var mouseCoordsTextSize = _textDrawer.GetTextBounds(uiBottomPanelImage, RendererConstants.UiFontSize, mouseCoordsText);
             var mouseCoordsTextShiftY = RendererConstants.UiTopPanelHeight - (RendererConstants.UiTopPanelHeight - (float)mouseCoordsTextSize.TextHeight) / 2.0f + (float)mouseCoordsTextSize.Descent;
             _textDrawer.DrawText(uiBottomPanelImage,

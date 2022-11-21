@@ -203,7 +203,7 @@ public class DesktopRenderer : OpenGlControlBase
         PointerMoved += OnMouseMoved;
     }
 
-    private void OnPropertyChangedListener(object? sender, AvaloniaPropertyChangedEventArgs e)
+    private void OnPropertyChangedListener(object sender, AvaloniaPropertyChangedEventArgs e)
     {
         if (e.Property.Name.Equals("Bounds"))
         {
@@ -256,7 +256,7 @@ public class DesktopRenderer : OpenGlControlBase
         _fpsTimer.Enabled = true;
     }
 
-    private void OnFpsTimer(object? sender, ElapsedEventArgs e)
+    private void OnFpsTimer(object sender, ElapsedEventArgs e)
     {
         _uiData.Fps = _framesDrawn * (1000 / (float)_fpsTimer.Interval);
         _framesDrawn = 0;
@@ -358,7 +358,7 @@ public class DesktopRenderer : OpenGlControlBase
     /// <summary>
     /// Mouse wheel event
     /// </summary>
-    private void OnWheel(object? sender, PointerWheelEventArgs e)
+    private void OnWheel(object sender, PointerWheelEventArgs e)
     {
         float steps = (float)Math.Abs(e.Delta.Y);
 
@@ -375,7 +375,7 @@ public class DesktopRenderer : OpenGlControlBase
     /// <summary>
     /// Mouse pressed event
     /// </summary>
-    private void OnMousePressed(object? sender, PointerPressedEventArgs e)
+    private void OnMousePressed(object sender, PointerPressedEventArgs e)
     {
         var x = (float)e.GetCurrentPoint(this).Position.X * _scaling;
         var y = (float)e.GetCurrentPoint(this).Position.Y * _scaling;
@@ -432,7 +432,7 @@ public class DesktopRenderer : OpenGlControlBase
     /// <summary>
     /// Mouse released event
     /// </summary>
-    private void OnMouseReleased(object? sender, PointerReleasedEventArgs e)
+    private void OnMouseReleased(object sender, PointerReleasedEventArgs e)
     {
         if (!e.GetCurrentPoint(this).Properties.IsLeftButtonPressed)
         {
@@ -448,7 +448,7 @@ public class DesktopRenderer : OpenGlControlBase
     /// <summary>
     /// Mouse move event
     /// </summary>
-    private void OnMouseMoved(object? sender, PointerEventArgs e)
+    private void OnMouseMoved(object sender, PointerEventArgs e)
     {
         var x = (float)e.GetCurrentPoint(this).Position.X * _scaling;
         var y = (float)e.GetCurrentPoint(this).Position.Y * _scaling;
