@@ -7,9 +7,11 @@ using Avalonia.OpenGL;
 using Avalonia.OpenGL.Controls;
 using Avalonia.Threading;
 using Foxtaur.Desktop.Controls.Renderer.Abstractions.Generators;
+using Foxtaur.Desktop.Controls.Renderer.Abstractions.UI;
 using Foxtaur.LibRenderer.Constants;
 using Foxtaur.LibRenderer.Helpers;
 using Foxtaur.LibRenderer.Models;
+using Foxtaur.LibRenderer.Models.UI;
 using Foxtaur.LibRenderer.Services.Abstractions.Camera;
 using Foxtaur.LibRenderer.Services.Abstractions.CoordinateProviders;
 using Foxtaur.LibRenderer.Services.Abstractions.Drawers;
@@ -46,9 +48,12 @@ public class DesktopRendererControl : OpenGlControlBase
     /// <summary>
     /// Silk.NET OpenGL context
     /// </summary>
-    private GL _silkGLContext;
+    private GL _silkGlContext;
 
-    private Shader _shader;
+    /// <summary>
+    /// Default shader
+    /// </summary>
+    private Shader _defaultShader;
 
     /// <summary>
     /// Camera
@@ -135,9 +140,19 @@ public class DesktopRendererControl : OpenGlControlBase
     #region UI
 
     /// <summary>
+    /// UI data
+    /// </summary>
+    private UiData _uiData;
+    
+    /// <summary>
     /// Rectangle mesh for UI
     /// </summary>
     private Mesh _uiMesh;
+
+    /// <summary>
+    /// Texture, where UI is being drawn
+    /// </summary>
+    private Texture _uiTexture;
     
     /// <summary>
     /// Shader for UI
@@ -157,12 +172,7 @@ public class DesktopRendererControl : OpenGlControlBase
     /// Times drawn since last OnFpsTimer
     /// </summary>
     private int _framesDrawn = 0;
-
-    /// <summary>
-    /// FPS
-    /// </summary>
-    private float _fps = 0;
-
+    
     #endregion
 
     #region DI
@@ -171,6 +181,7 @@ public class DesktopRendererControl : OpenGlControlBase
     private IEarthGenerator _earthGenerator = Program.Di.GetService<IEarthGenerator>();
     private IRectangleGenerator _rectangleGenerator = Program.Di.GetService<IRectangleGenerator>();
     private ITextDrawer _textDrawer = Program.Di.GetService<ITextDrawer>();
+    private IUi _ui = Program.Di.GetService<IUi>();
 
     #endregion
 
@@ -199,6 +210,10 @@ public class DesktopRendererControl : OpenGlControlBase
         // Targetting camera
         _camera.Target = RendererConstants.EarthCenter.AsPlanarPoint3D();
 
+        // UI
+        _uiData = new UiData();
+        _uiData.MarkForRegeneration();
+        
         // Setting-up input events
         PointerWheelChanged += OnWheel;
         PointerPressed += OnMousePressed;
@@ -215,20 +230,20 @@ public class DesktopRendererControl : OpenGlControlBase
 
         CalculateViewportSizes();
 
-        _silkGLContext = GL.GetApi(gl.GetProcAddress);
+        _silkGlContext = GL.GetApi(gl.GetProcAddress);
 
         // Generating buffers
-        _earthMesh.GenerateBuffers(_silkGLContext);
-        _uiMesh.GenerateBuffers(_silkGLContext);
+        _earthMesh.GenerateBuffers(_silkGlContext);
+        _uiMesh.GenerateBuffers(_silkGlContext);
         
         // Loading shaders
-        _shader = new Shader(_silkGLContext, @"Resources/Shaders/shader.vert", @"Resources/Shaders/shader.frag");
-        _uiShader = new Shader(_silkGLContext, @"Resources/Shaders/ui_shader.vert", @"Resources/Shaders/ui_shader.frag");
+        _defaultShader = new Shader(_silkGlContext, @"Resources/Shaders/shader.vert", @"Resources/Shaders/shader.frag");
+        _uiShader = new Shader(_silkGlContext, @"Resources/Shaders/ui_shader.vert", @"Resources/Shaders/ui_shader.frag");
         
         // Loading textures
-        _earthTexture = new Texture(_silkGLContext, @"Resources/Textures/Basemaps/NE2_50M_SR_W.jpeg");
+        _earthTexture = new Texture(_silkGlContext, @"Resources/Textures/Basemaps/NE2_50M_SR_W.jpeg");
         //_earthTexture = new Texture(_silkGLContext, @"Resources/Textures/davydovo.png");
-
+        
         _fpsTimer = new Timer(1000);
         _fpsTimer.Elapsed += OnFpsTimer;
         _fpsTimer.AutoReset = true;
@@ -237,8 +252,10 @@ public class DesktopRendererControl : OpenGlControlBase
 
     private void OnFpsTimer(object? sender, ElapsedEventArgs e)
     {
-        _fps = _framesDrawn * (1000 / (float)_fpsTimer.Interval);
+        _uiData.Fps = _framesDrawn * (1000 / (float)_fpsTimer.Interval);
         _framesDrawn = 0;
+
+        _uiData.MarkForRegeneration();
     }
 
     /// <summary>
@@ -248,15 +265,15 @@ public class DesktopRendererControl : OpenGlControlBase
     {
         CalculateViewportSizes();
 
-        _silkGLContext.ClearColor(Color.Black);
-        _silkGLContext.Clear((uint)(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit));
-        _silkGLContext.Enable(EnableCap.DepthTest);
+        _silkGlContext.ClearColor(Color.Black);
+        _silkGlContext.Clear((uint)(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit));
+        _silkGlContext.Enable(EnableCap.DepthTest);
         
         // Blending
-        _silkGLContext.Enable(EnableCap.Blend);
-        _silkGLContext.BlendFunc(GLEnum.SrcAlpha, GLEnum.OneMinusSrcAlpha);
+        _silkGlContext.Enable(EnableCap.Blend);
+        _silkGlContext.BlendFunc(GLEnum.SrcAlpha, GLEnum.OneMinusSrcAlpha);
 
-        _silkGLContext.Viewport(0, 0, (uint)_viewportWidth, (uint)_viewportHeight);
+        _silkGlContext.Viewport(0, 0, (uint)_viewportWidth, (uint)_viewportHeight);
 
         // Surface mode camera positioning
         if (_isSurfaceRunMode)
@@ -264,48 +281,66 @@ public class DesktopRendererControl : OpenGlControlBase
             SurfaceRunPositionCamera();
         }
 
-        _shader.Use();
+        _defaultShader.Use();
 
         // Setting shader parameters (common)
-        _shader.SetUniform2f("resolution", new Vector2(_viewportWidth, _viewportHeight));
+        _defaultShader.SetUniform2f("resolution", new Vector2(_viewportWidth, _viewportHeight));
 
         // Setting shader parameters (vertices)
-        _shader.SetUniform4f("uModel", _camera.ModelMatrix);
-        _shader.SetUniform4f("uView", _camera.ViewMatrix);
-        _shader.SetUniform4f("uProjection", _camera.ProjectionMatrix);
+        _defaultShader.SetUniform4f("uModel", _camera.ModelMatrix);
+        _defaultShader.SetUniform4f("uView", _camera.ViewMatrix);
+        _defaultShader.SetUniform4f("uProjection", _camera.ProjectionMatrix);
 
         // Setting shader parameters (fragments)
-        _shader.SetUniform1i("ourTexture", 0);
+        _defaultShader.SetUniform1i("ourTexture", 0);
 
         //_silkGLContext.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Line);
 
         // Earth
-        _earthMesh.BindBuffers(_silkGLContext);
+        _earthMesh.BindBuffers(_silkGlContext);
         _earthTexture.Bind();
-        _silkGLContext.DrawElements(PrimitiveType.Triangles, (uint)_earthMesh.Indices.Count, DrawElementsType.UnsignedInt, null);
+        _silkGlContext.DrawElements(PrimitiveType.Triangles, (uint)_earthMesh.Indices.Count, DrawElementsType.UnsignedInt, null);
         
         // UI
-        var uiImage = new MagickImage(MagickColors.Transparent, _viewportWidth, _viewportHeight);
-
-        // UI - Draw it here
-        _textDrawer.DrawText(uiImage, 72, MagickColors.Red,  new PlanarPoint2D(0, 72), $"FPS: { _fps }");
-
-        _silkGLContext.Disable(EnableCap.DepthTest);
-        _uiShader.Use();
-        _uiShader.SetUniform1i("ourTexture", 0);
+        RegenerateUiIfNeeded(); 
+        DrawUi();
         
-        _uiMesh.BindBuffers(_silkGLContext);
-        
-        var uiTexture = new Texture(_silkGLContext, uiImage);
-        uiTexture.Bind();
-        
-        _silkGLContext.DrawElements(PrimitiveType.Triangles, (uint)_uiMesh.Indices.Count, DrawElementsType.UnsignedInt, null);
-        
-        uiTexture.Dispose();
-        
+        // Everything is drawn
         _framesDrawn++;
         
         Dispatcher.UIThread.Post(InvalidateVisual, DispatcherPriority.Background);
+    }
+
+    private void RegenerateUiIfNeeded()
+    {
+        if (_uiData.IsRegenerationRequested)
+        {
+            if (_uiTexture != null)
+            {
+                _uiTexture.Dispose();    
+            }
+            
+            _uiTexture = _ui.GenerateUi(_silkGlContext, _viewportWidth, _viewportHeight, _uiData);
+            
+            _uiData.MarkAsRegenerated();
+        }
+    }
+
+    private unsafe void DrawUi()
+    {
+        // UI is not ready yet
+        if (_uiTexture == null)
+        {
+            return;
+        }
+        
+        _silkGlContext.Disable(EnableCap.DepthTest);
+        _uiShader.Use();
+        _uiShader.SetUniform1i("ourTexture", 0);
+    
+        _uiMesh.BindBuffers(_silkGlContext);
+        _uiTexture.Bind();
+        _silkGlContext.DrawElements(PrimitiveType.Triangles, (uint)_uiMesh.Indices.Count, DrawElementsType.UnsignedInt, null);
     }
 
     /// <summary>
@@ -318,7 +353,7 @@ public class DesktopRendererControl : OpenGlControlBase
 
         _uiMesh.Dispose();
         
-        _shader.Dispose();
+        _defaultShader.Dispose();
         _uiShader.Dispose();
         
         base.OnOpenGlDeinit(gl, fb);

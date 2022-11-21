@@ -3,7 +3,9 @@ using System.IO;
 using Avalonia;
 using Avalonia.ReactiveUI;
 using Foxtaur.Desktop.Controls.Renderer.Abstractions.Generators;
+using Foxtaur.Desktop.Controls.Renderer.Abstractions.UI;
 using Foxtaur.Desktop.Controls.Renderer.Implementations.Generators;
+using Foxtaur.Desktop.Controls.Renderer.Implementations.UI;
 using Foxtaur.LibRenderer.Services.Abstractions.Camera;
 using Foxtaur.LibRenderer.Services.Abstractions.CoordinateProviders;
 using Foxtaur.LibRenderer.Services.Abstractions.Drawers;
@@ -67,6 +69,7 @@ namespace Foxtaur.Desktop
             services.AddSingleton<ICamera, Camera>();
             services.AddSingleton<IRectangleGenerator, RectangleGenerator>();
             services.AddSingleton<ITextDrawer, TextDrawer>();
+            services.AddSingleton<IUi, Ui>();
 
             return services;
         }
