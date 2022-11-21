@@ -9,7 +9,22 @@ namespace Foxtaur.Desktop.Controls.Renderer.Abstractions.UI;
 public interface IUi
 {
     /// <summary>
+    /// Initialize UI
+    /// </summary>
+    void Initialize(GL silkGlContext);
+
+    /// <summary>
+    /// De-initialize UI
+    /// </summary>
+    void DeInitialize();
+    
+    /// <summary>
     /// Generate UI
     /// </summary>
-    Texture GenerateUi(GL silkGlContext, int uiWidth, int uiHeight, UiData data);
+    void GenerateUi(GL silkGlContext, int uiWidth, int uiHeight, UiData data);
+
+    /// <summary>
+    /// Draw GUI. Call it from OnRender()!
+    /// </summary>
+    void DrawUi(GL silkGlContext);
 }

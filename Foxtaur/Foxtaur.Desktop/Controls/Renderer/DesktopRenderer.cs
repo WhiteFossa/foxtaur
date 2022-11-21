@@ -144,21 +144,6 @@ public class DesktopRendererControl : OpenGlControlBase
     /// </summary>
     private UiData _uiData;
     
-    /// <summary>
-    /// Rectangle mesh for UI
-    /// </summary>
-    private Mesh _uiMesh;
-
-    /// <summary>
-    /// Texture, where UI is being drawn
-    /// </summary>
-    private Texture _uiTexture;
-    
-    /// <summary>
-    /// Shader for UI
-    /// </summary>
-    private Shader _uiShader;
-
     #endregion
 
     #region Debug
@@ -193,13 +178,7 @@ public class DesktopRendererControl : OpenGlControlBase
         // Generating the Earth
         _earthSphere = _earthGenerator.GenerateEarthSphere();
         _earthMesh = _earthGenerator.GenerateFullEarth((float)Math.PI / 900.0f);
-
-        // Generating UI
-        _uiMesh = _rectangleGenerator.GenerateRectangle(
-            new PlanarPoint3D(0.0f, 1.0f, 0.0f),
-            new PlanarPoint2D(0.0f, 1.0f),
-            new PlanarPoint3D(1.0f, 0.0f, 0.0f),
-            new PlanarPoint2D(1.0f, 0.0f));
+        
         
         // Creating camera
         _camera.Lat = 0.0f;
@@ -234,15 +213,16 @@ public class DesktopRendererControl : OpenGlControlBase
 
         // Generating buffers
         _earthMesh.GenerateBuffers(_silkGlContext);
-        _uiMesh.GenerateBuffers(_silkGlContext);
-        
+
         // Loading shaders
         _defaultShader = new Shader(_silkGlContext, @"Resources/Shaders/shader.vert", @"Resources/Shaders/shader.frag");
-        _uiShader = new Shader(_silkGlContext, @"Resources/Shaders/ui_shader.vert", @"Resources/Shaders/ui_shader.frag");
-        
+
         // Loading textures
         _earthTexture = new Texture(_silkGlContext, @"Resources/Textures/Basemaps/NE2_50M_SR_W.jpeg");
         //_earthTexture = new Texture(_silkGLContext, @"Resources/Textures/davydovo.png");
+        
+        // UI
+        _ui.Initialize(_silkGlContext);
         
         _fpsTimer = new Timer(1000);
         _fpsTimer.Elapsed += OnFpsTimer;
@@ -303,7 +283,7 @@ public class DesktopRendererControl : OpenGlControlBase
         
         // UI
         RegenerateUiIfNeeded(); 
-        DrawUi();
+        _ui.DrawUi(_silkGlContext);
         
         // Everything is drawn
         _framesDrawn++;
@@ -315,32 +295,10 @@ public class DesktopRendererControl : OpenGlControlBase
     {
         if (_uiData.IsRegenerationRequested)
         {
-            if (_uiTexture != null)
-            {
-                _uiTexture.Dispose();    
-            }
-            
-            _uiTexture = _ui.GenerateUi(_silkGlContext, _viewportWidth, _viewportHeight, _uiData);
+            _ui.GenerateUi(_silkGlContext, _viewportWidth, _viewportHeight, _uiData);
             
             _uiData.MarkAsRegenerated();
         }
-    }
-
-    private unsafe void DrawUi()
-    {
-        // UI is not ready yet
-        if (_uiTexture == null)
-        {
-            return;
-        }
-        
-        _silkGlContext.Disable(EnableCap.DepthTest);
-        _uiShader.Use();
-        _uiShader.SetUniform1i("ourTexture", 0);
-    
-        _uiMesh.BindBuffers(_silkGlContext);
-        _uiTexture.Bind();
-        _silkGlContext.DrawElements(PrimitiveType.Triangles, (uint)_uiMesh.Indices.Count, DrawElementsType.UnsignedInt, null);
     }
 
     /// <summary>
@@ -348,14 +306,13 @@ public class DesktopRendererControl : OpenGlControlBase
     /// </summary>
     protected override void OnOpenGlDeinit(GlInterface gl, int fb)
     {
+        _ui.DeInitialize();
+        
         _earthMesh.Dispose();
         _earthTexture.Dispose();
 
-        _uiMesh.Dispose();
-        
         _defaultShader.Dispose();
-        _uiShader.Dispose();
-        
+
         base.OnOpenGlDeinit(gl, fb);
     }
 
