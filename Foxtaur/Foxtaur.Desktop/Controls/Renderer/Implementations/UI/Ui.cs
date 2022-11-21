@@ -1,6 +1,7 @@
 using System;
 using Foxtaur.Desktop.Controls.Renderer.Abstractions.Generators;
 using Foxtaur.Desktop.Controls.Renderer.Abstractions.UI;
+using Foxtaur.LibRenderer.Constants;
 using Foxtaur.LibRenderer.Models;
 using Foxtaur.LibRenderer.Models.UI;
 using Foxtaur.LibRenderer.Services.Abstractions.Drawers;
@@ -15,19 +16,19 @@ public class Ui : IUi
     private IRectangleGenerator _rectangleGenerator;
 
     /// <summary>
-    /// Rectangle mesh for UI
+    /// Rectangle mesh for UI top panel
     /// </summary>
-    private Mesh _uiMesh;
+    private Mesh _uiMeshTop;
+    
+    /// <summary>
+    /// Texture for UI top panel
+    /// </summary>
+    private Texture _uiTextureTop;
     
     /// <summary>
     /// Shader for UI
     /// </summary>
     private Shader _uiShader;
-    
-    /// <summary>
-    /// Texture, where UI is being drawn
-    /// </summary>
-    private Texture _uiTexture;
     
     public Ui(ITextDrawer textDrawer,
         IRectangleGenerator rectangleGenerator)
@@ -41,13 +42,17 @@ public class Ui : IUi
         _ = silkGlContext ?? throw new ArgumentNullException(nameof(silkGlContext));
         _ = data ?? throw new ArgumentNullException(nameof(data));
         
-        _uiMesh = _rectangleGenerator.GenerateRectangle(
-            new PlanarPoint3D(0.0f, 1.0f, 0.0f),
-            new PlanarPoint2D(0.0f, 1.0f),
+        // Top
+        var topPanelRelativeHeight = RendererConstants.UiTopPanelHeight / (float)uiHeight;
+        _uiMeshTop = _rectangleGenerator.GenerateRectangle(
+            new PlanarPoint3D(0.0f, topPanelRelativeHeight, 0.0f),
+            new PlanarPoint2D(0.0f, topPanelRelativeHeight),
             new PlanarPoint3D(1.0f, 0.0f, 0.0f),
             new PlanarPoint2D(1.0f, 0.0f));
         
-        _uiMesh.GenerateBuffers(silkGlContext);
+        _uiMeshTop.GenerateBuffers(silkGlContext);
+        
+        // Bottom
         
         _uiShader = new Shader(silkGlContext, @"Resources/Shaders/ui_shader.vert", @"Resources/Shaders/ui_shader.frag");
         
@@ -57,8 +62,8 @@ public class Ui : IUi
 
     public void DeInitialize()
     {
-        _uiTexture.Dispose();
-        _uiMesh.Dispose();
+        _uiTextureTop.Dispose();
+        _uiMeshTop.Dispose();
         _uiShader.Dispose();
     }
 
@@ -67,11 +72,11 @@ public class Ui : IUi
         _ = silkGlContext ?? throw new ArgumentNullException(nameof(silkGlContext));
         _ = data ?? throw new ArgumentNullException(nameof(data));
 
-        using (var uiImage = new MagickImage(MagickColors.Transparent, uiWidth, uiHeight))
+        using (var uiImage = new MagickImage(new MagickColor(30, 30, 60, 128), uiWidth, uiHeight))
         {
-            _textDrawer.DrawText(uiImage, 72, MagickColors.Red,  new PlanarPoint2D(0, 72), $"FPS: { data.Fps }");
+            _textDrawer.DrawText(uiImage, 30, RendererConstants.UiTextColor,  new PlanarPoint2D(0, 30), $"FPS: { data.Fps }");
             
-            _uiTexture = new Texture(silkGlContext, uiImage);    
+            _uiTextureTop = new Texture(silkGlContext, uiImage);    
         }
     }
 
@@ -90,8 +95,8 @@ public class Ui : IUi
         _uiShader.Use();
         _uiShader.SetUniform1i("ourTexture", 0);
     
-        _uiMesh.BindBuffers(silkGlContext);
-        _uiTexture.Bind();
-        silkGlContext.DrawElements(PrimitiveType.Triangles, (uint)_uiMesh.Indices.Count, DrawElementsType.UnsignedInt, null);
+        _uiMeshTop.BindBuffers(silkGlContext);
+        _uiTextureTop.Bind();
+        silkGlContext.DrawElements(PrimitiveType.Triangles, (uint)_uiMeshTop.Indices.Count, DrawElementsType.UnsignedInt, null);
     }
 }

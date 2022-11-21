@@ -1,4 +1,5 @@
 using System.Numerics;
+using ImageMagick;
 
 namespace Foxtaur.LibRenderer.Constants;
 
@@ -75,7 +76,7 @@ public static class RendererConstants
     /// <summary>
     /// Earth center coordinates
     /// </summary>
-    public static Vector3 EarthCenter = new Vector3(0.0f, 0.0f, 0.0f);
+    public static readonly Vector3 EarthCenter = new Vector3(0.0f, 0.0f, 0.0f);
 
     /// <summary>
     /// Head rotation speed (latitudal) in surface run mode
@@ -86,4 +87,18 @@ public static class RendererConstants
     /// Head rotation speed (longitudal) in surface run mode
     /// </summary>
     public const float SurfaceRunHeadRotationSpeedLon = 0.0005f;
+
+    #region UI
+    
+    /// <summary>
+    /// UI top panel height in pixels
+    /// </summary>
+    public const int UiTopPanelHeight = 30;
+
+    /// <summary>
+    /// UI text color
+    /// </summary>
+    public static readonly MagickColor UiTextColor = new MagickColor(255, 255, 255, 255);
+
+    #endregion
 }
