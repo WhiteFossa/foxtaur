@@ -15,6 +15,8 @@ public class Ui : IUi
     private ITextDrawer _textDrawer;
     private IRectangleGenerator _rectangleGenerator;
 
+    public bool IsNeedToReinitialize { get; set; }
+    
     /// <summary>
     /// Rectangle mesh for UI top panel
     /// </summary>
@@ -114,6 +116,16 @@ public class Ui : IUi
         _ = silkGlContext ?? throw new ArgumentNullException(nameof(silkGlContext));
         _ = uiData ?? throw new ArgumentNullException(nameof(uiData));
 
+        if (IsNeedToReinitialize)
+        {
+            DeInitialize();
+            Initialize(silkGlContext, uiWidth, uiHeight, uiData);
+            
+            uiData.MarkForRegeneration();
+
+            IsNeedToReinitialize = false;
+        }
+        
         if (uiData.IsRegenerationRequested)
         {
             GenerateUi(silkGlContext, uiWidth, uiHeight, uiData);

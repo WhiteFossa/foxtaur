@@ -2,6 +2,7 @@ using System;
 using System.Diagnostics;
 using System.Numerics;
 using System.Timers;
+using Avalonia;
 using Avalonia.Input;
 using Avalonia.OpenGL;
 using Avalonia.OpenGL.Controls;
@@ -23,7 +24,7 @@ using Color = System.Drawing.Color;
 
 namespace Foxtaur.Desktop.Controls.Renderer;
 
-public class DesktopRendererControl : OpenGlControlBase
+public class DesktopRenderer : OpenGlControlBase
 {
     /// <summary>
     /// Logger
@@ -173,7 +174,7 @@ public class DesktopRendererControl : OpenGlControlBase
     /// <summary>
     /// Constructor
     /// </summary>
-    public DesktopRendererControl()
+    public DesktopRenderer()
     {
         // Generating the Earth
         _earthSphere = _earthGenerator.GenerateEarthSphere();
@@ -192,11 +193,39 @@ public class DesktopRendererControl : OpenGlControlBase
         // UI
         _uiData = new UiData();
 
+        // Listening for properties changes to process resize
+        PropertyChanged += OnPropertyChangedListener;
+
         // Setting-up input events
         PointerWheelChanged += OnWheel;
         PointerPressed += OnMousePressed;
         PointerReleased += OnMouseReleased;
         PointerMoved += OnMouseMoved;
+    }
+
+    private void OnPropertyChangedListener(object? sender, AvaloniaPropertyChangedEventArgs e)
+    {
+        if (e.Property.Name.Equals("Bounds"))
+        {
+            // Resize event
+            OnResize((Rect)e.NewValue);
+        }
+    }
+
+    /// <summary>
+    /// Called when control resized
+    /// </summary>
+    private void OnResize(Rect bounds)
+    {
+        _scaling = (float)VisualRoot.RenderScaling; // TODO: In future we may handle scaling change
+        
+        _viewportWidth = (int)(bounds.Width * _scaling);
+        _viewportHeight = (int)(bounds.Height * _scaling);
+        
+        _camera.AspectRatio = _viewportWidth / (float)_viewportHeight;
+        
+        // Marking GUI as requiring re-initialization
+        _ui.IsNeedToReinitialize = true;
     }
 
     /// <summary>
@@ -205,8 +234,6 @@ public class DesktopRendererControl : OpenGlControlBase
     protected unsafe override void OnOpenGlInit(GlInterface gl, int fb)
     {
         base.OnOpenGlInit(gl, fb);
-
-        CalculateViewportSizes();
 
         _silkGlContext = GL.GetApi(gl.GetProcAddress);
 
@@ -221,7 +248,7 @@ public class DesktopRendererControl : OpenGlControlBase
         //_earthTexture = new Texture(_silkGLContext, @"Resources/Textures/davydovo.png");
         
         // UI
-        _ui.Initialize(_silkGlContext, _viewportWidth, _viewportHeight, _uiData);
+        _ui.Initialize(_silkGlContext, _viewportWidth, _viewportHeight, _uiData); // We also need to re-initialize on viewport size change
         
         _fpsTimer = new Timer(1000);
         _fpsTimer.Elapsed += OnFpsTimer;
@@ -242,8 +269,6 @@ public class DesktopRendererControl : OpenGlControlBase
     /// </summary>
     protected unsafe override void OnOpenGlRender(GlInterface gl, int fb)
     {
-        CalculateViewportSizes();
-
         _silkGlContext.ClearColor(Color.Black);
         _silkGlContext.Clear((uint)(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit));
         _silkGlContext.Enable(EnableCap.DepthTest);
@@ -302,19 +327,6 @@ public class DesktopRendererControl : OpenGlControlBase
         _defaultShader.Dispose();
 
         base.OnOpenGlDeinit(gl, fb);
-    }
-
-    /// <summary>
-    /// Calculate scaling and viewport sizes
-    /// </summary>
-    private void CalculateViewportSizes()
-    {
-        _scaling = (float)VisualRoot.RenderScaling;
-
-        _viewportWidth = (int)(Bounds.Width * _scaling);
-        _viewportHeight = (int)(Bounds.Height * _scaling);
-
-        _camera.AspectRatio = (float)_viewportWidth / (float)_viewportHeight;
     }
 
     /// <summary>

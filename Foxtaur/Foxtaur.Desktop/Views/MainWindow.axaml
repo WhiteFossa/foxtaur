@@ -16,7 +16,7 @@
     <Grid ColumnDefinitions="*, Auto" RowDefinitions="*">
         
         <!-- Renderer -->
-        <renderer:DesktopRendererControl Grid.Column="0" Grid.Row="0" />
+        <renderer:DesktopRenderer Grid.Column="0" Grid.Row="0" />
         
         <!-- Side controls -->
         <TextBlock Grid.Column="1" Grid.Row="0">

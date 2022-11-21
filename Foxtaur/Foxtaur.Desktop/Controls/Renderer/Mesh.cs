@@ -121,6 +121,10 @@ public class Mesh : IDisposable
     {
         VerticesBufferObject.Dispose();
         ElementsBufferObject.Dispose();
-        VerticesArrayObject.Dispose();
+
+        if (VerticesArrayObject != null) // BindBuffer() may be never called
+        {
+            VerticesArrayObject.Dispose();            
+        }
     }
 }

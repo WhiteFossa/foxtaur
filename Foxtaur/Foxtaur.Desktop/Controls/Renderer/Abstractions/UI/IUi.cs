@@ -9,6 +9,12 @@ namespace Foxtaur.Desktop.Controls.Renderer.Abstractions.UI;
 public interface IUi
 {
     /// <summary>
+    /// If true, then next call of DrawUi() will call Initialize() internally.
+    /// Use it in case of viewport size changes
+    /// </summary>
+    public bool IsNeedToReinitialize { get; set; }
+
+    /// <summary>
     /// Initialize UI
     /// </summary>
     void Initialize(GL silkGlContext, int uiWidth, int uiHeight, UiData data);
