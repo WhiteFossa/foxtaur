@@ -26,6 +26,16 @@ public class Ui : IUi
     private Texture _uiTextureTop;
     
     /// <summary>
+    /// Rectangle mesh for UI bottom panel
+    /// </summary>
+    private Mesh _uiMeshBottom;
+    
+    /// <summary>
+    /// Texture for UI bottom panel
+    /// </summary>
+    private Texture _uiTextureBottom;
+    
+    /// <summary>
     /// Shader for UI
     /// </summary>
     private Shader _uiShader;
@@ -46,13 +56,21 @@ public class Ui : IUi
         var topPanelRelativeHeight = RendererConstants.UiTopPanelHeight / (float)uiHeight;
         _uiMeshTop = _rectangleGenerator.GenerateRectangle(
             new PlanarPoint3D(0.0f, topPanelRelativeHeight, 0.0f),
-            new PlanarPoint2D(0.0f, topPanelRelativeHeight),
+            new PlanarPoint2D(0.0f, 1.0f),
             new PlanarPoint3D(1.0f, 0.0f, 0.0f),
             new PlanarPoint2D(1.0f, 0.0f));
         
         _uiMeshTop.GenerateBuffers(silkGlContext);
         
-        // Bottom
+        /*// Bottom
+        var bottomPanelRelativeHeight = RendererConstants.UiBottomPanelHeight / (float)uiHeight;
+        _uiMeshTop = _rectangleGenerator.GenerateRectangle(
+            new PlanarPoint3D(0.0f, bottomPanelRelativeHeight, 0.0f),
+            new PlanarPoint2D(0.0f, bottomPanelRelativeHeight),
+            new PlanarPoint3D(1.0f, 0.0f, 0.0f),
+            new PlanarPoint2D(1.0f, 0.0f));
+        
+        _uiMeshTop.GenerateBuffers(silkGlContext);*/
         
         _uiShader = new Shader(silkGlContext, @"Resources/Shaders/ui_shader.vert", @"Resources/Shaders/ui_shader.frag");
         
@@ -72,11 +90,13 @@ public class Ui : IUi
         _ = silkGlContext ?? throw new ArgumentNullException(nameof(silkGlContext));
         _ = data ?? throw new ArgumentNullException(nameof(data));
 
-        using (var uiImage = new MagickImage(new MagickColor(30, 30, 60, 128), uiWidth, uiHeight))
+        // Top
+        using (var uiTopPanelImage = new MagickImage(RendererConstants.UiPanelsBackgroundColor, uiWidth, RendererConstants.UiTopPanelHeight))
         {
-            _textDrawer.DrawText(uiImage, 30, RendererConstants.UiTextColor,  new PlanarPoint2D(0, 30), $"FPS: { data.Fps }");
+            // FPS
+            _textDrawer.DrawText(uiTopPanelImage, RendererConstants.UiFontSize, RendererConstants.UiTextColor,  new PlanarPoint2D(0, 30), $"FPS: { data.Fps }");
             
-            _uiTextureTop = new Texture(silkGlContext, uiImage);    
+            _uiTextureTop = new Texture(silkGlContext, uiTopPanelImage);    
         }
     }
 

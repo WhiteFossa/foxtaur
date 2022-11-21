@@ -93,12 +93,27 @@ public static class RendererConstants
     /// <summary>
     /// UI top panel height in pixels
     /// </summary>
-    public const int UiTopPanelHeight = 30;
+    public const int UiTopPanelHeight = 40;
+    
+    /// <summary>
+    /// UI bottom panel height in pixels
+    /// </summary>
+    public const int UiBottomPanelHeight = 40;
 
     /// <summary>
     /// UI text color
     /// </summary>
     public static readonly MagickColor UiTextColor = new MagickColor(255, 255, 255, 255);
+    
+    /// <summary>
+    /// UI panels background color
+    /// </summary>
+    public static readonly MagickColor UiPanelsBackgroundColor = new MagickColor(30, 30, 60, 200);
+
+    /// <summary>
+    /// UI font size
+    /// </summary>
+    public const int UiFontSize = 30;
 
     #endregion
 }
