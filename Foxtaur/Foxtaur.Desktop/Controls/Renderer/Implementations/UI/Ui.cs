@@ -62,7 +62,7 @@ public class Ui : IUi
         _uiShader.Dispose();
     }
 
-    public void GenerateUi(GL silkGlContext, int uiWidth, int uiHeight, UiData data)
+    private void GenerateUi(GL silkGlContext, int uiWidth, int uiHeight, UiData data)
     {
         _ = silkGlContext ?? throw new ArgumentNullException(nameof(silkGlContext));
         _ = data ?? throw new ArgumentNullException(nameof(data));
@@ -75,12 +75,15 @@ public class Ui : IUi
         }
     }
 
-    public unsafe void DrawUi(GL silkGlContext)
+    public unsafe void DrawUi(GL silkGlContext, int uiWidth, int uiHeight, UiData uiData)
     {
-        // UI is not ready yet
-        if (_uiTexture == null)
+        _ = silkGlContext ?? throw new ArgumentNullException(nameof(silkGlContext));
+        _ = uiData ?? throw new ArgumentNullException(nameof(uiData));
+
+        if (uiData.IsRegenerationRequested)
         {
-            return;
+            GenerateUi(silkGlContext, uiWidth, uiHeight, uiData);
+            uiData.MarkAsRegenerated();
         }
         
         silkGlContext.Disable(EnableCap.DepthTest);

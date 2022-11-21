@@ -281,23 +281,12 @@ public class DesktopRendererControl : OpenGlControlBase
         _silkGlContext.DrawElements(PrimitiveType.Triangles, (uint)_earthMesh.Indices.Count, DrawElementsType.UnsignedInt, null);
         
         // UI
-        RegenerateUiIfNeeded(); 
-        _ui.DrawUi(_silkGlContext);
+        _ui.DrawUi(_silkGlContext, _viewportWidth, _viewportHeight, _uiData);
         
         // Everything is drawn
         _framesDrawn++;
         
         Dispatcher.UIThread.Post(InvalidateVisual, DispatcherPriority.Background);
-    }
-
-    private void RegenerateUiIfNeeded()
-    {
-        if (_uiData.IsRegenerationRequested)
-        {
-            _ui.GenerateUi(_silkGlContext, _viewportWidth, _viewportHeight, _uiData);
-            
-            _uiData.MarkAsRegenerated();
-        }
     }
 
     /// <summary>

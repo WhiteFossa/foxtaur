@@ -17,14 +17,9 @@ public interface IUi
     /// De-initialize UI
     /// </summary>
     void DeInitialize();
-    
-    /// <summary>
-    /// Generate UI
-    /// </summary>
-    void GenerateUi(GL silkGlContext, int uiWidth, int uiHeight, UiData data);
 
     /// <summary>
     /// Draw GUI. Call it from OnRender()!
     /// </summary>
-    void DrawUi(GL silkGlContext);
+    void DrawUi(GL silkGlContext, int uiWidth, int uiHeight, UiData uiData);
 }
