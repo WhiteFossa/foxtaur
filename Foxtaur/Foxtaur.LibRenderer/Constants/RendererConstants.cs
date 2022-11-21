@@ -115,5 +115,15 @@ public static class RendererConstants
     /// </summary>
     public const int UiFontSize = 30;
 
+    /// <summary>
+    /// FPS text X position
+    /// </summary>
+    public const float UiFpsTextXPosition = 10;
+    
+    /// <summary>
+    /// Mouse coords text X position
+    /// </summary>
+    public const float UiMouseCoordsTextXPosition = 10;
+
     #endregion
 }

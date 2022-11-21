@@ -6,8 +6,20 @@ namespace Foxtaur.LibRenderer.Services.Implementations.Drawers;
 
 public class TextDrawer : ITextDrawer
 {
+    public ITypeMetric GetTextBounds(MagickImage image, int size, string text)
+    {
+        _ = image ?? throw new ArgumentNullException(nameof(image));
+        
+        image.Settings.FontPointsize = size;
+        return image.FontTypeMetrics(text);
+    }
+
     public void DrawText(MagickImage image, int size, MagickColor color, PlanarPoint2D origin, string text)
     {
+        _ = image ?? throw new ArgumentNullException(nameof(image));
+        _ = color ?? throw new ArgumentNullException(nameof(color));
+        _ = origin ?? throw new ArgumentNullException(nameof(origin));
+        
         new Drawables()
             .FontPointSize(size)
             .Font("Open Sans")

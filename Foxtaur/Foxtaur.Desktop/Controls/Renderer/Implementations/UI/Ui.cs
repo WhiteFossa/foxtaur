@@ -96,7 +96,14 @@ public class Ui : IUi
         using (var uiTopPanelImage = new MagickImage(RendererConstants.UiPanelsBackgroundColor, uiWidth, RendererConstants.UiTopPanelHeight))
         {
             // FPS
-            _textDrawer.DrawText(uiTopPanelImage, RendererConstants.UiFontSize, RendererConstants.UiTextColor,  new PlanarPoint2D(0, 30), $"FPS: { data.Fps }");
+            var fpsText = $"FPS: {data.Fps}";
+            var fpsTextSize = _textDrawer.GetTextBounds(uiTopPanelImage, RendererConstants.UiFontSize, fpsText);
+            var fpsTextShiftY = RendererConstants.UiTopPanelHeight - (RendererConstants.UiTopPanelHeight - (float)fpsTextSize.TextHeight) / 2.0f + (float)fpsTextSize.Descent;
+            _textDrawer.DrawText(uiTopPanelImage,
+                RendererConstants.UiFontSize,
+                RendererConstants.UiTextColor, 
+                new PlanarPoint2D(RendererConstants.UiFpsTextXPosition, fpsTextShiftY),
+                fpsText);
             
             _uiTextureTop = new Texture(silkGlContext, uiTopPanelImage);    
         }
@@ -104,8 +111,15 @@ public class Ui : IUi
         // Bottom
         using (var uiBottomPanelImage = new MagickImage(RendererConstants.UiPanelsBackgroundColor, uiWidth, RendererConstants.UiBottomPanelHeight))
         {
-            // FPS
-            _textDrawer.DrawText(uiBottomPanelImage, RendererConstants.UiFontSize, RendererConstants.UiTextColor,  new PlanarPoint2D(0, 30), $"Mouse coordinates will be here");
+            // Mouse coordinates
+            var mouseCoordsText = $"Latitude: { data.MouseLat }, Longitude: { data.MouseLon }";
+            var mouseCoordsTextSize = _textDrawer.GetTextBounds(uiBottomPanelImage, RendererConstants.UiFontSize, mouseCoordsText);
+            var mouseCoordsTextShiftY = RendererConstants.UiTopPanelHeight - (RendererConstants.UiTopPanelHeight - (float)mouseCoordsTextSize.TextHeight) / 2.0f + (float)mouseCoordsTextSize.Descent;
+            _textDrawer.DrawText(uiBottomPanelImage,
+                RendererConstants.UiFontSize,
+                RendererConstants.UiTextColor, 
+                new PlanarPoint2D(RendererConstants.UiMouseCoordsTextXPosition, mouseCoordsTextShiftY),
+                mouseCoordsText);
             
             _uiTextureBottom = new Texture(silkGlContext, uiBottomPanelImage);    
         }

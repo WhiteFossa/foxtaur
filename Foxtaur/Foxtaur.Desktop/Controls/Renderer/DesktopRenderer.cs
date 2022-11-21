@@ -455,15 +455,26 @@ public class DesktopRenderer : OpenGlControlBase
 
         var dx = x - _pressX;
         var dy = y - _pressY;
-
+        
+        var geoCoordinates = GetMouseGeoCoordinates(x, y);
+        
+        // Updating UI
+        _uiData.IsMouseInEarth = geoCoordinates != null;
+        if (_uiData.IsMouseInEarth)
+        {
+            _uiData.MouseLat = geoCoordinates.Lat;
+            _uiData.MouseLon = geoCoordinates.Lon;
+        }
+        
+        _uiData.MarkForRegeneration();
+        
         if (_earthDragMode)
         {
             // Earth drag
-            var newGeoPoint = GetMouseGeoCoordinates(x, y);
-            if (newGeoPoint != null)
+            if (geoCoordinates != null)
             {
-                var latDelta = GeoPoint.SumLatitudesWithWrap(newGeoPoint.Lat, -1.0f * _pressGeoPoint.Lat);
-                var lonDelta = GeoPoint.SumLongitudesWithWrap(newGeoPoint.Lon, -1.0f * _pressGeoPoint.Lon);
+                var latDelta = GeoPoint.SumLatitudesWithWrap(geoCoordinates.Lat, -1.0f * _pressGeoPoint.Lat);
+                var lonDelta = GeoPoint.SumLongitudesWithWrap(geoCoordinates.Lon, -1.0f * _pressGeoPoint.Lon);
 
                 _camera.Lat = GeoPoint.SumLatitudesWithWrap(_camera.Lat, -1.0f * latDelta);
                 _camera.Lon = GeoPoint.SumLongitudesWithWrap(_camera.Lon, -1.0f * lonDelta);
@@ -472,10 +483,8 @@ public class DesktopRenderer : OpenGlControlBase
 
         if (_isSurfaceRunMode && _rotateHeadMode)
         {
-            _surfaceRunLatViewAngle =
-                RendererConstants.SurfaceRunHeadRotationSpeedLat * dy + _surfaceRunLatViewAnglePress;
-            _surfaceRunLonViewAngle = RendererConstants.SurfaceRunHeadRotationSpeedLon * 2.0f * dx +
-                                      _surfaceRunLonViewAnglePress; // 2.0f because lat is [-Pi; Pi], but lon is [-2 * Pi; 2 * Pi]
+            _surfaceRunLatViewAngle = RendererConstants.SurfaceRunHeadRotationSpeedLat * dy + _surfaceRunLatViewAnglePress;
+            _surfaceRunLonViewAngle = RendererConstants.SurfaceRunHeadRotationSpeedLon * 2.0f * dx + _surfaceRunLonViewAnglePress; // 2.0f because lat is [-Pi; Pi], but lon is [-2 * Pi; 2 * Pi]
         }
     }
 

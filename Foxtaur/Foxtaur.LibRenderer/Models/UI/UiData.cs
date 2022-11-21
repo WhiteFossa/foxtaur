@@ -16,6 +16,21 @@ public class UiData
     public float Fps { get; set; }
 
     /// <summary>
+    /// Is mouse in Earth (and so have geocoordinates)?
+    /// </summary>
+    public bool IsMouseInEarth { get; set; }
+
+    /// <summary>
+    /// Mouse latitude
+    /// </summary>
+    public float MouseLat { get; set; }
+
+    /// <summary>
+    /// Mouse longitude
+    /// </summary>
+    public float MouseLon { get; set; }
+
+    /// <summary>
     /// Mark UI for regeneration
     /// </summary>
     public void MarkForRegeneration()
