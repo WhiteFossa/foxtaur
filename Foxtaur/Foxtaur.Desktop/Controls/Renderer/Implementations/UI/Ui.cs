@@ -2,6 +2,7 @@ using System;
 using Foxtaur.Desktop.Controls.Renderer.Abstractions.Generators;
 using Foxtaur.Desktop.Controls.Renderer.Abstractions.UI;
 using Foxtaur.LibRenderer.Constants;
+using Foxtaur.LibRenderer.Helpers;
 using Foxtaur.LibRenderer.Models;
 using Foxtaur.LibRenderer.Models.UI;
 using Foxtaur.LibRenderer.Services.Abstractions.Drawers;
@@ -112,7 +113,7 @@ public class Ui : IUi
         using (var uiBottomPanelImage = new MagickImage(RendererConstants.UiPanelsBackgroundColor, uiWidth, RendererConstants.UiBottomPanelHeight))
         {
             // Mouse coordinates
-            var mouseCoordsText = $"Latitude: { data.MouseLat }, Longitude: { data.MouseLon }";
+            var mouseCoordsText = $"Latitude: { data.MouseLat.ToDegreesString() }, Longitude: { data.MouseLon.ToDegreesString() }";
             var mouseCoordsTextSize = _textDrawer.GetTextBounds(uiBottomPanelImage, RendererConstants.UiFontSize, mouseCoordsText);
             var mouseCoordsTextShiftY = RendererConstants.UiTopPanelHeight - (RendererConstants.UiTopPanelHeight - (float)mouseCoordsTextSize.TextHeight) / 2.0f + (float)mouseCoordsTextSize.Descent;
             _textDrawer.DrawText(uiBottomPanelImage,

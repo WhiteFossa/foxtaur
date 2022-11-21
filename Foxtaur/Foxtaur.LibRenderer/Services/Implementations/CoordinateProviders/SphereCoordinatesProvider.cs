@@ -37,8 +37,8 @@ public class SphereCoordinatesProvider : ISphereCoordinatesProvider
         var h = planar3d.DistanceTo(RendererConstants.EarthCenter.AsPlanarPoint3D());
 
         var lat = (float)Math.Asin((planar3d.Y - RendererConstants.EarthCenter.Y) / h);
-        var lon = (float)Math.Atan2(planar3d.Z - RendererConstants.EarthCenter.Z,
-            planar3d.X - RendererConstants.EarthCenter.X);
+        var lon = (float)Math.Atan2(planar3d.Z - RendererConstants.EarthCenter.Z, planar3d.X - RendererConstants.EarthCenter.X);
+        lon = -1.0f * GeoPoint.SumLongitudesWithWrap(lon, -1.0f * (float)Math.PI / 2.0f); // Dirty fix
 
         return new GeoPoint(lat, lon, h);
     }
