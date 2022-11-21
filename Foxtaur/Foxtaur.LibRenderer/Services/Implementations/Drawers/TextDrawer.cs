@@ -1,3 +1,4 @@
+using Foxtaur.LibRenderer.Constants;
 using Foxtaur.LibRenderer.Models;
 using Foxtaur.LibRenderer.Services.Abstractions.Drawers;
 using ImageMagick;
@@ -21,8 +22,8 @@ public class TextDrawer : ITextDrawer
         _ = origin ?? throw new ArgumentNullException(nameof(origin));
         
         new Drawables()
-            .FontPointSize(size)
-            .Font("Open Sans")
+            .FontPointSize(RendererConstants.UiFontSize)
+            .Font(RendererConstants.UiFontName)
             .StrokeColor(color)
             .FillColor(color)
             .Text(origin.X, origin.Y, text)

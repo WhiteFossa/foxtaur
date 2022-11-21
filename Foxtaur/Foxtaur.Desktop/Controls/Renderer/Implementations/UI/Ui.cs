@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using Foxtaur.Desktop.Controls.Renderer.Abstractions.Generators;
 using Foxtaur.Desktop.Controls.Renderer.Abstractions.UI;
 using Foxtaur.LibRenderer.Constants;
@@ -85,6 +86,10 @@ public class Ui : IUi
     {
         _uiTextureTop.Dispose();
         _uiMeshTop.Dispose();
+        
+        _uiTextureBottom.Dispose();
+        _uiMeshBottom.Dispose();
+        
         _uiShader.Dispose();
     }
 
@@ -100,12 +105,17 @@ public class Ui : IUi
             var fpsText = $"FPS: {data.Fps}";
             var fpsTextSize = _textDrawer.GetTextBounds(uiTopPanelImage, RendererConstants.UiFontSize, fpsText);
             var fpsTextShiftY = RendererConstants.UiTopPanelHeight - (RendererConstants.UiTopPanelHeight - (float)fpsTextSize.TextHeight) / 2.0f + (float)fpsTextSize.Descent;
+
             _textDrawer.DrawText(uiTopPanelImage,
                 RendererConstants.UiFontSize,
                 RendererConstants.UiTextColor, 
                 new PlanarPoint2D(RendererConstants.UiFpsTextXPosition, fpsTextShiftY),
                 fpsText);
-            
+
+            if (_uiTextureTop != null)
+            {
+                _uiTextureTop.Dispose();
+            }
             _uiTextureTop = new Texture(silkGlContext, uiTopPanelImage);    
         }
         
@@ -116,16 +126,21 @@ public class Ui : IUi
             var latText = data.IsMouseInEarth ? data.MouseLat.ToLatString() : "N/A";
             var lonText = data.IsMouseInEarth ? data.MouseLon.ToLonString() : "N/A";
             var mouseCoordsText = $"Latitude: { latText }, Longitude: { lonText }";
-            
+
             var mouseCoordsTextSize = _textDrawer.GetTextBounds(uiBottomPanelImage, RendererConstants.UiFontSize, mouseCoordsText);
             var mouseCoordsTextShiftY = RendererConstants.UiTopPanelHeight - (RendererConstants.UiTopPanelHeight - (float)mouseCoordsTextSize.TextHeight) / 2.0f + (float)mouseCoordsTextSize.Descent;
+
             _textDrawer.DrawText(uiBottomPanelImage,
                 RendererConstants.UiFontSize,
                 RendererConstants.UiTextColor, 
                 new PlanarPoint2D(RendererConstants.UiMouseCoordsTextXPosition, mouseCoordsTextShiftY),
                 mouseCoordsText);
-            
-            _uiTextureBottom = new Texture(silkGlContext, uiBottomPanelImage);    
+
+            if (_uiTextureBottom != null)
+            {
+                _uiTextureBottom.Dispose();    
+            }
+            _uiTextureBottom = new Texture(silkGlContext, uiBottomPanelImage);
         }
     }
 
@@ -143,7 +158,8 @@ public class Ui : IUi
 
             IsNeedToReinitialize = false;
         }
-        
+
+
         if (uiData.IsRegenerationRequested)
         {
             GenerateUi(silkGlContext, uiWidth, uiHeight, uiData);
@@ -153,11 +169,11 @@ public class Ui : IUi
         silkGlContext.Disable(EnableCap.DepthTest);
         _uiShader.Use();
         _uiShader.SetUniform1i("ourTexture", 0);
-    
+        
         _uiMeshTop.BindBuffers(silkGlContext);
         _uiTextureTop.Bind();
         silkGlContext.DrawElements(PrimitiveType.Triangles, (uint)_uiMeshTop.Indices.Count, DrawElementsType.UnsignedInt, null);
-        
+
         _uiMeshBottom.BindBuffers(silkGlContext);
         _uiTextureBottom.Bind();
         silkGlContext.DrawElements(PrimitiveType.Triangles, (uint)_uiMeshBottom.Indices.Count, DrawElementsType.UnsignedInt, null);

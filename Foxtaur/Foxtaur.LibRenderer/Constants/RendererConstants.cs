@@ -111,9 +111,14 @@ public static class RendererConstants
     public static readonly MagickColor UiPanelsBackgroundColor = new MagickColor(30, 30, 60, 200);
 
     /// <summary>
+    /// UI font name. !! USE RASTER FONTS ONLY !!
+    /// </summary>
+    public const string UiFontName = "Helvetica-converted, Regular [34 pixels]";
+    
+    /// <summary>
     /// UI font size
     /// </summary>
-    public const int UiFontSize = 30;
+    public const int UiFontSize = 34;
 
     /// <summary>
     /// FPS text X position
