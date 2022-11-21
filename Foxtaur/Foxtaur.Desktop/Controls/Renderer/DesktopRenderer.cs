@@ -178,7 +178,7 @@ public class DesktopRenderer : OpenGlControlBase
     {
         // Generating the Earth
         _earthSphere = _earthGenerator.GenerateEarthSphere();
-        _earthMesh = _earthGenerator.GenerateFullEarth((float)Math.PI / 900.0f);
+        _earthMesh = _earthGenerator.GenerateFullEarth((float)Math.PI / 90.0f);
         
         
         // Creating camera

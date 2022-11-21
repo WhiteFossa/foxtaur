@@ -21,8 +21,7 @@ public class BufferObject<TDataType> : IDisposable where TDataType : unmanaged
         Bind();
         fixed (void* d = data)
         {
-            //_silkGl.BufferData(bufferType, (nuint)(data.Length * sizeof(TDataType)), d, BufferUsageARB.StaticDraw);
-            _silkGl.NamedBufferData(_handle, (nuint)(data.Length * sizeof(TDataType)), d, GLEnum.StaticDraw);
+            _silkGl.BufferData(bufferType, (nuint)(data.Length * sizeof(TDataType)), d, BufferUsageARB.StaticDraw);
         }
     }
 
