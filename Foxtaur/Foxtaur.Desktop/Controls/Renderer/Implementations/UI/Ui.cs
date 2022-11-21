@@ -62,15 +62,15 @@ public class Ui : IUi
         
         _uiMeshTop.GenerateBuffers(silkGlContext);
         
-        /*// Bottom
+        // Bottom
         var bottomPanelRelativeHeight = RendererConstants.UiBottomPanelHeight / (float)uiHeight;
-        _uiMeshTop = _rectangleGenerator.GenerateRectangle(
-            new PlanarPoint3D(0.0f, bottomPanelRelativeHeight, 0.0f),
-            new PlanarPoint2D(0.0f, bottomPanelRelativeHeight),
-            new PlanarPoint3D(1.0f, 0.0f, 0.0f),
+        _uiMeshBottom = _rectangleGenerator.GenerateRectangle(
+            new PlanarPoint3D(0.0f, 1.0f, 0.0f),
+            new PlanarPoint2D(0.0f, 1.0f),
+            new PlanarPoint3D(1.0f, 1.0f - bottomPanelRelativeHeight, 0.0f),
             new PlanarPoint2D(1.0f, 0.0f));
         
-        _uiMeshTop.GenerateBuffers(silkGlContext);*/
+        _uiMeshBottom.GenerateBuffers(silkGlContext);
         
         _uiShader = new Shader(silkGlContext, @"Resources/Shaders/ui_shader.vert", @"Resources/Shaders/ui_shader.frag");
         
@@ -98,6 +98,15 @@ public class Ui : IUi
             
             _uiTextureTop = new Texture(silkGlContext, uiTopPanelImage);    
         }
+        
+        // Bottom
+        using (var uiBottomPanelImage = new MagickImage(RendererConstants.UiPanelsBackgroundColor, uiWidth, RendererConstants.UiBottomPanelHeight))
+        {
+            // FPS
+            _textDrawer.DrawText(uiBottomPanelImage, RendererConstants.UiFontSize, RendererConstants.UiTextColor,  new PlanarPoint2D(0, 30), $"Mouse coordinates will be here");
+            
+            _uiTextureBottom = new Texture(silkGlContext, uiBottomPanelImage);    
+        }
     }
 
     public unsafe void DrawUi(GL silkGlContext, int uiWidth, int uiHeight, UiData uiData)
@@ -118,5 +127,9 @@ public class Ui : IUi
         _uiMeshTop.BindBuffers(silkGlContext);
         _uiTextureTop.Bind();
         silkGlContext.DrawElements(PrimitiveType.Triangles, (uint)_uiMeshTop.Indices.Count, DrawElementsType.UnsignedInt, null);
+        
+        _uiMeshBottom.BindBuffers(silkGlContext);
+        _uiTextureBottom.Bind();
+        silkGlContext.DrawElements(PrimitiveType.Triangles, (uint)_uiMeshBottom.Indices.Count, DrawElementsType.UnsignedInt, null);
     }
 }
