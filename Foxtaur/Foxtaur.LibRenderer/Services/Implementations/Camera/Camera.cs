@@ -211,8 +211,7 @@ public class Camera : ICamera
     /// </summary>
     private void CalculateMatrices()
     {
-        ModelMatrix = Matrix4x4.CreateRotationZ(0.0f) * Matrix4x4.CreateRotationY(0.0f) *
-                      Matrix4x4.CreateRotationX(0.0f); // Rotation
+        ModelMatrix = Matrix4x4.CreateRotationZ(0.0f) * Matrix4x4.CreateRotationY(0.0f) * Matrix4x4.CreateRotationX(0.0f); // Rotation
         ViewMatrix = Matrix4x4.CreateLookAt(Position3D.AsVector3(), Target.AsVector3(), Up); // Camera position
         ProjectionMatrix = Matrix4x4.CreatePerspectiveFieldOfView(Zoom, AspectRatio, 0.0005f, 100.0f); // Zoom
 
