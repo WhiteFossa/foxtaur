@@ -13,13 +13,26 @@
         <vm:MainWindowViewModel/>
     </Design.DataContext>
     
-    <Grid ColumnDefinitions="*, Auto" RowDefinitions="*">
+    <Grid ColumnDefinitions="*, Auto" RowDefinitions="*, Auto, Auto">
         
         <!-- Renderer -->
         <renderer:DesktopRenderer Grid.Column="0" Grid.Row="0" />
         
+        <!-- Splitter between renderer and console -->
+        <GridSplitter Grid.Column="0" Grid.Row="1" ResizeDirection="Rows" MaxHeight="300"/>
+        
+        <!-- Console -->
+        <TextBox
+            Grid.Column="0"
+            Grid.Row="2"
+            AcceptsReturn="True"
+            IsReadOnly="True"
+            MaxHeight="300"
+            Text="{Binding ConsoleText}"
+            CaretIndex="{Binding ConsoleCaretIndex}" />
+        
         <!-- Side controls -->
-        <TextBlock Grid.Column="1" Grid.Row="0">
+        <TextBlock Grid.Column="1" Grid.Row="0" Grid.RowSpan="3">
             Yiffy text
         </TextBlock>
         

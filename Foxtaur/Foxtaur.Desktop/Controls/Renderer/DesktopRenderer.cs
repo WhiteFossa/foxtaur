@@ -513,6 +513,8 @@ public class DesktopRenderer : OpenGlControlBase
     /// </summary>
     private GeoPoint GetMouseGeoCoordinates(float x, float y)
     {
+        _logger.Info($"Mouse: X={x}, Y={y}");
+        
         var cameraRay = Ray.CreateByScreenRaycasting(_camera, x, y, _viewportWidth, _viewportHeight);
 
         var intersections = cameraRay.Intersect(_earthSphere);

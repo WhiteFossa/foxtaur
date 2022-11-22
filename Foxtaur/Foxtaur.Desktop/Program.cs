@@ -1,11 +1,14 @@
 ﻿using System;
 using System.IO;
 using Avalonia;
+using Avalonia.Controls;
+using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.ReactiveUI;
 using Foxtaur.Desktop.Controls.Renderer.Abstractions.Generators;
 using Foxtaur.Desktop.Controls.Renderer.Abstractions.UI;
 using Foxtaur.Desktop.Controls.Renderer.Implementations.Generators;
 using Foxtaur.Desktop.Controls.Renderer.Implementations.UI;
+using Foxtaur.Desktop.Logging;
 using Foxtaur.LibRenderer.Services.Abstractions.Camera;
 using Foxtaur.LibRenderer.Services.Abstractions.CoordinateProviders;
 using Foxtaur.LibRenderer.Services.Abstractions.Drawers;
@@ -15,6 +18,7 @@ using Foxtaur.LibRenderer.Services.Implementations.Drawers;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using NLog;
+using NLog.Config;
 using NLog.Extensions.Logging;
 
 namespace Foxtaur.Desktop
@@ -22,7 +26,7 @@ namespace Foxtaur.Desktop
     class Program
     {
         /// <summary>
-        ///     Dependency injection service provider
+        /// Dependency injection service provider
         /// </summary>
         public static ServiceProvider Di { get; set; }
 
@@ -43,6 +47,11 @@ namespace Foxtaur.Desktop
             var configuration = builder.Build();
 
             // Setting-up NLog
+            ConfigurationItemFactory
+                .Default
+                .Targets
+                .RegisterDefinition("ControlLogging", typeof(ControlLoggingTarget));
+            
             LogManager.Configuration = new NLogLoggingConfiguration(configuration.GetSection("NLog"));
 
             BuildAvaloniaApp()
@@ -72,6 +81,16 @@ namespace Foxtaur.Desktop
             services.AddSingleton<IUi, Ui>();
 
             return services;
+        }
+        
+        // Get main window
+        public static Window GetMainWindow()
+        {
+            if (Application.Current.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktopLifetime)
+            {
+                return desktopLifetime.MainWindow;
+            }
+            return null;
         }
     }
 }
