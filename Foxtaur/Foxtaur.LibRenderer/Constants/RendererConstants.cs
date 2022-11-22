@@ -131,4 +131,9 @@ public static class RendererConstants
     public const float UiMouseCoordsTextXPosition = 10;
 
     #endregion
+
+    /// <summary>
+    /// Precision for finding is point on ray
+    /// </summary>
+    public const float TestIsPointOnRayPrecision = 0.00001f;
 }

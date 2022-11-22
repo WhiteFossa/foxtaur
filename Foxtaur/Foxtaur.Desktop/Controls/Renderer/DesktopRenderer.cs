@@ -514,10 +514,6 @@ public class DesktopRenderer : OpenGlControlBase
     private GeoPoint GetMouseGeoCoordinates(float x, float y)
     {
         var cameraRay = Ray.CreateByScreenRaycasting(_camera, x, y, _viewportWidth, _viewportHeight);
-//        var cameraRay = new Ray(new PlanarPoint3D(0, 0.5f, 5), new PlanarPoint3D(0, 0.5f, -100));
-
-        /*_logger.Info("---------------------------------");
-        _logger.Info($"Mouse: X={x}, Y={y}; Ray begin: ({cameraRay.Begin.X}, {cameraRay.Begin.Y}, {cameraRay.Begin.Z}); Ray end: ({cameraRay.End.X}, {cameraRay.End.Y}, {cameraRay.End.Z})");*/
         
         var intersections = cameraRay.Intersect(_earthSphere);
         if (intersections.Count < 2)
@@ -529,9 +525,12 @@ public class DesktopRenderer : OpenGlControlBase
         // Closest to camera intersection
         var closestIntersection = _camera.Position3D.GetClosesPoint(intersections);
 
-        /*_logger.Info($"Closest intersection: ({closestIntersection.X}, {closestIntersection.Y}, {closestIntersection.Z})");
-        _logger.Info("---------------------------------");*/
-        
+        if (!cameraRay.IsPointOnEndSide(closestIntersection))
+        {
+            // Out-of-scene
+            return null;
+        }
+
         return _sphereCoordinatesProvider.Planar3DToGeo(closestIntersection);
     }
     

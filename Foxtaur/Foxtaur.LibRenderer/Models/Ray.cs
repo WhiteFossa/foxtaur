@@ -1,4 +1,5 @@
 using System.Numerics;
+using Foxtaur.LibRenderer.Constants;
 using Foxtaur.LibRenderer.Helpers;
 using Foxtaur.LibRenderer.Services.Abstractions.Camera;
 
@@ -40,6 +41,9 @@ public class Ray
         return new Ray(nearPoint.AsPlanarPoint3D(), farPoint.AsPlanarPoint3D());
     }
 
+    /// <summary>
+    /// Intersect ray with the sphere
+    /// </summary>
     public List<PlanarPoint3D> Intersect(Sphere sphere)
     {
         var p0 = Begin.AsVector3();
@@ -69,5 +73,27 @@ public class Ray
             i0.AsPlanarPoint3D(),
             i1.AsPlanarPoint3D()
         };
+    }
+
+    /// <summary>
+    /// Is point on the End side of line, specified by ray
+    /// </summary>
+    public bool IsPointOnEndSide(PlanarPoint3D point)
+    {
+        var p0 = Begin.AsVector3();
+        var u = Vector3.Normalize(End.AsVector3() - p0);
+
+        var t = (point.AsVector3() - p0) / u;
+
+        var txy = Math.Abs(t.X - t.Y);
+        var tyz = Math.Abs(t.Y - t.Z);
+
+        if (txy > RendererConstants.TestIsPointOnRayPrecision || tyz > RendererConstants.TestIsPointOnRayPrecision)
+        {
+            // Point is not on line, part of what ray is
+            return false;
+        }
+        
+        return t.X >= 0;
     }
 }
