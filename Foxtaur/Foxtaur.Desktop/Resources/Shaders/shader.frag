@@ -10,11 +10,11 @@
 in vec2 fTexCoords;
 
 // Saved texture coordinates
-varying vec2 v_rgbNW;
-varying vec2 v_rgbNE;
-varying vec2 v_rgbSW;
-varying vec2 v_rgbSE;
-varying vec2 v_rgbM;
+in vec2 v_rgbNW;
+in vec2 v_rgbNE;
+in vec2 v_rgbSW;
+in vec2 v_rgbSE;
+in vec2 v_rgbM;
 
 // Texture
 uniform sampler2D ourTexture;
@@ -25,10 +25,8 @@ uniform vec2 resolution;
 // Resulting color
 out vec4 FragColor;
 
-vec4 fxaa(sampler2D tex, vec2 fragCoord, vec2 resolution,
-vec2 v_rgbNW, vec2 v_rgbNE,
-vec2 v_rgbSW, vec2 v_rgbSE,
-vec2 v_rgbM) {
+vec4 fxaa(sampler2D tex, vec2 fragCoord, vec2 resolution, vec2 v_rgbNW, vec2 v_rgbNE, vec2 v_rgbSW, vec2 v_rgbSE, vec2 v_rgbM)
+{
     vec4 color;
     mediump vec2 inverseVP = vec2(1.0 / resolution.x, 1.0 / resolution.y);
     vec3 rgbNW = texture2D(tex, v_rgbNW).xyz;
