@@ -42,54 +42,32 @@ public class Ray
 
     public List<PlanarPoint3D> Intersect(Sphere sphere)
     {
-        var bxex = Begin.X - End.X;
-        var byey = Begin.Y - End.Y;
-        var bzez = Begin.Z - End.Z;
+        var p0 = Begin.AsVector3();
+        var rayDirection = Vector3.Normalize(End.AsVector3() - p0);
+        
+        var k = p0 - sphere.Center.AsVector3();
 
-        var bxeyexby = Begin.X * End.Y - End.X * Begin.Y;
-        var bxezexbz = Begin.X * End.Z - End.X * Begin.Z;
-
-        var a = 1.0f + (float)Math.Pow(byey / bxex, 2) + (float)Math.Pow(bzez / bxex, 2);
-
-        var b = 2.0f * (sphere.Center.X
-                        + byey / bxex * (bxeyexby / bxex - sphere.Center.Y)
-                        + bzez / bxex * (bxezexbz / bxex - sphere.Center.Z));
-
-        var c = (float)Math.Pow(sphere.Center.X, 2)
-                + (float)Math.Pow(bxeyexby / bxex - sphere.Center.Y, 2)
-                + (float)Math.Pow(bxezexbz / bxex - sphere.Center.Z, 2)
-                - sphere.Radius;
-
-        var d = (float)Math.Pow(b, 2) - 4 * a * c;
-
+        var b = Vector3.Dot(k, rayDirection);
+        var c = Vector3.Dot(k, k) - (float)Math.Pow(sphere.Radius, 2);
+        var d = (float)Math.Pow(b, 2) - c; // a = 1 because rayDirection is normalized
+        
         if (d < 0)
         {
             return new List<PlanarPoint3D>();
         }
 
-        var x1 = (-1.0f * b + (float)Math.Sqrt(d)) / (2.0f * a);
-        var x2 = (-1.0f * b - (float)Math.Sqrt(d)) / (2.0f * a);
+        var dSqRt = (float)Math.Sqrt(d);
 
-        var y1 = GetYForSphereIntersection(x1, bxex, byey, bxeyexby);
-        var y2 = GetYForSphereIntersection(x2, bxex, byey, bxeyexby);
+        var t0 = -1.0f * b + dSqRt;
+        var t1 = -1.0f * b - dSqRt;
 
-        var z1 = GetZForSphereIntersection(x1, bxex, bzez, bxezexbz);
-        var z2 = GetZForSphereIntersection(x2, bxex, bzez, bxezexbz);
+        var i0 = p0 + rayDirection * t0;
+        var i1 = p0 + rayDirection * t1;
 
         return new List<PlanarPoint3D>()
         {
-            new(x1, y1, z1),
-            new(x2, y2, z2)
+            i0.AsPlanarPoint3D(),
+            i1.AsPlanarPoint3D()
         };
-    }
-
-    private float GetYForSphereIntersection(float x, float bxex, float byey, float bxeyexby)
-    {
-        return byey / bxex * x + bxeyexby / bxex;
-    }
-
-    private float GetZForSphereIntersection(float x, float bxex, float bzez, float bxezexbz)
-    {
-        return bzez / bxex * x + bxezexbz / bxex;
     }
 }

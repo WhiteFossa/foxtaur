@@ -147,7 +147,7 @@ public class DesktopRenderer : OpenGlControlBase
     
     #endregion
 
-    #region Debug
+    #region FPS
 
     /// <summary>
     /// FPS timer
@@ -165,8 +165,6 @@ public class DesktopRenderer : OpenGlControlBase
 
     private ICoordinatesProvider _sphereCoordinatesProvider = Program.Di.GetService<ISphereCoordinatesProvider>();
     private IEarthGenerator _earthGenerator = Program.Di.GetService<IEarthGenerator>();
-    private IRectangleGenerator _rectangleGenerator = Program.Di.GetService<IRectangleGenerator>();
-    private ITextDrawer _textDrawer = Program.Di.GetService<ITextDrawer>();
     private IUi _ui = Program.Di.GetService<IUi>();
 
     #endregion
@@ -298,7 +296,7 @@ public class DesktopRenderer : OpenGlControlBase
         // Setting shader parameters (fragments)
         _defaultShader.SetUniform1i("ourTexture", 0);
 
-        //_silkGLContext.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Line);
+        //_silkGlContext.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Line);
 
         // Earth
         _earthMesh.BindBuffers(_silkGlContext);
@@ -528,4 +526,33 @@ public class DesktopRenderer : OpenGlControlBase
         var closestIntersection = _camera.Position3D.GetClosesPoint(intersections);
         return _sphereCoordinatesProvider.Planar3DToGeo(closestIntersection);
     }
+    
+    /*/// <summary>
+    /// Draw debug vector
+    /// </summary>
+    private unsafe void DrawDebugVector(GL silkGlContext, PlanarPoint3D startPoint, PlanarPoint3D endPoint)
+    {
+        var mesh = new Mesh();
+        mesh.AddVertex(new PlanarPoint3D(startPoint.X - 0.01f, startPoint.Y, startPoint.Z), new PlanarPoint2D(0, 0));
+        mesh.AddVertex(new PlanarPoint3D(startPoint.X + 0.01f, startPoint.Y, startPoint.Z), new PlanarPoint2D(0, 1));
+        
+        mesh.AddVertex(new PlanarPoint3D(endPoint.X - 0.01f, endPoint.Y, endPoint.Z), new PlanarPoint2D(1, 0));
+        mesh.AddVertex(new PlanarPoint3D(endPoint.X + 0.01f, endPoint.Y, endPoint.Z), new PlanarPoint2D(1, 1));
+        
+        mesh.AddIndex(0);
+        mesh.AddIndex(1);
+        mesh.AddIndex(2);
+        
+        mesh.AddIndex(2);
+        mesh.AddIndex(3);
+        mesh.AddIndex(1);
+        
+        mesh.GenerateBuffers(silkGlContext);
+        
+        mesh.BindBuffers(silkGlContext);
+        
+        silkGlContext.DrawElements(PrimitiveType.Triangles, (uint)mesh.Indices.Count, DrawElementsType.UnsignedInt, null);
+        
+        mesh.Dispose();
+    }*/
 }
