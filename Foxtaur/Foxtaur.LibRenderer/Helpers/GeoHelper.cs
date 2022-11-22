@@ -8,7 +8,7 @@ public static class GeoHelper
     /// <summary>
     /// Radians to degrees string (sign is discarded)
     /// </summary>
-    public static string ToDegreesStringSignless(this float radians)
+    public static string ToDegreesStringSignless(this float radians, bool isLat)
     {
         var degreesRaw = Math.Abs(radians * 180.0f / (float)Math.PI);
 
@@ -20,7 +20,7 @@ public static class GeoHelper
 
         var seconds = 60.0f * (minutesRaw - minutes);
         
-        return $"{ degrees }° { minutes }' { seconds }''";
+        return isLat ? $"{degrees:00}° {minutes:00}' {seconds:00}''" : $"{degrees:000}° {minutes:00}' {seconds:00}''";
     }
 
     /// <summary>
@@ -30,7 +30,7 @@ public static class GeoHelper
     {
         var postfix = lat >= 0 ? "N" : "S";
 
-        return $"{ lat.ToDegreesStringSignless() }{postfix}";
+        return $"{ lat.ToDegreesStringSignless(true) }{postfix}";
     }
     
     /// <summary>
@@ -40,6 +40,6 @@ public static class GeoHelper
     {
         var postfix = lon >= 0 ? "W" : "E";
 
-        return $"{ lon.ToDegreesStringSignless() }{postfix}";
+        return $"{ lon.ToDegreesStringSignless(false) }{postfix}";
     }
 }
