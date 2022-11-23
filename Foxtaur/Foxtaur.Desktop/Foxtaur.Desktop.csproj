@@ -39,6 +39,9 @@
         <None Update="Resources\DEMs\30n000e_20101117_gmted_mea075_scaled.tif">
           <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </None>
+        <None Update="Resources\DEMs\30n000e_20101117_gmted_mea075.tif">
+          <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
     </ItemGroup>
     <ItemGroup>
         <!--This helps with theme dll-s trimming.

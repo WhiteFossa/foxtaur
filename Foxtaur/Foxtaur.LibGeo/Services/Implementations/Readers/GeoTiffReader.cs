@@ -49,7 +49,7 @@ public class GeoTiffReader : IGeoTiffReader
         
         // Allocating buffer spaces
         var firstBandPixelDataType = _dataset.GetRasterBand(1).DataType;
-        for (var band = 2; band < _dataset.RasterCount; band++)
+        for (var band = 2; band <= _dataset.RasterCount; band++)
         {
             if (_dataset.GetRasterBand(band).DataType != firstBandPixelDataType)
             {
@@ -116,18 +116,19 @@ public class GeoTiffReader : IGeoTiffReader
             throw new ArgumentException("Incorrect coordinates");
         }
         
-        var position = _bytesPerPixel * (y * _dataset.RasterXSize + x);
         var bandIndex = band - 1;
         if (_bytesPerPixel == 1)
         {
-            return _rasters[bandIndex][position];
+            return _rasters[bandIndex][y * _dataset.RasterXSize + x] / 255.0f;
         }
         else if (_bytesPerPixel == 2)
         {
-            var higherByte = _rasters[bandIndex][position];
-            var lowerByte = _rasters[bandIndex][position + 1];
+            var baseIndex = y * _dataset.RasterXSize + x;
+            
+            var higherByte = _rasters[bandIndex][baseIndex + _dataset.RasterXSize];
+            var lowerByte = _rasters[bandIndex][baseIndex + x];
 
-            return higherByte * 256 + lowerByte;
+            return (higherByte * 256 + lowerByte) / 65535.0f;
         }
         else
         {

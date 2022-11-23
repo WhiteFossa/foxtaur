@@ -13,7 +13,7 @@ public interface IGeoTiffReader
     void Open(string path);
 
     /// <summary>
-    /// Get pixel by planar coordinates
+    /// Get pixel by planar coordinates. Result is normalized to [0; 1]
     /// </summary>
     float GetPixel(int band, int x, int y);
 
