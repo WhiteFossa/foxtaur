@@ -1,4 +1,5 @@
 using System.Numerics;
+using Foxtaur.LibGeo.Constants;
 using Foxtaur.LibGeo.Models;
 using Foxtaur.LibGeo.Services.Abstractions.CoordinateProviders;
 using Foxtaur.LibGeo.Services.Implementations.CoordinateProviders;
@@ -82,9 +83,9 @@ public class Camera : ICamera
 
         set
         {
-            if (value < RendererConstants.EarthRadius)
+            if (value < GeoConstants.EarthRadius)
             {
-                _h = RendererConstants.EarthRadius;
+                _h = GeoConstants.EarthRadius;
             }
 
             _h = value;

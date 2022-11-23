@@ -1,3 +1,4 @@
+using Foxtaur.LibGeo.Constants;
 using ImageMagick;
 
 namespace Foxtaur.LibRenderer.Constants;
@@ -7,11 +8,6 @@ namespace Foxtaur.LibRenderer.Constants;
 /// </summary>
 public static class RendererConstants
 {
-    /// <summary>
-    ///     Earth radius (in 3D coordinates)
-    /// </summary>
-    public const float EarthRadius = 1.0f;
-
     /// <summary>
     /// Camera zoom must be greater than this
     /// </summary>
@@ -35,12 +31,12 @@ public static class RendererConstants
     /// <summary>
     /// Camera orbit height
     /// </summary>
-    public const float CameraOrbitHeight = 2.0f * EarthRadius;
+    public const float CameraOrbitHeight = 2.0f * GeoConstants.EarthRadius;
 
     /// <summary>
     /// Camera height for surface walk mode
     /// </summary>
-    public const float SurfaceModeCameraOrbitHeight = EarthRadius + 0.0005f * EarthRadius;
+    public const float SurfaceModeCameraOrbitHeight = GeoConstants.EarthRadius + 0.0005f * GeoConstants.EarthRadius;
 
     /// <summary>
     /// Head rotation speed (latitudal) in surface run mode

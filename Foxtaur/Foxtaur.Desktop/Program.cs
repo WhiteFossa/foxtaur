@@ -10,7 +10,9 @@ using Foxtaur.Desktop.Controls.Renderer.Implementations.Generators;
 using Foxtaur.Desktop.Controls.Renderer.Implementations.UI;
 using Foxtaur.Desktop.Logging;
 using Foxtaur.LibGeo.Services.Abstractions.CoordinateProviders;
+using Foxtaur.LibGeo.Services.Abstractions.DemProviders;
 using Foxtaur.LibGeo.Services.Implementations.CoordinateProviders;
+using Foxtaur.LibGeo.Services.Implementations.DemProviders;
 using Foxtaur.LibRenderer.Services.Abstractions.Camera;
 using Foxtaur.LibRenderer.Services.Abstractions.Drawers;
 using Foxtaur.LibRenderer.Services.Implementations.Camera;
@@ -79,6 +81,7 @@ namespace Foxtaur.Desktop
             services.AddSingleton<IRectangleGenerator, RectangleGenerator>();
             services.AddSingleton<ITextDrawer, TextDrawer>();
             services.AddSingleton<IUi, Ui>();
+            services.AddSingleton<IDemProvider, DemProvider>();
 
             return services;
         }

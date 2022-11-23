@@ -342,9 +342,7 @@ public class DesktopRenderer : OpenGlControlBase
 
         // Target
         var toNorthVector =
-            _sphereCoordinatesProvider
-                .GeoToPlanar3D(new GeoPoint((float)Math.PI / 2.0f, 0, RendererConstants.EarthRadius)).AsVector3() -
-            _camera.Position3D.AsVector3();
+            _sphereCoordinatesProvider.GeoToPlanar3D(new GeoPoint((float)Math.PI / 2.0f, 0, _camera.H)).AsVector3() - _camera.Position3D.AsVector3();
         var nadirNorthPerpVector =
             Vector3.Cross(nadirVector, toNorthVector); // Perpendicular to nadir vector and north vector
 
