@@ -36,6 +36,9 @@
         <None Update="Resources\Fonts\helvR-100dpi-34.otb">
           <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </None>
+        <None Update="Resources\DEMs\30n000e_20101117_gmted_mea075_scaled.tif">
+          <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
     </ItemGroup>
     <ItemGroup>
         <!--This helps with theme dll-s trimming.

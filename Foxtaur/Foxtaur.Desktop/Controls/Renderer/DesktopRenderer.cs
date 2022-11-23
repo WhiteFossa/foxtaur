@@ -13,11 +13,14 @@ using Foxtaur.LibGeo.Constants;
 using Foxtaur.LibGeo.Helpers;
 using Foxtaur.LibGeo.Models;
 using Foxtaur.LibGeo.Services.Abstractions.CoordinateProviders;
+using Foxtaur.LibGeo.Services.Abstractions.Readers;
+using Foxtaur.LibGeo.Services.Implementations.Readers;
 using Foxtaur.LibRenderer.Constants;
 using Foxtaur.LibRenderer.Helpers;
 using Foxtaur.LibRenderer.Models;
 using Foxtaur.LibRenderer.Models.UI;
 using Foxtaur.LibRenderer.Services.Abstractions.Camera;
+using ImageMagick;
 using Microsoft.Extensions.DependencyInjection;
 using NLog;
 using Silk.NET.OpenGL;
@@ -169,15 +172,20 @@ public class DesktopRenderer : OpenGlControlBase
 
     #endregion
 
+    private IGeoTiffReader _testDem;
+
     /// <summary>
     /// Constructor
     /// </summary>
     public DesktopRenderer()
     {
+        // Debug DEM
+        _testDem = new GeoTiffReader();
+        _testDem.Open(@"Resources/DEMs/30n000e_20101117_gmted_mea075_scaled.tif");
+
         // Generating the Earth
         _earthSphere = _earthGenerator.GenerateEarthSphere();
-        _earthMesh = _earthGenerator.GenerateFullEarth((float)Math.PI / 90.0f);
-
+        _earthMesh = _earthGenerator.GenerateFullEarth((float)Math.PI / 900.0f);
 
         // Creating camera
         _camera.Lat = 0.0f;
@@ -242,8 +250,29 @@ public class DesktopRenderer : OpenGlControlBase
         _defaultShader = new Shader(_silkGlContext, @"Resources/Shaders/shader.vert", @"Resources/Shaders/shader.frag");
 
         // Loading textures
-        _earthTexture = new Texture(_silkGlContext, @"Resources/Textures/Basemaps/NE2_50M_SR_W.jpeg");
+        //_earthTexture = new Texture(_silkGlContext, @"Resources/Textures/Basemaps/NE2_50M_SR_W.jpeg");
         //_earthTexture = new Texture(_silkGLContext, @"Resources/Textures/davydovo.png");
+
+        var demImage = new MagickImage(MagickColors.Black, _testDem.GetWidth(), _testDem.GetHeight());
+        var demPixels = demImage.GetPixels();
+
+        var pixel = new byte[] { 0, 0, 0 };
+        for (var y = 0; y < _testDem.GetHeight(); y++)
+        {
+            for (int x = 0; x < _testDem.GetWidth(); x++)
+            {
+                var pixelValue = (byte)(_testDem.GetPixel(1, x, y) / 255);
+                pixel[0] = pixelValue;
+                pixel[1] = pixelValue;
+                pixel[2] = pixelValue;
+                
+                demPixels.SetPixel(x, y, pixel);
+            }    
+        }
+        
+        demImage.Write("debug.tiff");
+
+        _earthTexture = new Texture(_silkGlContext, demImage);
 
         // UI
         _ui.Initialize(_silkGlContext, _viewportWidth, _viewportHeight,
