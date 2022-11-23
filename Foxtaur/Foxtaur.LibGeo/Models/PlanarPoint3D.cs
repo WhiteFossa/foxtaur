@@ -1,4 +1,4 @@
-namespace Foxtaur.LibRenderer.Models;
+namespace Foxtaur.LibGeo.Models;
 
 /// <summary>
 ///     Point with planar coordinates

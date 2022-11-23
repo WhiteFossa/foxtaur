@@ -1,5 +1,5 @@
 using System.Numerics;
-using Foxtaur.LibRenderer.Models;
+using Foxtaur.LibGeo.Models;
 
 namespace Foxtaur.LibRenderer.Services.Abstractions.Camera;
 

@@ -1,5 +1,5 @@
 using System.Numerics;
-using Foxtaur.LibRenderer.Models;
+using Foxtaur.LibGeo.Models;
 using MathNet.Numerics.LinearAlgebra;
 using NLog;
 
@@ -34,14 +34,6 @@ public static class RendererHelper
     {
         var transformedVector = Vector4.Transform(new Vector4(vector, 1.0f), matrix);
         return transformedVector.ToVector3() / transformedVector.W;
-    }
-
-    /// <summary>
-    /// Vector3 to PlanarPorint3D
-    /// </summary>
-    public static PlanarPoint3D AsPlanarPoint3D(this Vector3 vector)
-    {
-        return new PlanarPoint3D(vector.X, vector.Y, vector.Z);
     }
 
     /// <summary>

@@ -1,4 +1,4 @@
-using Foxtaur.LibRenderer.Models;
+using Foxtaur.LibGeo.Models;
 using ImageMagick;
 
 namespace Foxtaur.LibRenderer.Services.Abstractions.Drawers;
@@ -12,7 +12,7 @@ public interface ITextDrawer
     /// Get width and height of given text
     /// </summary>
     ITypeMetric GetTextBounds(MagickImage image, int size, string text);
-    
+
     /// <summary>
     /// Draw given text on an image
     /// </summary>

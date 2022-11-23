@@ -1,5 +1,5 @@
+using Foxtaur.LibGeo.Models;
 using Foxtaur.LibRenderer.Constants;
-using Foxtaur.LibRenderer.Models;
 using Foxtaur.LibRenderer.Services.Abstractions.Drawers;
 using ImageMagick;
 
@@ -10,7 +10,7 @@ public class TextDrawer : ITextDrawer
     public ITypeMetric GetTextBounds(MagickImage image, int size, string text)
     {
         _ = image ?? throw new ArgumentNullException(nameof(image));
-        
+
         image.Settings.FontPointsize = size;
         return image.FontTypeMetrics(text);
     }
@@ -22,7 +22,7 @@ public class TextDrawer : ITextDrawer
         _ = origin ?? throw new ArgumentNullException(nameof(origin));
 
         image.Settings.Font = RendererConstants.UiFontPath;
-        
+
         new Drawables()
             .FontPointSize(RendererConstants.UiFontSize)
             //.Font(RendererConstants.UiFontPath) // DO NOT USE IT. Allows only font names 

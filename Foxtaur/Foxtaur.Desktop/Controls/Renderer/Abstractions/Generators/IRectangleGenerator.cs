@@ -1,4 +1,4 @@
-using Foxtaur.LibRenderer.Models;
+using Foxtaur.LibGeo.Models;
 
 namespace Foxtaur.Desktop.Controls.Renderer.Abstractions.Generators;
 

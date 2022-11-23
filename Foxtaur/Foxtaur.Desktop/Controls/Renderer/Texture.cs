@@ -20,7 +20,7 @@ public class Texture : IDisposable
 
         _handle = this._silkGl.GenTexture();
         Bind();
-        
+
         using (var img = new MagickImage(path))
         {
             fixed (void* pixels = img.GetPixels().ToByteArray(PixelMapping.RGBA))
@@ -33,20 +33,20 @@ public class Texture : IDisposable
                     0,
                     PixelFormat.Rgba,
                     PixelType.UnsignedByte,
-                    pixels);    
+                    pixels);
             }
         }
 
         SetParameters();
     }
-    
+
     public unsafe Texture(GL silkGl, MagickImage image)
     {
         _silkGl = silkGl ?? throw new ArgumentNullException(nameof(silkGl));
-        
+
         _handle = this._silkGl.GenTexture();
         Bind();
-        
+
         fixed (void* pixels = image.GetPixels().ToByteArray(PixelMapping.RGBA))
         {
             _silkGl.TexImage2D(TextureTarget.Texture2D,
@@ -57,7 +57,7 @@ public class Texture : IDisposable
                 0,
                 PixelFormat.Rgba,
                 PixelType.UnsignedByte,
-                pixels);    
+                pixels);
         }
 
         SetParameters();

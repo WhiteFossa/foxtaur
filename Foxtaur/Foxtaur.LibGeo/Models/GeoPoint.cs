@@ -1,6 +1,6 @@
-using Foxtaur.LibRenderer.Constants;
+using Foxtaur.LibGeo.Constants;
 
-namespace Foxtaur.LibRenderer.Models;
+namespace Foxtaur.LibGeo.Models;
 
 /// <summary>
 ///     Geo point (always 3D - lat, lon, h)
@@ -24,12 +24,12 @@ public class GeoPoint
 
     public GeoPoint(float lat, float lon, float h)
     {
-        if (lat < RendererConstants.MinLat || lat > RendererConstants.MaxLat)
+        if (lat < GeoConstants.MinLat || lat > GeoConstants.MaxLat)
         {
             throw new ArgumentException(nameof(lat));
         }
 
-        if (lon < RendererConstants.MinLon || lat > RendererConstants.MaxLon)
+        if (lon < GeoConstants.MinLon || lat > GeoConstants.MaxLon)
         {
             throw new ArgumentException(nameof(lon));
         }
@@ -46,13 +46,13 @@ public class GeoPoint
     {
         var result = lat + delta;
 
-        if (result > RendererConstants.MaxLat)
+        if (result > GeoConstants.MaxLat)
         {
-            result = 2 * RendererConstants.MaxLat - result;
+            result = 2 * GeoConstants.MaxLat - result;
         }
-        else if (result < RendererConstants.MinLat)
+        else if (result < GeoConstants.MinLat)
         {
-            result = result + 2 * RendererConstants.MaxLat;
+            result = result + 2 * GeoConstants.MaxLat;
         }
 
         return result;
