@@ -18,6 +18,11 @@ public class GeoTiffReader : IGeoTiffReader
     /// BYTES per pixel
     /// </summary>
     private int _bytesPerPixel;
+
+    /// <summary>
+    /// Pixel type
+    /// </summary>
+    private DataType _pixelType;
     
     /// <summary>
     /// Size of one raster in bytes
@@ -48,20 +53,20 @@ public class GeoTiffReader : IGeoTiffReader
         _ = driver ?? throw new InvalidOperationException($"Can't get driver for { path }");
         
         // Allocating buffer spaces
-        var firstBandPixelDataType = _dataset.GetRasterBand(1).DataType;
+        _pixelType = _dataset.GetRasterBand(1).DataType;
         for (var band = 2; band <= _dataset.RasterCount; band++)
         {
-            if (_dataset.GetRasterBand(band).DataType != firstBandPixelDataType)
+            if (_dataset.GetRasterBand(band).DataType != _pixelType)
             {
                 throw new NotSupportedException("All bands have to be of the same type");
             }
         }
 
-        if (firstBandPixelDataType == DataType.GDT_Byte)
+        if (_pixelType == DataType.GDT_Byte)
         {
             _bytesPerPixel = 1;
         }
-        else if (firstBandPixelDataType == DataType.GDT_Int16)
+        else if (_pixelType == DataType.GDT_Int16)
         {
             _bytesPerPixel = 2;
         }
@@ -86,7 +91,7 @@ public class GeoTiffReader : IGeoTiffReader
         }
     }
 
-    private void LoadBand(int band)
+    private unsafe void LoadBand(int band)
     {
         if (band < 0 || band > _dataset.RasterCount)
         {
@@ -95,7 +100,22 @@ public class GeoTiffReader : IGeoTiffReader
         
         var dataBand = _dataset.GetRasterBand(band);
         var effectiveBand = band - 1;
-        var result = dataBand.ReadRaster(0, 0, _dataset.RasterXSize, _dataset.RasterYSize, _rasters[effectiveBand], _dataset.RasterXSize, _dataset.RasterYSize, 0, 0);
+
+        CPLErr result;
+        fixed (void* bufferPtr = _rasters[effectiveBand])
+        {
+            result = dataBand.ReadRaster(0,
+                0,
+                _dataset.RasterXSize,
+                _dataset.RasterYSize,
+                (IntPtr)bufferPtr,
+                _dataset.RasterXSize,
+                _dataset.RasterYSize,
+                DataType.GDT_Int16,
+                0,
+                0);    
+        }
+        
         if (result != CPLErr.CE_None)
         {
             throw new InvalidOperationException($"Failed to read band { band }");
@@ -119,16 +139,18 @@ public class GeoTiffReader : IGeoTiffReader
         var bandIndex = band - 1;
         if (_bytesPerPixel == 1)
         {
-            return _rasters[bandIndex][y * _dataset.RasterXSize + x] / 255.0f;
+            return _rasters[bandIndex][y * _dataset.RasterXSize + x] / (float)byte.MaxValue;
         }
         else if (_bytesPerPixel == 2)
         {
-            var baseIndex = y * _dataset.RasterXSize + x;
+            var baseIndex = 2 * (y * _dataset.RasterXSize + x);
             
-            var higherByte = _rasters[bandIndex][baseIndex + _dataset.RasterXSize];
-            var lowerByte = _rasters[bandIndex][baseIndex + x];
+            var higherByte = _rasters[bandIndex][baseIndex + 1];
+            var lowerByte = _rasters[bandIndex][baseIndex];
 
-            return (higherByte * 256 + lowerByte) / 65535.0f;
+            var result = BitConverter.ToInt16(new byte[] { lowerByte, higherByte }, 0) / (float)Int16.MaxValue;
+
+            return result;
         }
         else
         {

@@ -261,7 +261,7 @@ public class DesktopRenderer : OpenGlControlBase
         {
             for (int x = 0; x < _testDem.GetWidth(); x++)
             {
-                var pixelValue = (byte)(255 * _testDem.GetPixel(1, x, y));
+                var pixelValue = (byte)(2048 * _testDem.GetPixel(1, x, y));
                 pixel[0] = pixelValue;
                 pixel[1] = pixelValue;
                 pixel[2] = pixelValue;
@@ -271,7 +271,7 @@ public class DesktopRenderer : OpenGlControlBase
         }
         
         demImage.Write("debug.tiff");
-
+        
         _earthTexture = new Texture(_silkGlContext, demImage);
 
         // UI
