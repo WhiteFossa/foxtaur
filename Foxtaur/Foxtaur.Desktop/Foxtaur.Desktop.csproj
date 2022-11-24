@@ -24,9 +24,6 @@
         <None Update="Resources\Textures\Basemaps\NE2_50M_SR_W.jpeg">
           <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </None>
-        <None Update="Resources\Textures\ProtoUI.png">
-          <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-        </None>
         <None Update="Resources\Shaders\ui_shader.vert">
           <CopyToOutputDirectory>Always</CopyToOutputDirectory>
         </None>
@@ -37,9 +34,6 @@
           <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </None>
         <None Update="Resources\DEMs\30n000e_20101117_gmted_mea075_scaled.tif">
-          <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-        </None>
-        <None Update="Resources\DEMs\30n000e_20101117_gmted_mea075.tif">
           <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </None>
     </ItemGroup>
