@@ -12,8 +12,4 @@
       <ProjectReference Include="..\Foxtaur.LibResources\Foxtaur.LibResources.csproj" />
     </ItemGroup>
 
-    <ItemGroup>
-      <Folder Include="Services\Implementations\Readers" />
-    </ItemGroup>
-
 </Project>

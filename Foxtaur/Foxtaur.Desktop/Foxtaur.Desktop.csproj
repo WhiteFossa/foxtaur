@@ -48,6 +48,18 @@
         <None Update="Resources\DEMs\30n090e_20101117_gmted_mea075_lowres.tif">
           <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </None>
+        <None Update="Resources\DEMs\30n120e_20101117_gmted_mea075_lowres.tif">
+          <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
+        <None Update="Resources\DEMs\30n150e_20101117_gmted_mea075_lowres.tif">
+          <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
+        <None Update="Resources\DEMs\30n180w_20101117_gmted_mea075_lowres.tif">
+          <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
+        <None Update="Resources\DEMs\30n150w_20101117_gmted_mea075_lowres.tif">
+          <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
     </ItemGroup>
     <ItemGroup>
         <!--This helps with theme dll-s trimming.

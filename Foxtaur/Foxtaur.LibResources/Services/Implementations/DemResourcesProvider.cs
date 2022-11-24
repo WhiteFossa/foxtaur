@@ -16,39 +16,67 @@ public class DemResourcesProvider : IFragmentedResourcesProvider
         _fragments = new List<DemFragment>();
 
         // 30N-50N stripe
-        _fragments.Add(new DemFragment(50.0f.ToRadians(),
-            30.0f.ToRadians(),
-            -30.0f.ToRadians(),
-            0.0f.ToRadians(),
+        _fragments.Add(new DemFragment(49.999861111f.ToRadians(),
+            29.999861111f.ToRadians(),
+            -30.000138889f.ToRadians(),
+            -0.000138889f.ToRadians(),
             "30n030w_20101117_gmted_mea075_lowres.tif",
             true));
         
-        _fragments.Add(new DemFragment(50.0f.ToRadians(),
-            30.0f.ToRadians(),
-            0.0f.ToRadians(),
-            30.0f.ToRadians(),
+        _fragments.Add(new DemFragment(49.999861111f.ToRadians(),
+            29.999861111f.ToRadians(),
+            -0.000138889f.ToRadians(),
+            29.999861111f.ToRadians(),
             "30n000e_20101117_gmted_mea075_lowres.tif",
             true));
         
-        _fragments.Add(new DemFragment(50.0f.ToRadians(),
-            30.0f.ToRadians(),
-            30.0f.ToRadians(),
-            60.0f.ToRadians(),
+        _fragments.Add(new DemFragment(49.999861111f.ToRadians(),
+            29.999861111f.ToRadians(),
+            29.999861111f.ToRadians(),
+            59.999861111f.ToRadians(),
             "30n030e_20101117_gmted_mea075_lowres.tif",
             true));
         
-        _fragments.Add(new DemFragment(50.0f.ToRadians(),
-            30.0f.ToRadians(),
-            60.0f.ToRadians(),
-            90.0f.ToRadians(),
+        _fragments.Add(new DemFragment(49.999861111f.ToRadians(),
+            29.999861111f.ToRadians(),
+            59.999861111f.ToRadians(),
+            89.999861111f.ToRadians(),
             "30n060e_20101117_gmted_mea075_lowres.tif",
             true));
         
-        _fragments.Add(new DemFragment(50.0f.ToRadians(),
-            30.0f.ToRadians(),
-            90.0f.ToRadians(),
-            120.0f.ToRadians(),
+        _fragments.Add(new DemFragment(49.999861111f.ToRadians(),
+            29.999861111f.ToRadians(),
+            89.999861111f.ToRadians(),
+            119.999861111f.ToRadians(),
             "30n090e_20101117_gmted_mea075_lowres.tif",
+            true));
+        
+        _fragments.Add(new DemFragment(49.999861111f.ToRadians(),
+            29.999861111f.ToRadians(),
+            119.999861111f.ToRadians(),
+            149.999861111f.ToRadians(),
+            "30n120e_20101117_gmted_mea075_lowres.tif",
+            true));
+        
+        _fragments.Add(new DemFragment(49.999861111f.ToRadians(),
+            29.999861111f.ToRadians(),
+            149.999861111f.ToRadians(),
+            179.999861111f.ToRadians(),
+            "30n150e_20101117_gmted_mea075_lowres.tif",
+            true));
+        
+        _fragments.Add(new DemFragment(49.999861111f.ToRadians(),
+            29.999861111f.ToRadians(),
+            -180.000138889f.ToRadians(),
+            -150.000138889f.ToRadians(),
+            "30n180w_20101117_gmted_mea075_lowres.tif",
+            true));
+        
+        _fragments.Add(new DemFragment(49.999861111f.ToRadians(),
+            29.999861111f.ToRadians(),
+            -150.000138889f.ToRadians(),
+            -120.000138889f.ToRadians(),
+            "30n150w_20101117_gmted_mea075_lowres.tif",
             true));
     }
 
