@@ -33,9 +33,6 @@
         <None Update="Resources\Fonts\helvR-100dpi-34.otb">
           <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </None>
-        <None Update="Resources\DEMs\GMTED2010\LowResolution\30n000e_20101117_gmted_mea075_lowres.tif">
-          <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-        </None>
         <None Update="Resources\DEMs\GMTED2010\LowResolution\30n030e_20101117_gmted_mea075_lowres.tif">
           <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </None>
@@ -67,6 +64,9 @@
           <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </None>
         <None Update="Resources\DEMs\GMTED2010\LowResolution\30n180w_20101117_gmted_mea075_lowres.tif">
+          <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
+        <None Update="Resources\DEMs\GMTED2010\LowResolution\30n000e_20101117_gmted_mea075_lowres.tif">
           <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </None>
     </ItemGroup>
