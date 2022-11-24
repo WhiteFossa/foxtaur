@@ -13,14 +13,11 @@ using Foxtaur.LibGeo.Constants;
 using Foxtaur.LibGeo.Helpers;
 using Foxtaur.LibGeo.Models;
 using Foxtaur.LibGeo.Services.Abstractions.CoordinateProviders;
-using Foxtaur.LibGeo.Services.Abstractions.Readers;
-using Foxtaur.LibGeo.Services.Implementations.Readers;
 using Foxtaur.LibRenderer.Constants;
 using Foxtaur.LibRenderer.Helpers;
 using Foxtaur.LibRenderer.Models;
 using Foxtaur.LibRenderer.Models.UI;
 using Foxtaur.LibRenderer.Services.Abstractions.Camera;
-using ImageMagick;
 using Microsoft.Extensions.DependencyInjection;
 using NLog;
 using Silk.NET.OpenGL;
@@ -344,7 +341,8 @@ public class DesktopRenderer : OpenGlControlBase
 
         // Target
         var toNorthVector =
-            _sphereCoordinatesProvider.GeoToPlanar3D(new GeoPoint((float)Math.PI / 2.0f, 0, _camera.H)).AsVector3() - _camera.Position3D.AsVector3();
+            _sphereCoordinatesProvider.GeoToPlanar3D(new GeoPoint((float)Math.PI / 2.0f, 0, _camera.H)).AsVector3() -
+            _camera.Position3D.AsVector3();
         var nadirNorthPerpVector =
             Vector3.Cross(nadirVector, toNorthVector); // Perpendicular to nadir vector and north vector
 

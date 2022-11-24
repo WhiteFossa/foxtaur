@@ -11,7 +11,7 @@ public static class GeoConstants
     ///     Earth radius (in 3D coordinates)
     /// </summary>
     public const float EarthRadius = 1.0f;
-    
+
     /// <summary>
     ///     Add this delta to coordinates check to avoid exceptions in case of non-precise calculations (planar coordinates)
     /// </summary>

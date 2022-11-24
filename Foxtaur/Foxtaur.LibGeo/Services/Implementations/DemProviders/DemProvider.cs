@@ -1,24 +1,34 @@
 using Foxtaur.LibGeo.Constants;
-using Foxtaur.LibGeo.Models;
 using Foxtaur.LibGeo.Services.Abstractions.DemProviders;
-using Foxtaur.LibGeo.Services.Abstractions.Readers;
-using Foxtaur.LibGeo.Services.Implementations.Readers;
+using Foxtaur.LibResources.Models;
+using Foxtaur.LibResources.Services.Abstractions;
+using Foxtaur.LibResources.Services.Implementations;
 
 namespace Foxtaur.LibGeo.Services.Implementations.DemProviders;
 
 public class DemProvider : IDemProvider
 {
-    private IGeoTiffReader _demReader;
+    private IFragmentedResourcesProvider _demResourcesProvider;
 
     public DemProvider()
     {
-        _demReader = new GeoTiffReader();
-        _demReader.Open(@"Resources/DEMs/30n000e_20101117_gmted_mea075_scaled.tif");
+        _demResourcesProvider = new DemResourcesProvider();
     }
-    
+
     public float GetSurfaceAltitude(float lat, float lon)
     {
-        var h = _demReader.GetPixel(1, new GeoPoint(lat, lon, 0));
+        // Searching for fragment
+        var fragment = _demResourcesProvider.GetResource(lat, lon) as DemFragment;
+        if (fragment == null)
+        {
+            // We don't have DEM for this coordinates at all
+            return GeoConstants.EarthRadius;
+        }
+
+        // TODO: Move this into threads pool
+        Task.WaitAll(fragment.DownloadAsync());
+
+        var h = fragment.GetHeight(lat, lon);
         if (h == null)
         {
             return GeoConstants.EarthRadius;

@@ -87,7 +87,7 @@ public class EarthGenerator : IEarthGenerator
         // Geopoints
         var altitude0 = _demProvider.GetSurfaceAltitude(p0Lat, p0Lon);
         var geoPoint0 = new GeoPoint(p0Lat, p0Lon, altitude0);
-        
+
         var altitude1 = _demProvider.GetSurfaceAltitude(p1Lat, p1Lon);
         var geoPoint1 = new GeoPoint(p1Lat, p1Lon, altitude1);
 

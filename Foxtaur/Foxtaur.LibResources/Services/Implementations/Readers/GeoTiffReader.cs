@@ -1,9 +1,8 @@
-using Foxtaur.LibGeo.Helpers;
-using Foxtaur.LibGeo.Models;
-using Foxtaur.LibGeo.Services.Abstractions.Readers;
+using Foxtaur.Helpers;
+using Foxtaur.LibResources.Services.Abstractions.Readers;
 using OSGeo.GDAL;
 
-namespace Foxtaur.LibGeo.Services.Implementations.Readers;
+namespace Foxtaur.LibResources.Services.Implementations.Readers;
 
 /// <summary>
 ///  GeoTIFF reader
@@ -189,13 +188,13 @@ public class GeoTiffReader : IGeoTiffReader
         return _dataset.RasterYSize;
     }
 
-    public float? GetPixel(int band, GeoPoint coords)
+    public float? GetPixelByGeoCoords(int band, float lat, float lon)
     {
-        var lat = coords.Lat.ToDegrees();
-        var lon = coords.Lon.ToDegrees();
+        var latDegrees = lat.ToDegrees();
+        var lonDegrees = lon.ToDegrees();
 
-        var y = (lat - _geoCoefficients[3] + _geoK3 - _geoK1 * lon) / _geoK2;
-        var x = lon / _geoCoefficients[1] - _geoK4 - _geoK5 * y;
+        var y = (latDegrees - _geoCoefficients[3] + _geoK3 - _geoK1 * lonDegrees) / _geoK2;
+        var x = lonDegrees / _geoCoefficients[1] - _geoK4 - _geoK5 * y;
 
         if (x < 0 || y < 0 || x > _dataset.RasterXSize - 1 || y > _dataset.RasterYSize - 1)
         {

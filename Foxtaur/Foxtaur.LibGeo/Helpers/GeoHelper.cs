@@ -1,4 +1,5 @@
 using System.Numerics;
+using Foxtaur.Helpers;
 using Foxtaur.LibGeo.Models;
 
 namespace Foxtaur.LibGeo.Helpers;
@@ -8,14 +9,6 @@ namespace Foxtaur.LibGeo.Helpers;
 /// </summary>
 public static class GeoHelper
 {
-    /// <summary>
-    /// Radians to degrees
-    /// </summary>
-    public static float ToDegrees(this float radians)
-    {
-        return radians * 180.0f / (float)Math.PI;
-    }
-    
     /// <summary>
     /// Radians to degrees string (sign is discarded)
     /// </summary>
