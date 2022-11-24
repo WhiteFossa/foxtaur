@@ -99,6 +99,56 @@ public class DemResourcesProvider : IFragmentedResourcesProvider
             -0.000138889f.ToRadians(),
             "30n030w_20101117_gmted_mea075_lowres.tif",
             true));
+        
+        // 50N-70N stripe
+        _fragments.Add(new DemFragment(69.999861111f.ToRadians(),
+            49.999861111f.ToRadians(),
+            -0.000138889f.ToRadians(),
+            29.999861111f.ToRadians(),
+            "50n000e_20101117_gmted_mea075_lowres.tif",
+            true));
+        
+        _fragments.Add(new DemFragment(69.999861111f.ToRadians(),
+            49.999861111f.ToRadians(),
+            29.999861111f.ToRadians(),
+            59.999861111f.ToRadians(),
+            "50n030e_20101117_gmted_mea075_lowres.tif",
+            true));
+        
+        _fragments.Add(new DemFragment(69.999861111f.ToRadians(),
+            49.999861111f.ToRadians(),
+            59.999861111f.ToRadians(),
+            89.999861111f.ToRadians(),
+            "50n060e_20101117_gmted_mea075_lowres.tif",
+            true));
+        
+        _fragments.Add(new DemFragment(69.999861111f.ToRadians(),
+            49.999861111f.ToRadians(),
+            89.999861111f.ToRadians(),
+            119.999861111f.ToRadians(),
+            "50n090e_20101117_gmted_mea075_lowres.tif",
+            true));
+        
+        _fragments.Add(new DemFragment(69.999861111f.ToRadians(),
+            49.999861111f.ToRadians(),
+            119.999861111f.ToRadians(),
+            149.999861111f.ToRadians(),
+            "50n120e_20101117_gmted_mea075_lowres.tif",
+            true));
+        
+        _fragments.Add(new DemFragment(69.999861111f.ToRadians(),
+            49.999861111f.ToRadians(),
+            149.999861111f.ToRadians(),
+            179.999861111f.ToRadians(),
+            "50n150e_20101117_gmted_mea075_lowres.tif",
+            true));
+        
+        _fragments.Add(new DemFragment(69.999861111f.ToRadians(),
+            49.999861111f.ToRadians(),
+            -180.000138889f.ToRadians(),
+            -150.000138889f.ToRadians(),
+            "50n180w_20101117_gmted_mea075_lowres.tif",
+            true));
     }
 
     public FragmentedResourceBase GetResource(float lat, float lon)
