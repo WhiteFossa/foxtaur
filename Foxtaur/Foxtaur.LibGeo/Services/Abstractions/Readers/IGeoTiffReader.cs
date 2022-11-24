@@ -30,6 +30,7 @@ public interface IGeoTiffReader
 
     /// <summary>
     /// Get pixel by geocoordinates. Height is ignored
+    /// If geocoordinates are outside image will return null
     /// </summary>
-    float GetPixel(int band, GeoPoint coords);
+    float? GetPixel(int band, GeoPoint coords);
 }

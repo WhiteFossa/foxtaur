@@ -1,3 +1,4 @@
+using Foxtaur.LibGeo.Helpers;
 using Foxtaur.LibGeo.Models;
 using Foxtaur.LibGeo.Services.Abstractions.Readers;
 using OSGeo.GDAL;
@@ -23,35 +24,46 @@ public class GeoTiffReader : IGeoTiffReader
     /// Pixel type
     /// </summary>
     private DataType _pixelType;
-    
+
     /// <summary>
     /// Size of one raster in bytes
     /// </summary>
     private int _rasterSize;
-    
+
     /// <summary>
     /// Raster data
     /// </summary>
     private byte[][] _rasters;
-    
+
+    /// <summary>
+    /// Coefficients for geolocation
+    /// </summary>
+    private double[] _geoCoefficients = new double[6];
+
+    private double _geoK1;
+    private double _geoK2;
+    private double _geoK3;
+    private double _geoK4;
+    private double _geoK5;
+
     public GeoTiffReader()
     {
         Gdal.AllRegister(); // Registering GDAL drivers
     }
-    
+
     public void Open(string path)
     {
         if (string.IsNullOrEmpty(path))
         {
             throw new ArgumentException(nameof(path));
         }
-        
+
         _dataset = Gdal.Open(path, Access.GA_ReadOnly);
-        _ = _dataset ?? throw new InvalidOperationException($"Can't open { path }");
-        
+        _ = _dataset ?? throw new InvalidOperationException($"Can't open {path}");
+
         var driver = _dataset.GetDriver();
-        _ = driver ?? throw new InvalidOperationException($"Can't get driver for { path }");
-        
+        _ = driver ?? throw new InvalidOperationException($"Can't get driver for {path}");
+
         // Allocating buffer spaces
         _pixelType = _dataset.GetRasterBand(1).DataType;
         for (var band = 2; band <= _dataset.RasterCount; band++)
@@ -74,7 +86,7 @@ public class GeoTiffReader : IGeoTiffReader
         {
             throw new NotSupportedException("Only byte and int16 datatypes are supported");
         }
-        
+
         _rasterSize = _dataset.RasterXSize * _dataset.RasterYSize * _bytesPerPixel;
 
         _rasters = new byte[_dataset.RasterCount][];
@@ -83,12 +95,21 @@ public class GeoTiffReader : IGeoTiffReader
             var bandIndex = band - 1; // Bands are counted from 1
             _rasters[bandIndex] = new byte[_rasterSize];
         }
-        
+
         // Loading the rasters from all bands
         for (var band = 1; band <= _dataset.RasterCount; band++)
         {
             LoadBand(band);
         }
+
+        // Loading geolocation
+        _dataset.GetGeoTransform(_geoCoefficients);
+
+        _geoK1 = _geoCoefficients[4] / _geoCoefficients[1];
+        _geoK2 = _geoCoefficients[5] - _geoK1 * _geoCoefficients[2];
+        _geoK3 = _geoK1 * _geoCoefficients[0];
+        _geoK4 = _geoCoefficients[0] / _geoCoefficients[1];
+        _geoK5 = _geoCoefficients[2] / _geoCoefficients[1];
     }
 
     private unsafe void LoadBand(int band)
@@ -97,7 +118,7 @@ public class GeoTiffReader : IGeoTiffReader
         {
             throw new ArgumentException(nameof(band));
         }
-        
+
         var dataBand = _dataset.GetRasterBand(band);
         var effectiveBand = band - 1;
 
@@ -113,12 +134,12 @@ public class GeoTiffReader : IGeoTiffReader
                 _dataset.RasterYSize,
                 DataType.GDT_Int16,
                 0,
-                0);    
+                0);
         }
-        
+
         if (result != CPLErr.CE_None)
         {
-            throw new InvalidOperationException($"Failed to read band { band }");
+            throw new InvalidOperationException($"Failed to read band {band}");
         }
     }
 
@@ -135,7 +156,7 @@ public class GeoTiffReader : IGeoTiffReader
         {
             throw new ArgumentException("Incorrect coordinates");
         }
-        
+
         var bandIndex = band - 1;
         if (_bytesPerPixel == 1)
         {
@@ -144,13 +165,11 @@ public class GeoTiffReader : IGeoTiffReader
         else if (_bytesPerPixel == 2)
         {
             var baseIndex = 2 * (y * _dataset.RasterXSize + x);
-            
-            var higherByte = _rasters[bandIndex][baseIndex + 1];
+
             var lowerByte = _rasters[bandIndex][baseIndex];
+            var higherByte = _rasters[bandIndex][baseIndex + 1];
 
-            var result = BitConverter.ToInt16(new byte[] { lowerByte, higherByte }, 0) / (float)Int16.MaxValue;
-
-            return result;
+            return BitConverter.ToInt16(new byte[] { lowerByte, higherByte }, 0) / (float)UInt16.MaxValue + 0.5f;
         }
         else
         {
@@ -170,8 +189,19 @@ public class GeoTiffReader : IGeoTiffReader
         return _dataset.RasterYSize;
     }
 
-    public float GetPixel(int band, GeoPoint coords)
+    public float? GetPixel(int band, GeoPoint coords)
     {
-        throw new NotImplementedException();
+        var lat = coords.Lat.ToDegrees();
+        var lon = -1.0f * coords.Lon.ToDegrees();
+
+        var y = (lat - _geoCoefficients[3] + _geoK3 - _geoK1 * lon) / _geoK2;
+        var x = lon / _geoCoefficients[1] - _geoK4 - _geoK5 * y;
+
+        if (x < 0 || y < 0 || x > _dataset.RasterXSize - 1 || y > _dataset.RasterYSize - 1)
+        {
+            return null;
+        }
+
+        return GetPixel(band, (int)x, (int)y); // TODO: Add bilinear interpolation
     }
 }

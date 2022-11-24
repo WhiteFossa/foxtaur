@@ -261,7 +261,7 @@ public class DesktopRenderer : OpenGlControlBase
         {
             for (int x = 0; x < _testDem.GetWidth(); x++)
             {
-                var pixelValue = (byte)(2048 * _testDem.GetPixel(1, x, y));
+                var pixelValue = (byte)(3000 * (_testDem.GetPixel(1, x, y) - 0.5f));
                 pixel[0] = pixelValue;
                 pixel[1] = pixelValue;
                 pixel[2] = pixelValue;
@@ -270,9 +270,9 @@ public class DesktopRenderer : OpenGlControlBase
             }    
         }
         
-        demImage.Write("debug.tiff");
-        
         _earthTexture = new Texture(_silkGlContext, demImage);
+
+        var testH = _testDem.GetPixel(1, new GeoPoint(0.802851f, -0.331613f, 1.0f));
 
         // UI
         _ui.Initialize(_silkGlContext, _viewportWidth, _viewportHeight,

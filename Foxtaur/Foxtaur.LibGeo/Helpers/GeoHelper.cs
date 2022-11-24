@@ -9,11 +9,19 @@ namespace Foxtaur.LibGeo.Helpers;
 public static class GeoHelper
 {
     /// <summary>
+    /// Radians to degrees
+    /// </summary>
+    public static float ToDegrees(this float radians)
+    {
+        return radians * 180.0f / (float)Math.PI;
+    }
+    
+    /// <summary>
     /// Radians to degrees string (sign is discarded)
     /// </summary>
     public static string ToDegreesStringSignless(this float radians, bool isLat)
     {
-        var degreesRaw = Math.Abs(radians * 180.0f / (float)Math.PI);
+        var degreesRaw = Math.Abs(radians.ToDegrees());
 
         var degrees = (int)degreesRaw;
 
