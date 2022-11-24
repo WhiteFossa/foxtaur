@@ -192,7 +192,7 @@ public class GeoTiffReader : IGeoTiffReader
     public float? GetPixel(int band, GeoPoint coords)
     {
         var lat = coords.Lat.ToDegrees();
-        var lon = -1.0f * coords.Lon.ToDegrees();
+        var lon = coords.Lon.ToDegrees();
 
         var y = (lat - _geoCoefficients[3] + _geoK3 - _geoK1 * lon) / _geoK2;
         var x = lon / _geoCoefficients[1] - _geoK4 - _geoK5 * y;

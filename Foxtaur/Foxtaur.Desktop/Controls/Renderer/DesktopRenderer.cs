@@ -172,17 +172,11 @@ public class DesktopRenderer : OpenGlControlBase
 
     #endregion
 
-    private IGeoTiffReader _testDem;
-
     /// <summary>
     /// Constructor
     /// </summary>
     public DesktopRenderer()
     {
-        // Debug DEM
-        _testDem = new GeoTiffReader();
-        _testDem.Open(@"Resources/DEMs/30n000e_20101117_gmted_mea075_scaled.tif");
-
         // Generating the Earth
         _earthSphere = _earthGenerator.GenerateEarthSphere();
         _earthMesh = _earthGenerator.GenerateFullEarth((float)Math.PI / 900.0f);
@@ -250,29 +244,8 @@ public class DesktopRenderer : OpenGlControlBase
         _defaultShader = new Shader(_silkGlContext, @"Resources/Shaders/shader.vert", @"Resources/Shaders/shader.frag");
 
         // Loading textures
-        //_earthTexture = new Texture(_silkGlContext, @"Resources/Textures/Basemaps/NE2_50M_SR_W.jpeg");
+        _earthTexture = new Texture(_silkGlContext, @"Resources/Textures/Basemaps/NE2_50M_SR_W.jpeg");
         //_earthTexture = new Texture(_silkGLContext, @"Resources/Textures/davydovo.png");
-
-        var demImage = new MagickImage(MagickColors.Black, _testDem.GetWidth(), _testDem.GetHeight());
-        var demPixels = demImage.GetPixels();
-
-        var pixel = new byte[] { 0, 0, 0 };
-        for (var y = 0; y < _testDem.GetHeight(); y++)
-        {
-            for (int x = 0; x < _testDem.GetWidth(); x++)
-            {
-                var pixelValue = (byte)(3000 * (_testDem.GetPixel(1, x, y) - 0.5f));
-                pixel[0] = pixelValue;
-                pixel[1] = pixelValue;
-                pixel[2] = pixelValue;
-                
-                demPixels.SetPixel(x, y, pixel);
-            }    
-        }
-        
-        _earthTexture = new Texture(_silkGlContext, demImage);
-
-        var testH = _testDem.GetPixel(1, new GeoPoint(0.802851f, -0.331613f, 1.0f));
 
         // UI
         _ui.Initialize(_silkGlContext, _viewportWidth, _viewportHeight,
