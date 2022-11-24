@@ -1,18 +1,23 @@
 using System;
 using Foxtaur.Desktop.Controls.Renderer.Abstractions.Generators;
-using Foxtaur.LibRenderer.Constants;
+using Foxtaur.LibGeo.Constants;
+using Foxtaur.LibGeo.Models;
+using Foxtaur.LibGeo.Services.Abstractions.CoordinateProviders;
+using Foxtaur.LibGeo.Services.Abstractions.DemProviders;
 using Foxtaur.LibRenderer.Models;
-using Foxtaur.LibRenderer.Services.Abstractions.CoordinateProviders;
 
 namespace Foxtaur.Desktop.Controls.Renderer.Implementations.Generators;
 
 public class EarthGenerator : IEarthGenerator
 {
     private readonly ISphereCoordinatesProvider _sphereCoordinatesProvider;
+    private readonly IDemProvider _demProvider;
 
-    public EarthGenerator(ISphereCoordinatesProvider sphereCoordinatesProvider)
+    public EarthGenerator(ISphereCoordinatesProvider sphereCoordinatesProvider,
+        IDemProvider demProvider)
     {
         _sphereCoordinatesProvider = sphereCoordinatesProvider;
+        _demProvider = demProvider;
     }
 
     public Mesh GenerateFullEarth(float gridStep)
@@ -48,7 +53,8 @@ public class EarthGenerator : IEarthGenerator
             }
 
             // Two last triangles of a stripe
-            var lastPair = GenerateAndAddPointsPair(earthMesh, lat, -1.0f * (float)Math.PI, latNorther, -1.0f * (float)Math.PI);
+            var lastPair = GenerateAndAddPointsPair(earthMesh, lat, -1.0f * (float)Math.PI, latNorther,
+                -1.0f * (float)Math.PI);
             var i3last0 = lastPair.Item1;
             var i3last1 = lastPair.Item2;
 
@@ -66,7 +72,7 @@ public class EarthGenerator : IEarthGenerator
 
     public Sphere GenerateEarthSphere()
     {
-        return new Sphere(new PlanarPoint3D(0.0f, 0.0f, 0.0f), RendererConstants.EarthRadius);
+        return new Sphere(new PlanarPoint3D(0.0f, 0.0f, 0.0f), GeoConstants.EarthRadius);
     }
 
     /// <summary>
@@ -79,8 +85,11 @@ public class EarthGenerator : IEarthGenerator
         _ = mesh ?? throw new ArgumentNullException(nameof(mesh));
 
         // Geopoints
-        var geoPoint0 = new GeoPoint(p0Lat, p0Lon, RendererConstants.EarthRadius);
-        var geoPoint1 = new GeoPoint(p1Lat, p1Lon, RendererConstants.EarthRadius);
+        var altitude0 = _demProvider.GetSurfaceAltitude(p0Lat, p0Lon);
+        var geoPoint0 = new GeoPoint(p0Lat, p0Lon, altitude0);
+        
+        var altitude1 = _demProvider.GetSurfaceAltitude(p1Lat, p1Lon);
+        var geoPoint1 = new GeoPoint(p1Lat, p1Lon, altitude1);
 
         // Planar coordinates (3D + Texture)
         var p3D0 = _sphereCoordinatesProvider.GeoToPlanar3D(geoPoint0);

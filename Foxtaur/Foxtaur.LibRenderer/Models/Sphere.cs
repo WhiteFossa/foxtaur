@@ -1,3 +1,5 @@
+using Foxtaur.LibGeo.Models;
+
 namespace Foxtaur.LibRenderer.Models;
 
 /// <summary>

@@ -4,6 +4,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Foxtaur.Desktop", "Foxtaur.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Foxtaur.LibRenderer", "Foxtaur.LibRenderer\Foxtaur.LibRenderer.csproj", "{260A599C-392D-4A59-A5C1-904D8EDE3F1F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Foxtaur.LibGeo", "Foxtaur.LibGeo\Foxtaur.LibGeo.csproj", "{F6EEB2E7-C6C6-4584-BA10-97ACDC239C78}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -18,5 +20,9 @@ Global
 		{260A599C-392D-4A59-A5C1-904D8EDE3F1F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{260A599C-392D-4A59-A5C1-904D8EDE3F1F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{260A599C-392D-4A59-A5C1-904D8EDE3F1F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F6EEB2E7-C6C6-4584-BA10-97ACDC239C78}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F6EEB2E7-C6C6-4584-BA10-97ACDC239C78}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F6EEB2E7-C6C6-4584-BA10-97ACDC239C78}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F6EEB2E7-C6C6-4584-BA10-97ACDC239C78}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

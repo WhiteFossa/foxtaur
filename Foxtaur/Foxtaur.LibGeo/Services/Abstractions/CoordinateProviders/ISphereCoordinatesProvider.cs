@@ -1,4 +1,4 @@
-namespace Foxtaur.LibRenderer.Services.Abstractions.CoordinateProviders;
+namespace Foxtaur.LibGeo.Services.Abstractions.CoordinateProviders;
 
 /// <summary>
 /// Sphere coordinates provider

@@ -1,5 +1,5 @@
 using System;
-using System.Diagnostics;
+using System.Drawing;
 using System.Numerics;
 using System.Timers;
 using Avalonia;
@@ -9,18 +9,21 @@ using Avalonia.OpenGL.Controls;
 using Avalonia.Threading;
 using Foxtaur.Desktop.Controls.Renderer.Abstractions.Generators;
 using Foxtaur.Desktop.Controls.Renderer.Abstractions.UI;
+using Foxtaur.LibGeo.Constants;
+using Foxtaur.LibGeo.Helpers;
+using Foxtaur.LibGeo.Models;
+using Foxtaur.LibGeo.Services.Abstractions.CoordinateProviders;
+using Foxtaur.LibGeo.Services.Abstractions.Readers;
+using Foxtaur.LibGeo.Services.Implementations.Readers;
 using Foxtaur.LibRenderer.Constants;
 using Foxtaur.LibRenderer.Helpers;
 using Foxtaur.LibRenderer.Models;
 using Foxtaur.LibRenderer.Models.UI;
 using Foxtaur.LibRenderer.Services.Abstractions.Camera;
-using Foxtaur.LibRenderer.Services.Abstractions.CoordinateProviders;
-using Foxtaur.LibRenderer.Services.Abstractions.Drawers;
 using ImageMagick;
 using Microsoft.Extensions.DependencyInjection;
 using NLog;
 using Silk.NET.OpenGL;
-using Color = System.Drawing.Color;
 
 namespace Foxtaur.Desktop.Controls.Renderer;
 
@@ -144,7 +147,7 @@ public class DesktopRenderer : OpenGlControlBase
     /// UI data
     /// </summary>
     private UiData _uiData;
-    
+
     #endregion
 
     #region FPS
@@ -158,7 +161,7 @@ public class DesktopRenderer : OpenGlControlBase
     /// Times drawn since last OnFpsTimer
     /// </summary>
     private int _framesDrawn = 0;
-    
+
     #endregion
 
     #region DI
@@ -176,9 +179,8 @@ public class DesktopRenderer : OpenGlControlBase
     {
         // Generating the Earth
         _earthSphere = _earthGenerator.GenerateEarthSphere();
-        _earthMesh = _earthGenerator.GenerateFullEarth((float)Math.PI / 90.0f);
-        
-        
+        _earthMesh = _earthGenerator.GenerateFullEarth((float)Math.PI / 900.0f);
+
         // Creating camera
         _camera.Lat = 0.0f;
         _camera.Lon = 0.0f;
@@ -186,7 +188,7 @@ public class DesktopRenderer : OpenGlControlBase
         _camera.Zoom = RendererConstants.CameraMinZoom;
 
         // Targetting camera
-        _camera.Target = RendererConstants.EarthCenter.AsPlanarPoint3D();
+        _camera.Target = GeoConstants.EarthCenter.AsPlanarPoint3D();
 
         // UI
         _uiData = new UiData();
@@ -216,12 +218,12 @@ public class DesktopRenderer : OpenGlControlBase
     private void OnResize(Rect bounds)
     {
         _scaling = (float)VisualRoot.RenderScaling; // TODO: In future we may handle scaling change
-        
+
         _viewportWidth = (int)(bounds.Width * _scaling);
         _viewportHeight = (int)(bounds.Height * _scaling);
-        
+
         _camera.AspectRatio = _viewportWidth / (float)_viewportHeight;
-        
+
         // Marking GUI as requiring re-initialization
         _ui.IsNeedToReinitialize = true;
     }
@@ -244,10 +246,11 @@ public class DesktopRenderer : OpenGlControlBase
         // Loading textures
         _earthTexture = new Texture(_silkGlContext, @"Resources/Textures/Basemaps/NE2_50M_SR_W.jpeg");
         //_earthTexture = new Texture(_silkGLContext, @"Resources/Textures/davydovo.png");
-        
+
         // UI
-        _ui.Initialize(_silkGlContext, _viewportWidth, _viewportHeight, _uiData); // We also need to re-initialize on viewport size change
-        
+        _ui.Initialize(_silkGlContext, _viewportWidth, _viewportHeight,
+            _uiData); // We also need to re-initialize on viewport size change
+
         _fpsTimer = new Timer(1000);
         _fpsTimer.Elapsed += OnFpsTimer;
         _fpsTimer.AutoReset = true;
@@ -270,7 +273,7 @@ public class DesktopRenderer : OpenGlControlBase
         _silkGlContext.ClearColor(Color.Black);
         _silkGlContext.Clear((uint)(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit));
         _silkGlContext.Enable(EnableCap.DepthTest);
-        
+
         // Blending
         _silkGlContext.Enable(EnableCap.Blend);
         _silkGlContext.BlendFunc(GLEnum.SrcAlpha, GLEnum.OneMinusSrcAlpha);
@@ -301,14 +304,15 @@ public class DesktopRenderer : OpenGlControlBase
         // Earth
         _earthMesh.BindBuffers(_silkGlContext);
         _earthTexture.Bind();
-        _silkGlContext.DrawElements(PrimitiveType.Triangles, (uint)_earthMesh.Indices.Count, DrawElementsType.UnsignedInt, null);
-        
+        _silkGlContext.DrawElements(PrimitiveType.Triangles, (uint)_earthMesh.Indices.Count,
+            DrawElementsType.UnsignedInt, null);
+
         // UI
         _ui.DrawUi(_silkGlContext, _viewportWidth, _viewportHeight, _uiData);
-        
+
         // Everything is drawn
         _framesDrawn++;
-        
+
         Dispatcher.UIThread.Post(InvalidateVisual, DispatcherPriority.Background);
     }
 
@@ -318,7 +322,7 @@ public class DesktopRenderer : OpenGlControlBase
     protected override void OnOpenGlDeinit(GlInterface gl, int fb)
     {
         _ui.DeInitialize();
-        
+
         _earthMesh.Dispose();
         _earthTexture.Dispose();
 
@@ -335,12 +339,14 @@ public class DesktopRenderer : OpenGlControlBase
         LimitSurfaceRunViewAngles();
 
         // Up
-        var nadirVector = RendererConstants.EarthCenter - _camera.Position3D.AsVector3();
+        var nadirVector = GeoConstants.EarthCenter - _camera.Position3D.AsVector3();
         _camera.Up = nadirVector;
 
         // Target
-        var toNorthVector = _sphereCoordinatesProvider.GeoToPlanar3D(new GeoPoint((float)Math.PI / 2.0f, 0, RendererConstants.EarthRadius)).AsVector3() - _camera.Position3D.AsVector3();
-        var nadirNorthPerpVector = Vector3.Cross(nadirVector, toNorthVector); // Perpendicular to nadir vector and north vector
+        var toNorthVector =
+            _sphereCoordinatesProvider.GeoToPlanar3D(new GeoPoint((float)Math.PI / 2.0f, 0, _camera.H)).AsVector3() - _camera.Position3D.AsVector3();
+        var nadirNorthPerpVector =
+            Vector3.Cross(nadirVector, toNorthVector); // Perpendicular to nadir vector and north vector
 
         var targetVector = nadirVector.RotateAround(nadirNorthPerpVector, (float)Math.PI / 2.0f);
 
@@ -350,7 +356,8 @@ public class DesktopRenderer : OpenGlControlBase
         // Longitudal view
         targetVector = targetVector.RotateAround(nadirVector, _surfaceRunLonViewAngle);
 
-        _camera.Target = new PlanarPoint3D(targetVector.X + _camera.Position3D.X, targetVector.Y + _camera.Position3D.Y, targetVector.Z + _camera.Position3D.Z);
+        _camera.Target = new PlanarPoint3D(targetVector.X + _camera.Position3D.X, targetVector.Y + _camera.Position3D.Y,
+            targetVector.Z + _camera.Position3D.Z);
     }
 
     /// <summary>
@@ -408,7 +415,7 @@ public class DesktopRenderer : OpenGlControlBase
             else
             {
                 _camera.H = RendererConstants.CameraOrbitHeight;
-                _camera.Target = RendererConstants.EarthCenter.AsPlanarPoint3D();
+                _camera.Target = GeoConstants.EarthCenter.AsPlanarPoint3D();
                 _camera.Up = new Vector3(0.0f, -1.0f, 0.0f);
 
                 _isSurfaceRunMode = false;
@@ -453,9 +460,9 @@ public class DesktopRenderer : OpenGlControlBase
 
         var dx = x - _pressX;
         var dy = y - _pressY;
-        
+
         var geoCoordinates = GetMouseGeoCoordinates(x, y);
-        
+
         // Updating UI
         _uiData.IsMouseInEarth = geoCoordinates != null;
         if (_uiData.IsMouseInEarth)
@@ -463,9 +470,9 @@ public class DesktopRenderer : OpenGlControlBase
             _uiData.MouseLat = geoCoordinates.Lat;
             _uiData.MouseLon = geoCoordinates.Lon;
         }
-        
+
         _uiData.MarkForRegeneration();
-        
+
         if (_earthDragMode)
         {
             // Earth drag
@@ -481,8 +488,10 @@ public class DesktopRenderer : OpenGlControlBase
 
         if (_isSurfaceRunMode && _rotateHeadMode)
         {
-            _surfaceRunLatViewAngle = RendererConstants.SurfaceRunHeadRotationSpeedLat * dy + _surfaceRunLatViewAnglePress;
-            _surfaceRunLonViewAngle = RendererConstants.SurfaceRunHeadRotationSpeedLon * 2.0f * dx + _surfaceRunLonViewAnglePress; // 2.0f because lat is [-Pi; Pi], but lon is [-2 * Pi; 2 * Pi]
+            _surfaceRunLatViewAngle =
+                RendererConstants.SurfaceRunHeadRotationSpeedLat * dy + _surfaceRunLatViewAnglePress;
+            _surfaceRunLonViewAngle = RendererConstants.SurfaceRunHeadRotationSpeedLon * 2.0f * dx +
+                                      _surfaceRunLonViewAnglePress; // 2.0f because lat is [-Pi; Pi], but lon is [-2 * Pi; 2 * Pi]
         }
     }
 
@@ -514,7 +523,7 @@ public class DesktopRenderer : OpenGlControlBase
     private GeoPoint GetMouseGeoCoordinates(float x, float y)
     {
         var cameraRay = Ray.CreateByScreenRaycasting(_camera, x, y, _viewportWidth, _viewportHeight);
-        
+
         var intersections = cameraRay.Intersect(_earthSphere);
         if (intersections.Count < 2)
         {
@@ -533,7 +542,7 @@ public class DesktopRenderer : OpenGlControlBase
 
         return _sphereCoordinatesProvider.Planar3DToGeo(closestIntersection);
     }
-    
+
     /*/// <summary>
     /// Draw debug vector
     /// </summary>

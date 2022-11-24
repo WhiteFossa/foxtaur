@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using Foxtaur.LibRenderer.Models;
+using Foxtaur.LibGeo.Models;
 using Silk.NET.OpenGL;
 
 namespace Foxtaur.Desktop.Controls.Renderer;
@@ -79,14 +79,16 @@ public class Mesh : IDisposable
     public void BindBuffers(GL silkGl)
     {
         _ = silkGl ?? throw new ArgumentNullException(nameof(silkGl));
-        
+
         // Vertices array
         VerticesArrayObject = new VertexArrayObject<float, uint>(silkGl, VerticesBufferObject, ElementsBufferObject);
-        
+
         //Telling the VAO object how to lay out the attribute pointers
-        VerticesArrayObject.VertexAttributePointer(VerticesPositionLocation, VertexCoordsSize, VertexAttribPointerType.Float, VertexSize, 0);
-        VerticesArrayObject.VertexAttributePointer(VerticesTextureCoordsLocation, TextureCoordsSize, VertexAttribPointerType.Float, VertexSize, VertexCoordsSize);
-     
+        VerticesArrayObject.VertexAttributePointer(VerticesPositionLocation, VertexCoordsSize,
+            VertexAttribPointerType.Float, VertexSize, 0);
+        VerticesArrayObject.VertexAttributePointer(VerticesTextureCoordsLocation, TextureCoordsSize,
+            VertexAttribPointerType.Float, VertexSize, VertexCoordsSize);
+
         VerticesBufferObject.Bind();
         ElementsBufferObject.Bind();
         VerticesArrayObject.Bind();
@@ -124,7 +126,7 @@ public class Mesh : IDisposable
 
         if (VerticesArrayObject != null) // BindBuffer() may be never called
         {
-            VerticesArrayObject.Dispose();            
+            VerticesArrayObject.Dispose();
         }
     }
 }

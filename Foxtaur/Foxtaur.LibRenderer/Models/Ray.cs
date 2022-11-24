@@ -1,4 +1,6 @@
 using System.Numerics;
+using Foxtaur.LibGeo.Helpers;
+using Foxtaur.LibGeo.Models;
 using Foxtaur.LibRenderer.Constants;
 using Foxtaur.LibRenderer.Helpers;
 using Foxtaur.LibRenderer.Services.Abstractions.Camera;
@@ -34,9 +36,10 @@ public class Ray
     {
         var normalizedDeviceX = screenX / viewportWidth * 2.0f - 1.0f;
         var normalizedDeviceY = screenY / viewportHeight * 2.0f - 1.0f;
-        
+
         var nearPoint = camera.Position3D.AsVector3();
-        var farPoint = camera.BackProjectionMatrix.TransformPerspectively(new Vector3(normalizedDeviceX, normalizedDeviceY, 1.0f));
+        var farPoint =
+            camera.BackProjectionMatrix.TransformPerspectively(new Vector3(normalizedDeviceX, normalizedDeviceY, 1.0f));
 
         return new Ray(nearPoint.AsPlanarPoint3D(), farPoint.AsPlanarPoint3D());
     }
@@ -48,13 +51,13 @@ public class Ray
     {
         var p0 = Begin.AsVector3();
         var rayDirection = Vector3.Normalize(End.AsVector3() - p0);
-        
+
         var k = p0 - sphere.Center.AsVector3();
 
         var b = Vector3.Dot(k, rayDirection);
         var c = Vector3.Dot(k, k) - (float)Math.Pow(sphere.Radius, 2);
         var d = (float)Math.Pow(b, 2) - c; // a = 1 because rayDirection is normalized
-        
+
         if (d < 0)
         {
             return new List<PlanarPoint3D>();
@@ -93,7 +96,7 @@ public class Ray
             // Point is not on line, part of what ray is
             return false;
         }
-        
+
         return t.X >= 0;
     }
 }

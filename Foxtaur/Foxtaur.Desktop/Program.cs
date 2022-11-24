@@ -9,11 +9,13 @@ using Foxtaur.Desktop.Controls.Renderer.Abstractions.UI;
 using Foxtaur.Desktop.Controls.Renderer.Implementations.Generators;
 using Foxtaur.Desktop.Controls.Renderer.Implementations.UI;
 using Foxtaur.Desktop.Logging;
+using Foxtaur.LibGeo.Services.Abstractions.CoordinateProviders;
+using Foxtaur.LibGeo.Services.Abstractions.DemProviders;
+using Foxtaur.LibGeo.Services.Implementations.CoordinateProviders;
+using Foxtaur.LibGeo.Services.Implementations.DemProviders;
 using Foxtaur.LibRenderer.Services.Abstractions.Camera;
-using Foxtaur.LibRenderer.Services.Abstractions.CoordinateProviders;
 using Foxtaur.LibRenderer.Services.Abstractions.Drawers;
 using Foxtaur.LibRenderer.Services.Implementations.Camera;
-using Foxtaur.LibRenderer.Services.Implementations.CoordinateProviders;
 using Foxtaur.LibRenderer.Services.Implementations.Drawers;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -51,7 +53,7 @@ namespace Foxtaur.Desktop
                 .Default
                 .Targets
                 .RegisterDefinition("ControlLogging", typeof(ControlLoggingTarget));
-            
+
             LogManager.Configuration = new NLogLoggingConfiguration(configuration.GetSection("NLog"));
 
             BuildAvaloniaApp()
@@ -79,10 +81,11 @@ namespace Foxtaur.Desktop
             services.AddSingleton<IRectangleGenerator, RectangleGenerator>();
             services.AddSingleton<ITextDrawer, TextDrawer>();
             services.AddSingleton<IUi, Ui>();
+            services.AddSingleton<IDemProvider, DemProvider>();
 
             return services;
         }
-        
+
         // Get main window
         public static Window GetMainWindow()
         {
@@ -90,6 +93,7 @@ namespace Foxtaur.Desktop
             {
                 return desktopLifetime.MainWindow;
             }
+
             return null;
         }
     }

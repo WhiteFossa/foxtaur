@@ -8,7 +8,7 @@ namespace Foxtaur.Desktop.Logging;
 /// <summary>
 /// NLog target to log into control
 /// </summary>
-[Target("ControlLogging")] 
+[Target("ControlLogging")]
 public class ControlLoggingTarget : TargetWithLayout
 {
     public ControlLoggingTarget()
@@ -16,13 +16,12 @@ public class ControlLoggingTarget : TargetWithLayout
         Host = "localhost";
     }
 
-    [RequiredParameter] 
-    public string Host { get; set; }
+    [RequiredParameter] public string Host { get; set; }
 
-    protected override void Write(LogEventInfo logEvent) 
-    { 
+    protected override void Write(LogEventInfo logEvent)
+    {
         var logMessage = Layout.Render(logEvent);
-        
+
         ((MainWindowViewModel)Program.GetMainWindow().DataContext).AddLineToConsole(logMessage);
-    } 
+    }
 }

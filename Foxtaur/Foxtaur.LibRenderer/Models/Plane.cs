@@ -1,3 +1,4 @@
+using Foxtaur.LibGeo.Models;
 using MathNet.Numerics.LinearAlgebra;
 
 namespace Foxtaur.LibRenderer.Models;

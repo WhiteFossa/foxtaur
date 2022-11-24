@@ -1,10 +1,9 @@
 using System;
-using System.Diagnostics;
 using Foxtaur.Desktop.Controls.Renderer.Abstractions.Generators;
 using Foxtaur.Desktop.Controls.Renderer.Abstractions.UI;
+using Foxtaur.LibGeo.Helpers;
+using Foxtaur.LibGeo.Models;
 using Foxtaur.LibRenderer.Constants;
-using Foxtaur.LibRenderer.Helpers;
-using Foxtaur.LibRenderer.Models;
 using Foxtaur.LibRenderer.Models.UI;
 using Foxtaur.LibRenderer.Services.Abstractions.Drawers;
 using ImageMagick;
@@ -18,32 +17,32 @@ public class Ui : IUi
     private IRectangleGenerator _rectangleGenerator;
 
     public bool IsNeedToReinitialize { get; set; }
-    
+
     /// <summary>
     /// Rectangle mesh for UI top panel
     /// </summary>
     private Mesh _uiMeshTop;
-    
+
     /// <summary>
     /// Texture for UI top panel
     /// </summary>
     private Texture _uiTextureTop;
-    
+
     /// <summary>
     /// Rectangle mesh for UI bottom panel
     /// </summary>
     private Mesh _uiMeshBottom;
-    
+
     /// <summary>
     /// Texture for UI bottom panel
     /// </summary>
     private Texture _uiTextureBottom;
-    
+
     /// <summary>
     /// Shader for UI
     /// </summary>
     private Shader _uiShader;
-    
+
     public Ui(ITextDrawer textDrawer,
         IRectangleGenerator rectangleGenerator)
     {
@@ -55,7 +54,7 @@ public class Ui : IUi
     {
         _ = silkGlContext ?? throw new ArgumentNullException(nameof(silkGlContext));
         _ = data ?? throw new ArgumentNullException(nameof(data));
-        
+
         // Top
         var topPanelRelativeHeight = RendererConstants.UiTopPanelHeight / (float)uiHeight;
         _uiMeshTop = _rectangleGenerator.GenerateRectangle(
@@ -63,9 +62,9 @@ public class Ui : IUi
             new PlanarPoint2D(0.0f, 1.0f),
             new PlanarPoint3D(1.0f, 0.0f, 0.0f),
             new PlanarPoint2D(1.0f, 0.0f));
-        
+
         _uiMeshTop.GenerateBuffers(silkGlContext);
-        
+
         // Bottom
         var bottomPanelRelativeHeight = RendererConstants.UiBottomPanelHeight / (float)uiHeight;
         _uiMeshBottom = _rectangleGenerator.GenerateRectangle(
@@ -73,11 +72,11 @@ public class Ui : IUi
             new PlanarPoint2D(0.0f, 1.0f),
             new PlanarPoint3D(1.0f, 1.0f - bottomPanelRelativeHeight, 0.0f),
             new PlanarPoint2D(1.0f, 0.0f));
-        
+
         _uiMeshBottom.GenerateBuffers(silkGlContext);
-        
+
         _uiShader = new Shader(silkGlContext, @"Resources/Shaders/ui_shader.vert", @"Resources/Shaders/ui_shader.frag");
-        
+
         // Initial generation
         GenerateUi(silkGlContext, uiWidth, uiHeight, data);
     }
@@ -86,10 +85,10 @@ public class Ui : IUi
     {
         _uiTextureTop.Dispose();
         _uiMeshTop.Dispose();
-        
+
         _uiTextureBottom.Dispose();
         _uiMeshBottom.Dispose();
-        
+
         _uiShader.Dispose();
     }
 
@@ -99,16 +98,19 @@ public class Ui : IUi
         _ = data ?? throw new ArgumentNullException(nameof(data));
 
         // Top
-        using (var uiTopPanelImage = new MagickImage(RendererConstants.UiPanelsBackgroundColor, uiWidth, RendererConstants.UiTopPanelHeight))
+        using (var uiTopPanelImage = new MagickImage(RendererConstants.UiPanelsBackgroundColor, uiWidth,
+                   RendererConstants.UiTopPanelHeight))
         {
             // FPS
             var fpsText = $"FPS: {data.Fps}";
             var fpsTextSize = _textDrawer.GetTextBounds(uiTopPanelImage, RendererConstants.UiFontSize, fpsText);
-            var fpsTextShiftY = RendererConstants.UiTopPanelHeight - (RendererConstants.UiTopPanelHeight - (float)fpsTextSize.TextHeight) / 2.0f + (float)fpsTextSize.Descent;
+            var fpsTextShiftY = RendererConstants.UiTopPanelHeight -
+                                (RendererConstants.UiTopPanelHeight - (float)fpsTextSize.TextHeight) / 2.0f +
+                                (float)fpsTextSize.Descent;
 
             _textDrawer.DrawText(uiTopPanelImage,
                 RendererConstants.UiFontSize,
-                RendererConstants.UiTextColor, 
+                RendererConstants.UiTextColor,
                 new PlanarPoint2D(RendererConstants.UiFpsTextXPosition, fpsTextShiftY),
                 fpsText);
 
@@ -116,30 +118,37 @@ public class Ui : IUi
             {
                 _uiTextureTop.Dispose();
             }
-            _uiTextureTop = new Texture(silkGlContext, uiTopPanelImage);    
+
+            _uiTextureTop = new Texture(silkGlContext, uiTopPanelImage);
         }
-        
+
         // Bottom
-        using (var uiBottomPanelImage = new MagickImage(RendererConstants.UiPanelsBackgroundColor, uiWidth, RendererConstants.UiBottomPanelHeight))
+        using (var uiBottomPanelImage = new MagickImage(RendererConstants.UiPanelsBackgroundColor, uiWidth,
+                   RendererConstants.UiBottomPanelHeight))
         {
             // Mouse coordinates
             var latText = data.IsMouseInEarth ? data.MouseLat.ToLatString() : "N/A";
             var lonText = data.IsMouseInEarth ? data.MouseLon.ToLonString() : "N/A";
-            var mouseCoordsText = $"Latitude: { latText }, Longitude: { lonText }";
+            var mouseCoordsText = $"Latitude: {latText}, Longitude: {lonText}";
 
-            var mouseCoordsTextSize = _textDrawer.GetTextBounds(uiBottomPanelImage, RendererConstants.UiFontSize, mouseCoordsText);
-            var mouseCoordsTextShiftY = RendererConstants.UiTopPanelHeight - (RendererConstants.UiTopPanelHeight - (float)mouseCoordsTextSize.TextHeight) / 2.0f + (float)mouseCoordsTextSize.Descent;
+            var mouseCoordsTextSize =
+                _textDrawer.GetTextBounds(uiBottomPanelImage, RendererConstants.UiFontSize, mouseCoordsText);
+            var mouseCoordsTextShiftY = RendererConstants.UiTopPanelHeight -
+                                        (RendererConstants.UiTopPanelHeight - (float)mouseCoordsTextSize.TextHeight) /
+                                        2.0f +
+                                        (float)mouseCoordsTextSize.Descent;
 
             _textDrawer.DrawText(uiBottomPanelImage,
                 RendererConstants.UiFontSize,
-                RendererConstants.UiTextColor, 
+                RendererConstants.UiTextColor,
                 new PlanarPoint2D(RendererConstants.UiMouseCoordsTextXPosition, mouseCoordsTextShiftY),
                 mouseCoordsText);
 
             if (_uiTextureBottom != null)
             {
-                _uiTextureBottom.Dispose();    
+                _uiTextureBottom.Dispose();
             }
+
             _uiTextureBottom = new Texture(silkGlContext, uiBottomPanelImage);
         }
     }
@@ -153,7 +162,7 @@ public class Ui : IUi
         {
             DeInitialize();
             Initialize(silkGlContext, uiWidth, uiHeight, uiData);
-            
+
             uiData.MarkForRegeneration();
 
             IsNeedToReinitialize = false;
@@ -165,17 +174,19 @@ public class Ui : IUi
             GenerateUi(silkGlContext, uiWidth, uiHeight, uiData);
             uiData.MarkAsRegenerated();
         }
-        
+
         silkGlContext.Disable(EnableCap.DepthTest);
         _uiShader.Use();
         _uiShader.SetUniform1i("ourTexture", 0);
-        
+
         _uiMeshTop.BindBuffers(silkGlContext);
         _uiTextureTop.Bind();
-        silkGlContext.DrawElements(PrimitiveType.Triangles, (uint)_uiMeshTop.Indices.Count, DrawElementsType.UnsignedInt, null);
+        silkGlContext.DrawElements(PrimitiveType.Triangles, (uint)_uiMeshTop.Indices.Count,
+            DrawElementsType.UnsignedInt, null);
 
         _uiMeshBottom.BindBuffers(silkGlContext);
         _uiTextureBottom.Bind();
-        silkGlContext.DrawElements(PrimitiveType.Triangles, (uint)_uiMeshBottom.Indices.Count, DrawElementsType.UnsignedInt, null);
+        silkGlContext.DrawElements(PrimitiveType.Triangles, (uint)_uiMeshBottom.Indices.Count,
+            DrawElementsType.UnsignedInt, null);
     }
 }

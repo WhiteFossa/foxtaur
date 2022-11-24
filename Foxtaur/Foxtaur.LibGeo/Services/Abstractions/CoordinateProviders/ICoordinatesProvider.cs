@@ -1,6 +1,6 @@
-using Foxtaur.LibRenderer.Models;
+using Foxtaur.LibGeo.Models;
 
-namespace Foxtaur.LibRenderer.Services.Abstractions.CoordinateProviders;
+namespace Foxtaur.LibGeo.Services.Abstractions.CoordinateProviders;
 
 /// <summary>
 ///     Interface to work with geocoordinates
