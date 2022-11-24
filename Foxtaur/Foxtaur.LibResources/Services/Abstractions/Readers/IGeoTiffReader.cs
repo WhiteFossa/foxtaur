@@ -1,6 +1,4 @@
-using Foxtaur.LibGeo.Models;
-
-namespace Foxtaur.LibGeo.Services.Abstractions.Readers;
+namespace Foxtaur.LibResources.Services.Abstractions.Readers;
 
 /// <summary>
 /// GeoTIFF reader
@@ -29,8 +27,8 @@ public interface IGeoTiffReader
     int GetHeight();
 
     /// <summary>
-    /// Get pixel by geocoordinates. Height is ignored
+    /// Get pixel by geocoordinates
     /// If geocoordinates are outside image will return null
     /// </summary>
-    float? GetPixel(int band, GeoPoint coords);
+    float? GetPixelByGeoCoords(int band, float lat, float lon);
 }
