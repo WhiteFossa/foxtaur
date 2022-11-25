@@ -15,6 +15,28 @@ public class DemResourcesProvider : IFragmentedResourcesProvider
     {
         _fragments = new List<DemFragment>();
 
+        // 10N-30N stripe
+        _fragments.Add(new DemFragment(29.999861111f.ToRadians(),
+            9.999861111f.ToRadians(),
+            -0.000138889f.ToRadians(),
+            29.999861111f.ToRadians(),
+            "10n000e_20101117_gmted_mea075_lowres.tif",
+            true));
+        
+        _fragments.Add(new DemFragment(29.999861111f.ToRadians(),
+            9.999861111f.ToRadians(),
+            29.999861111f.ToRadians(),
+            59.999861111f.ToRadians(),
+            "10n030e_20101117_gmted_mea075_lowres.tif",
+            true));
+        
+        _fragments.Add(new DemFragment(29.999861111f.ToRadians(),
+            9.999861111f.ToRadians(),
+            59.999861111f.ToRadians(),
+            89.999861111f.ToRadians(),
+            "10n060e_20101117_gmted_mea075_lowres.tif",
+            true));
+        
         // 30N-50N stripe
         _fragments.Add(new DemFragment(49.999861111f.ToRadians(),
             29.999861111f.ToRadians(),
