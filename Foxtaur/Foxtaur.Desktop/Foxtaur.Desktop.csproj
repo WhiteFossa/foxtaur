@@ -105,6 +105,24 @@
         <None Update="Resources\DEMs\GMTED2010\LowResolution\50n030w_20101117_gmted_mea075_lowres.tif">
           <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </None>
+        <None Update="Resources\DEMs\GMTED2010\LowResolution\70n000e_20101117_gmted_mea075_lowres.tif">
+          <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
+        <None Update="Resources\DEMs\GMTED2010\LowResolution\70n030e_20101117_gmted_mea075_lowres.tif">
+          <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
+        <None Update="Resources\DEMs\GMTED2010\LowResolution\70n060e_20101117_gmted_mea075_lowres.tif">
+          <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
+        <None Update="Resources\DEMs\GMTED2010\LowResolution\70n090e_20101117_gmted_mea075_lowres.tif">
+          <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
+        <None Update="Resources\DEMs\GMTED2010\LowResolution\70n120e_20101117_gmted_mea075_lowres.tif">
+          <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
+        <None Update="Resources\DEMs\GMTED2010\LowResolution\70n150e_20101117_gmted_mea075_lowres.tif">
+          <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
     </ItemGroup>
     <ItemGroup>
         <!--This helps with theme dll-s trimming.
