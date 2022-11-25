@@ -149,6 +149,41 @@ public class DemResourcesProvider : IFragmentedResourcesProvider
             -150.000138889f.ToRadians(),
             "50n180w_20101117_gmted_mea075_lowres.tif",
             true));
+        
+        _fragments.Add(new DemFragment(69.999861111f.ToRadians(),
+            49.999861111f.ToRadians(),
+            -150.000138889f.ToRadians(),
+            -120.000138889f.ToRadians(),
+            "50n150w_20101117_gmted_mea075_lowres.tif",
+            true));
+        
+        _fragments.Add(new DemFragment(69.999861111f.ToRadians(),
+            49.999861111f.ToRadians(),
+            -120.000138889f.ToRadians(),
+            -90.000138889f.ToRadians(),
+            "50n120w_20101117_gmted_mea075_lowres.tif",
+            true));
+        
+        _fragments.Add(new DemFragment(69.999861111f.ToRadians(),
+            49.999861111f.ToRadians(),
+            -90.000138889f.ToRadians(),
+            -60.000138889f.ToRadians(),
+            "50n090w_20101117_gmted_mea075_lowres.tif",
+            true));
+        
+        _fragments.Add(new DemFragment(69.999861111f.ToRadians(),
+            49.999861111f.ToRadians(),
+            -60.000138889f.ToRadians(),
+            -30.000138889f.ToRadians(),
+            "50n060w_20101117_gmted_mea075_lowres.tif",
+            true));
+        
+        _fragments.Add(new DemFragment(69.999861111f.ToRadians(),
+            49.999861111f.ToRadians(),
+            -30.000138889f.ToRadians(),
+            -0.000138889f.ToRadians(),
+            "50n030w_20101117_gmted_mea075_lowres.tif",
+            true));
     }
 
     public FragmentedResourceBase GetResource(float lat, float lon)
