@@ -14,4 +14,14 @@ public class ResourcesConstants
     /// Read DEM data from this band
     /// </summary>
     public const int DemBand = 1;
+
+    /// <summary>
+    /// This brightness in DEM is equal to the sea level
+    /// </summary>
+    public const float DemSeaLevel = 0.5f;
+
+    /// <summary>
+    /// If DEM brightness is lower than this value, then there is no data
+    /// </summary>
+    public const float DemNoData = 0.1f;
 }

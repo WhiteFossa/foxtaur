@@ -53,6 +53,14 @@ public class DemFragment : FragmentedResourceBase
             throw new InvalidOperationException($"Download {ResourceName} first!");
         }
 
-        return _reader.GetPixelByGeoCoords(ResourcesConstants.DemBand, lat, lon);
+        var height =  _reader.GetPixelByGeoCoords(ResourcesConstants.DemBand, lat, lon);
+        
+        // If we have "no data", then it's sea level
+        if (height < ResourcesConstants.DemNoData)
+        {
+            height = ResourcesConstants.DemSeaLevel;
+        }
+
+        return height;
     }
 }

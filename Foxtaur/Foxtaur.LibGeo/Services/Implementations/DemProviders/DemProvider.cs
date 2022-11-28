@@ -1,5 +1,6 @@
 using Foxtaur.LibGeo.Constants;
 using Foxtaur.LibGeo.Services.Abstractions.DemProviders;
+using Foxtaur.LibResources.Constants;
 using Foxtaur.LibResources.Models;
 using Foxtaur.LibResources.Services.Abstractions;
 using Foxtaur.LibResources.Services.Implementations;
@@ -34,6 +35,6 @@ public class DemProvider : IDemProvider
             return GeoConstants.EarthRadius;
         }
 
-        return GeoConstants.EarthRadius + 0.2f * (h.Value - 0.5f);
+        return GeoConstants.EarthRadius + 0.2f * (h.Value - ResourcesConstants.DemSeaLevel);
     }
 }
