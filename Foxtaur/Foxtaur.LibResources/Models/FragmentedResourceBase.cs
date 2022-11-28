@@ -53,7 +53,7 @@ public abstract class FragmentedResourceBase
             throw new ArgumentException("NorthLat must be norther than SouthLat");
         }
 
-        if (westLon >= eastLon)
+        if (westLon <= eastLon)
         {
             throw new ArgumentException("WestLon must be wester than EastLon");
         }
@@ -85,7 +85,7 @@ public abstract class FragmentedResourceBase
     /// </summary>
     public bool IsHit(float lat, float lon)
     {
-        return lat >= SouthLat && lat <= NorthLat && lon <= EastLon && lon >= WestLon;
+        return lat >= SouthLat && lat <= NorthLat && lon >= EastLon && lon <= WestLon;
     }
 
     /// <summary>

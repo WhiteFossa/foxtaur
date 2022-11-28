@@ -191,12 +191,12 @@ public class GeoTiffReader : IGeoTiffReader
     public float? GetPixelByGeoCoords(int band, float lat, float lon)
     {
         var latDegrees = lat.ToDegrees();
-        var lonDegrees = lon.ToDegrees();
+        var lonDegrees = -1.0f * lon.ToDegrees(); // GeoTIFF use negative west, we use negative east
 
         var y = (latDegrees - _geoCoefficients[3] + _geoK3 - _geoK1 * lonDegrees) / _geoK2;
         var x = lonDegrees / _geoCoefficients[1] - _geoK4 - _geoK5 * y;
 
-        if (x < 0 || y < 0 || x > _dataset.RasterXSize - 1 || y > _dataset.RasterYSize - 1)
+        if (x < 0 || y < 0 || x >= _dataset.RasterXSize || y >= _dataset.RasterYSize)
         {
             return null;
         }

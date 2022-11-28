@@ -12,19 +12,16 @@ public class SphereCoordinatesProvider : ISphereCoordinatesProvider
 {
     public PlanarPoint2D GeoToPlanar2D(GeoPoint geo)
     {
-        return new PlanarPoint2D(geo.Lon / (2.0f * (float)Math.PI) + 0.5f, 1 - (geo.Lat / (float)Math.PI + 0.5f));
+        return new PlanarPoint2D(-0.5f * (geo.Lon / (float)Math.PI - 1.0f), 1 - (geo.Lat / (float)Math.PI + 0.5f));
     }
 
     public PlanarPoint3D GeoToPlanar3D(GeoPoint geo)
     {
-        var tmpLon = GeoPoint.SumLongitudesWithWrap(geo.Lon, (float)Math.PI / 2.0f);
-
-        var x = geo.H * (float)Math.Cos(geo.Lat) * (float)Math.Cos(tmpLon);
-        var z = geo.H * (float)Math.Cos(geo.Lat) * (float)Math.Sin(tmpLon);
+        var z = geo.H * (float)Math.Cos(geo.Lat) * (float)Math.Cos(geo.Lon);
+        var x = geo.H * (float)Math.Cos(geo.Lat) * (float)Math.Sin(geo.Lon);
         var y = geo.H * (float)Math.Sin(geo.Lat);
 
-        return new PlanarPoint3D(x + GeoConstants.EarthCenter.X, y + GeoConstants.EarthCenter.Y,
-            z + GeoConstants.EarthCenter.Z);
+        return new PlanarPoint3D(x + GeoConstants.EarthCenter.X, y + GeoConstants.EarthCenter.Y, z + GeoConstants.EarthCenter.Z);
     }
 
     public GeoPoint Planar2DToGeo(PlanarPoint2D planar2d)
