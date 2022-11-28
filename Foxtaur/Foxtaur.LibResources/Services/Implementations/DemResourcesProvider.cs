@@ -14,7 +14,7 @@ public class DemResourcesProvider : IFragmentedResourcesProvider
     public DemResourcesProvider()
     {
         _fragments = new List<DemFragment>();
-
+        
         // 70S-50S stripe
         _fragments.Add(new DemFragment(-50.000138889f.ToRadians(),
             -70.000138889f.ToRadians(),
