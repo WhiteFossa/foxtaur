@@ -24,4 +24,9 @@ public class ResourcesConstants
     /// If DEM brightness is lower than this value, then there is no data
     /// </summary>
     public const float DemNoData = 0.1f;
+
+    /// <summary>
+    /// DEM scaling factor (full swipe / Earth radius)
+    /// </summary>
+    public const float DemScalingFactor = 65.535f / 6371.0f;
 }

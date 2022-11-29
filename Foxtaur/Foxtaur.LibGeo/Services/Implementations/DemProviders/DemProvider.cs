@@ -35,6 +35,6 @@ public class DemProvider : IDemProvider
             return GeoConstants.EarthRadius;
         }
 
-        return GeoConstants.EarthRadius + 0.2f * (h.Value - ResourcesConstants.DemSeaLevel);
+        return GeoConstants.EarthRadius + GeoConstants.DemAltitudeMultiplicator * ResourcesConstants.DemScalingFactor * (h.Value - ResourcesConstants.DemSeaLevel);
     }
 }

@@ -41,10 +41,14 @@ public static class GeoConstants
     ///     Maximal possible longitude
     /// </summary>
     public const float MaxLon = (float)Math.PI + GeoCoordinatesCheckDelta;
-
-
+    
     /// <summary>
     /// Earth center coordinates
     /// </summary>
     public static readonly Vector3 EarthCenter = new Vector3(0.0f, 0.0f, 0.0f);
+
+    /// <summary>
+    /// Multiply visual DEM altitudes by this value
+    /// </summary>
+    public const float DemAltitudeMultiplicator = 10.0f;
 }
