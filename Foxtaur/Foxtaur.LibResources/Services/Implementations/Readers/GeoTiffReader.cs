@@ -111,6 +111,25 @@ public class GeoTiffReader : IGeoTiffReader
         _geoK5 = _geoCoefficients[2] / _geoCoefficients[1];
     }
 
+    public void Open(Stream stream)
+    {
+        _ = stream ?? throw new ArgumentNullException(nameof(stream));
+        
+        using(var memoryStream = new MemoryStream())
+        {
+            stream.CopyTo(memoryStream);
+            var buffer = memoryStream.ToArray();
+            
+            // Virtual file
+            var virtualFilename = $"/vsimem/{Guid.NewGuid()}.tif";
+            Gdal.FileFromMemBuffer(virtualFilename, buffer);
+            
+            Open(virtualFilename);
+            
+            Gdal.Unlink(virtualFilename);
+        }
+    }
+
     private unsafe void LoadBand(int band)
     {
         if (band < 0 || band > _dataset.RasterCount)

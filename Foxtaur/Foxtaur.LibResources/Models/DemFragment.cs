@@ -56,10 +56,23 @@ public class DemFragment : FragmentedResourceBase
             // TODO: Put download code here
         }
 
-        // Now file is downloaded, we are ready to process
-        _logger.Info($"Processing { ResourceName }...");
-        _reader = new GeoTiffReader();
-        _reader.Open(GetLocalPath());
+        // Decompressing
+        try
+        {
+            _logger.Info($"Decompressing { ResourceName }...");
+            using (var decompressedStream = LoadZstdFile(GetLocalPath()))
+            {
+                // Processing
+                _logger.Info($"Processing { ResourceName }...");
+                _reader = new GeoTiffReader();
+                _reader.Open(decompressedStream);    
+            }
+        }
+        catch (Exception e)
+        {
+            _logger.Error(e.Message);
+            throw;
+        }
 
         _isLoading = false;
         _isLoaded = true;

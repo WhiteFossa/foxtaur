@@ -1,3 +1,5 @@
+using ZstdNet;
+
 namespace Foxtaur.LibResources.Models;
 
 /// <summary>
@@ -102,4 +104,17 @@ public abstract class FragmentedResourceBase
     /// Download resource
     /// </summary>
     public abstract Task DownloadAsync(OnFragmentedResourceLoaded onLoad);
+
+    /// <summary>
+    /// Load ZSTD file to stream
+    /// </summary>
+    protected Stream LoadZstdFile(string path)
+    {
+        if (string.IsNullOrEmpty(path))
+        {
+            throw new ArgumentException(nameof(path));
+        }
+
+        return new DecompressionStream(File.OpenRead(path));
+    }
 }
