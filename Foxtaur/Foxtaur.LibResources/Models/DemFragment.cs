@@ -17,7 +17,9 @@ public class DemFragment : FragmentedResourceBase
     
     private IGeoTiffReader _reader;
 
-    private bool _isDownloaded;
+    private bool _isLoading;
+    
+    private bool _isLoaded;
 
     public DemFragment(float northLat, float southLat, float westLon, float eastLon, string resourceName, bool isLocal)
         : base(northLat, southLat, westLon, eastLon, resourceName, isLocal)
@@ -33,11 +35,19 @@ public class DemFragment : FragmentedResourceBase
     {
         _onLoad = onLoad ?? throw new ArgumentNullException(nameof(onLoad));
         
-        if (_isDownloaded)
+        if (_isLoaded)
         {
             // Fragment already downloaded
             return;
         }
+        
+        if (_isLoading)
+        {
+            // Loading in progress
+            return;
+        }
+
+        _isLoading = true;
         
         _logger.Info($"Loading { ResourceName }...");
 
@@ -51,7 +61,8 @@ public class DemFragment : FragmentedResourceBase
         _reader = new GeoTiffReader();
         _reader.Open(GetLocalPath());
 
-        _isDownloaded = true;
+        _isLoading = false;
+        _isLoaded = true;
 
         _logger.Info($"{ ResourceName } is ready.");
         _onLoad(this);
@@ -62,7 +73,7 @@ public class DemFragment : FragmentedResourceBase
     /// </summary>
     public float? GetHeight(float lat, float lon)
     {
-        if (!_isDownloaded)
+        if (!_isLoaded)
         {
             return ResourcesConstants.DemSeaLevel;
         }
