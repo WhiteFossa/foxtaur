@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Linq;
 using System.Numerics;
 using System.Timers;
 using Avalonia;
@@ -86,7 +87,7 @@ public class DesktopRenderer : OpenGlControlBase
     /// <summary>
     /// Earth segment size
     /// </summary>
-    private float _earthSegmentSize = 20.0f.ToRadians();
+    private float _earthSegmentSize = 10.0f.ToRadians();
 
     /// <summary>
     /// Earth texture
@@ -318,15 +319,44 @@ public class DesktopRenderer : OpenGlControlBase
 
         //_silkGlContext.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Line);
 
-        // Earth
+        #region Earth segments regeneration
+        
+        var toRegenerateInThisFrame = _earthSegments
+            .Where(es => es.IsRegenerationNeeded)
+            .TakeLast(RendererConstants.MaxSegmentsPerFrameRegeneration)
+            .ToList();
+
+        // Regenerating meshes
+        toRegenerateInThisFrame
+            .ForEach(es => _earthGenerator.GenerateMeshForSegment(es));
+        
+        // Regenerating buffers
+        toRegenerateInThisFrame
+            .ForEach(es => es.Mesh.GenerateBuffers(_silkGlContext));
+        
+        // Done
+        toRegenerateInThisFrame
+            .ForEach(es => es.MarkAsRegenerated());
+
+        #endregion
+        
+        #region Earth draw
+        
         _earthTexture.Bind();
         
         // For now we treat all segments as visible
         foreach (var earthSegment in _earthSegments)
         {
+            if (earthSegment.Mesh == null)
+            {
+                continue; // Mesh is not generated yet
+            }
+            
             earthSegment.Mesh.BindBuffers(_silkGlContext);
             _silkGlContext.DrawElements(PrimitiveType.Triangles, (uint)earthSegment.Mesh.Indices.Count, DrawElementsType.UnsignedInt, null);   
         }
+        
+        #endregion
 
         // UI
         _ui.DrawUi(_silkGlContext, _viewportWidth, _viewportHeight, _uiData);
@@ -347,7 +377,10 @@ public class DesktopRenderer : OpenGlControlBase
         // Cleaning Earth segments
         foreach (var earthSegment in _earthSegments)
         {
-            earthSegment.Mesh.Dispose();
+            if (earthSegment.Mesh != null)
+            {
+                earthSegment.Mesh.Dispose();   
+            }
         }
         
         _earthTexture.Dispose();
@@ -575,15 +608,17 @@ public class DesktopRenderer : OpenGlControlBase
     /// </summary>
     private void OnDemChanged(object sender, OnRegenerateDemFragmentArgs args)
     {
-        // TODO: Mark affected segments for regeneration
-        //GenerateEarthSegments();
+        _earthSegments
+            .Where(es => es.GeoSegment.IsCoveredBy(args.Segment))
+            .ToList()
+            .ForEach(s => s.MarkToRegeneration());
     }
 
     private void GenerateEarthSegments(GL silkGl)
     {
         _earthSegments.Clear();
         
-        for (var lat = -0.5f * (float)Math.PI; lat < 0.5f * (float)Math.PI; lat += _earthSegmentSize)
+        for (var lat = -0.5f * (float)Math.PI; lat < GeoPoint.SumLatitudesWithWrap(0.5f * (float)Math.PI, -1.0f * _earthSegmentSize); lat += _earthSegmentSize)
         {
             for (var lon = (float)Math.PI; lon > GeoPoint.SumLongitudesWithWrap(-1.0f * (float)Math.PI, _earthSegmentSize); lon -= _earthSegmentSize)
             {
@@ -595,12 +630,6 @@ public class DesktopRenderer : OpenGlControlBase
                         GeoPoint.SumLongitudesWithWrap(lon, -1.0f * _earthSegmentSize)),
                     _earthSegmentSize / RendererConstants.SegmentStepsMultiplier));
             }
-        }
-        
-        // Generating buffers
-        foreach (var segment in _earthSegments)
-        {
-            segment.Mesh.GenerateBuffers(silkGl);
         }
     }
 

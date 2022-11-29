@@ -27,7 +27,8 @@ public class DemProvider : IDemProvider
             // We don't have DEM for this coordinates at all
             return GeoConstants.EarthRadius;
         }
-        
+
+        //Task.Run(() => fragment.DownloadAsync(OnFragmentLoaded));
         fragment.DownloadAsync(OnFragmentLoaded); // Running in separate task
 
         var h = fragment.GetHeight(lat, lon);

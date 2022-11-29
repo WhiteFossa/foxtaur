@@ -7,6 +7,7 @@ using Foxtaur.LibGeo.Models;
 using Foxtaur.LibGeo.Services.Abstractions.CoordinateProviders;
 using Foxtaur.LibGeo.Services.Abstractions.DemProviders;
 using Foxtaur.LibRenderer.Models;
+using Silk.NET.OpenGL;
 
 namespace Foxtaur.Desktop.Controls.Renderer.Implementations.Generators;
 
@@ -74,19 +75,26 @@ public class EarthGenerator : IEarthGenerator
 
     public EarthSegment GenerateEarthSegment(GeoSegment segment, float gridStep)
     {
+        return new EarthSegment(segment, gridStep);
+    }
+
+    public void GenerateMeshForSegment(EarthSegment segment)
+    {
+        _ = segment ?? throw new ArgumentNullException(nameof(segment));
+        
         var segmentMesh = new Mesh();
         
-        for (var lat = segment.SouthLat; lat < segment.NorthLat; lat += gridStep)
+        for (var lat = segment.GeoSegment.SouthLat; lat < segment.GeoSegment.NorthLat; lat += segment.GridStep)
         {
-            var latNorther = lat + gridStep;
+            var latNorther = lat + segment.GridStep;
 
             // First two points of a stripe
-            var firstPair = GenerateAndAddPointsPair(segmentMesh, lat, segment.WestLon, latNorther, segment.WestLon);
+            var firstPair = GenerateAndAddPointsPair(segmentMesh, lat, segment.GeoSegment.WestLon, latNorther, segment.GeoSegment.WestLon);
             var i3D0 = firstPair.Item1;
             var i3D1 = firstPair.Item2;
 
             // Intermediate triangles
-            for (var lon = segment.WestLon - gridStep; lon > segment.EastLon; lon -= gridStep)
+            for (var lon = segment.GeoSegment.WestLon - segment.GridStep; lon > segment.GeoSegment.EastLon; lon -= segment.GridStep)
             {
                 var intermediatePair = GenerateAndAddPointsPair(segmentMesh, lat, lon, latNorther, lon);
                 var i3D2 = intermediatePair.Item1;
@@ -105,7 +113,7 @@ public class EarthGenerator : IEarthGenerator
             }
             
             // Two last triangles of a stripe
-            var lastPair = GenerateAndAddPointsPair(segmentMesh, lat, segment.EastLon, latNorther, segment.EastLon);
+            var lastPair = GenerateAndAddPointsPair(segmentMesh, lat, segment.GeoSegment.EastLon, latNorther, segment.GeoSegment.EastLon);
             var i3last0 = lastPair.Item1;
             var i3last1 = lastPair.Item2;
 
@@ -117,8 +125,8 @@ public class EarthGenerator : IEarthGenerator
             segmentMesh.AddIndex(i3last0);
             segmentMesh.AddIndex(i3D0);
         }
-
-        return new EarthSegment(segment, segmentMesh);
+        
+        segment.UpdateMesh(segmentMesh);
     }
 
     public Sphere GenerateEarthSphere()

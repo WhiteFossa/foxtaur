@@ -1,3 +1,4 @@
+using Avalonia.Threading;
 using Foxtaur.Desktop.ViewModels;
 using NLog;
 using NLog.Config;
@@ -22,10 +23,13 @@ public class ControlLoggingTarget : TargetWithLayout
     {
         var logMessage = Layout.Render(logEvent);
 
-        var dataContext = Program.GetMainWindow()?.DataContext;
-        if (dataContext != null)
+        Dispatcher.UIThread.InvokeAsync(() =>
         {
-            (dataContext as MainWindowViewModel).AddLineToConsole(logMessage);
-        }
+            var dataContext = Program.GetMainWindow()?.DataContext;
+            if (dataContext != null)
+            {
+                (dataContext as MainWindowViewModel).AddLineToConsole(logMessage);
+            }
+        });
     }
 }

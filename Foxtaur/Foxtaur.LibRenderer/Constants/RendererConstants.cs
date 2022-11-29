@@ -100,5 +100,10 @@ public static class RendererConstants
     /// <summary>
     /// Each Earth segments will have SegmentStepsMultiplier ^ 2 vertices
     /// </summary>
-    public const float SegmentStepsMultiplier = 100.0f;
+    public const float SegmentStepsMultiplier = 20.0f;
+
+    /// <summary>
+    /// Regenerate no more than this amount of segments per frame
+    /// </summary>
+    public const int MaxSegmentsPerFrameRegeneration = 10;
 }

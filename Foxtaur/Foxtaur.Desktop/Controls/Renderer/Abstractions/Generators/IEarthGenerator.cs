@@ -1,6 +1,7 @@
 using Foxtaur.Desktop.Controls.Renderer.Models;
 using Foxtaur.LibGeo.Models;
 using Foxtaur.LibRenderer.Models;
+using Silk.NET.OpenGL;
 
 namespace Foxtaur.Desktop.Controls.Renderer.Abstractions.Generators;
 
@@ -19,6 +20,11 @@ public interface IEarthGenerator
     /// Generate Earth segment
     /// </summary>
     public EarthSegment GenerateEarthSegment(GeoSegment segment, float gridStep);
+
+    /// <summary>
+    /// Generate mesh for given Earth segment and store it into segment
+    /// </summary>
+    public void GenerateMeshForSegment(EarthSegment segment);
     
     /// <summary>
     /// Generate Earth sphere (for raycasting)
