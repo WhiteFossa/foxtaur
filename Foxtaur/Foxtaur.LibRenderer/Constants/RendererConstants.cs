@@ -105,5 +105,5 @@ public static class RendererConstants
     /// <summary>
     /// Regenerate no more than this amount of segments per frame
     /// </summary>
-    public const int MaxSegmentsPerFrameRegeneration = 10;
+    public const int MaxSegmentsPerFrameRegeneration = 20;
 }

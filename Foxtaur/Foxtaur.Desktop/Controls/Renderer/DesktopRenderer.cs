@@ -53,11 +53,6 @@ public class DesktopRenderer : OpenGlControlBase
     private int _viewportHeight;
 
     /// <summary>
-    /// Silk.NET OpenGL context
-    /// </summary>
-    private GL _silkGlContext;
-
-    /// <summary>
     /// Default shader
     /// </summary>
     private Shader _defaultShader;
@@ -230,13 +225,13 @@ public class DesktopRenderer : OpenGlControlBase
     {
         base.OnOpenGlInit(gl, fb);
 
-        _silkGlContext = GL.GetApi(gl.GetProcAddress);
+        var silkGlContext = GL.GetApi(gl.GetProcAddress);
         
         #region Initialization
 
         // Generating the Earth
         _earthSphere = _earthGenerator.GenerateEarthSphere();
-        GenerateEarthSegments(_silkGlContext);
+        GenerateEarthSegments();
 
         // Creating camera
         _camera.Lat = 0.0f;
@@ -260,14 +255,14 @@ public class DesktopRenderer : OpenGlControlBase
         
 
         // Loading shaders
-        _defaultShader = new Shader(_silkGlContext, @"Resources/Shaders/shader.vert", @"Resources/Shaders/shader.frag");
+        _defaultShader = new Shader(silkGlContext, @"Resources/Shaders/shader.vert", @"Resources/Shaders/shader.frag");
 
         // Loading textures
-        _earthTexture = new Texture(_silkGlContext, @"Resources/Textures/Basemaps/NE2_50M_SR_W.jpeg");
+        _earthTexture = new Texture(silkGlContext, @"Resources/Textures/Basemaps/NE2_50M_SR_W.jpeg");
         //_earthTexture = new Texture(_silkGLContext, @"Resources/Textures/davydovo.png");
 
         // UI
-        _ui.Initialize(_silkGlContext, _viewportWidth, _viewportHeight, _uiData); // We also need to re-initialize on viewport size change
+        _ui.Initialize(silkGlContext, _viewportWidth, _viewportHeight, _uiData); // We also need to re-initialize on viewport size change
 
         _fpsTimer = new Timer(1000);
         _fpsTimer.Elapsed += OnFpsTimer;
@@ -288,15 +283,17 @@ public class DesktopRenderer : OpenGlControlBase
     /// </summary>
     protected unsafe override void OnOpenGlRender(GlInterface gl, int fb)
     {
-        _silkGlContext.ClearColor(Color.Black);
-        _silkGlContext.Clear((uint)(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit));
-        _silkGlContext.Enable(EnableCap.DepthTest);
+        var silkGlContext = GL.GetApi(gl.GetProcAddress);
+        
+        silkGlContext.ClearColor(Color.Black);
+        silkGlContext.Clear((uint)(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit));
+        silkGlContext.Enable(EnableCap.DepthTest);
 
         // Blending
-        _silkGlContext.Enable(EnableCap.Blend);
-        _silkGlContext.BlendFunc(GLEnum.SrcAlpha, GLEnum.OneMinusSrcAlpha);
+        silkGlContext.Enable(EnableCap.Blend);
+        silkGlContext.BlendFunc(GLEnum.SrcAlpha, GLEnum.OneMinusSrcAlpha);
 
-        _silkGlContext.Viewport(0, 0, (uint)_viewportWidth, (uint)_viewportHeight);
+        silkGlContext.Viewport(0, 0, (uint)_viewportWidth, (uint)_viewportHeight);
 
         // Surface mode camera positioning
         if (_isSurfaceRunMode)
@@ -319,47 +316,14 @@ public class DesktopRenderer : OpenGlControlBase
 
         //_silkGlContext.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Line);
 
-        #region Earth segments regeneration
-        
-        var toRegenerateInThisFrame = _earthSegments
-            .Where(es => es.IsRegenerationNeeded)
-            .TakeLast(RendererConstants.MaxSegmentsPerFrameRegeneration)
-            .ToList();
+        // Regenerating Earth segments
+        RegenerateEarthSegments(silkGlContext);
 
-        // Regenerating meshes
-        toRegenerateInThisFrame
-            .ForEach(es => _earthGenerator.GenerateMeshForSegment(es));
-        
-        // Regenerating buffers
-        toRegenerateInThisFrame
-            .ForEach(es => es.Mesh.GenerateBuffers(_silkGlContext));
-        
-        // Done
-        toRegenerateInThisFrame
-            .ForEach(es => es.MarkAsRegenerated());
-
-        #endregion
-        
-        #region Earth draw
-        
-        _earthTexture.Bind();
-        
-        // For now we treat all segments as visible
-        foreach (var earthSegment in _earthSegments)
-        {
-            if (earthSegment.Mesh == null)
-            {
-                continue; // Mesh is not generated yet
-            }
-            
-            earthSegment.Mesh.BindBuffers(_silkGlContext);
-            _silkGlContext.DrawElements(PrimitiveType.Triangles, (uint)earthSegment.Mesh.Indices.Count, DrawElementsType.UnsignedInt, null);   
-        }
-        
-        #endregion
+        // Draw Earth
+        DrawEarth(silkGlContext);
 
         // UI
-        _ui.DrawUi(_silkGlContext, _viewportWidth, _viewportHeight, _uiData);
+        _ui.DrawUi(silkGlContext, _viewportWidth, _viewportHeight, _uiData);
 
         // Everything is drawn
         _framesDrawn++;
@@ -614,7 +578,7 @@ public class DesktopRenderer : OpenGlControlBase
             .ForEach(s => s.MarkToRegeneration());
     }
 
-    private void GenerateEarthSegments(GL silkGl)
+    private void GenerateEarthSegments()
     {
         _earthSegments.Clear();
         
@@ -630,6 +594,43 @@ public class DesktopRenderer : OpenGlControlBase
                         GeoPoint.SumLongitudesWithWrap(lon, -1.0f * _earthSegmentSize)),
                     _earthSegmentSize / RendererConstants.SegmentStepsMultiplier));
             }
+        }
+    }
+
+    private void RegenerateEarthSegments(GL silkGl)
+    {
+        var toRegenerateInThisFrame = _earthSegments
+            .Where(es => es.IsRegenerationNeeded)
+            .TakeLast(RendererConstants.MaxSegmentsPerFrameRegeneration)
+            .ToList();
+
+        // Regenerating meshes
+        toRegenerateInThisFrame
+            .ForEach(es => _earthGenerator.GenerateMeshForSegment(es));
+        
+        // Regenerating buffers
+        toRegenerateInThisFrame
+            .ForEach(es => es.Mesh.GenerateBuffers(silkGl));
+        
+        // Done
+        toRegenerateInThisFrame
+            .ForEach(es => es.MarkAsRegenerated());
+    }
+
+    private unsafe void DrawEarth(GL silkGl)
+    {
+        _earthTexture.Bind();
+        
+        // For now we treat all segments as visible
+        foreach (var earthSegment in _earthSegments)
+        {
+            if (earthSegment.Mesh == null)
+            {
+                continue; // Mesh is not generated yet
+            }
+            
+            earthSegment.Mesh.BindBuffers(silkGl);
+            silkGl.DrawElements(PrimitiveType.Triangles, (uint)earthSegment.Mesh.Indices.Count, DrawElementsType.UnsignedInt, null);   
         }
     }
 

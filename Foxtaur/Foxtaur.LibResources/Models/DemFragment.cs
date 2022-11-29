@@ -56,8 +56,6 @@ public class DemFragment : FragmentedResourceBase
             // TODO: Put download code here
         }
 
-        await Task.Delay(5000); // !! TODO: REMOVE ME  SLOW LOAD IMITATION !!
-        
         // Decompressing
         try
         {
