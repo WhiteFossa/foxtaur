@@ -1,21 +1,17 @@
+using Foxtaur.LibGeo.Models;
+
 namespace Foxtaur.LibGeo.Services.Abstractions.DemProviders;
 
 public class OnRegenerateDemFragmentArgs
 {
-    public float NLat { get; private set; }
-    
-    public float SLat { get; private set; }
-
-    public float WLon { get; private set; }
-    
-    public float ELon { get; private set; }
+    /// <summary>
+    /// Segment, affected by DEM regeneration
+    /// </summary>
+    public GeoSegment Segment { get; private set; }
 
     public OnRegenerateDemFragmentArgs(float nLat, float wLon, float sLat, float eLon)
     {
-        NLat = nLat;
-        SLat = sLat;
-        WLon = wLon;
-        ELon = eLon;
+        Segment = new GeoSegment(nLat, wLon, sLat, eLon);
     }
 }
 

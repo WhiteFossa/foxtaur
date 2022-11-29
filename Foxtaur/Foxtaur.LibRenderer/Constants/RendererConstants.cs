@@ -96,4 +96,9 @@ public static class RendererConstants
     /// Precision for finding is point on ray
     /// </summary>
     public const float TestIsPointOnRayPrecision = 0.00001f;
+
+    /// <summary>
+    /// Each Earth segments will have SegmentStepsMultiplier ^ 2 vertices
+    /// </summary>
+    public const float SegmentStepsMultiplier = 100.0f;
 }

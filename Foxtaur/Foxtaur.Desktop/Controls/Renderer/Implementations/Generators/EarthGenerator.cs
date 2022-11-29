@@ -1,5 +1,6 @@
 using System;
 using Foxtaur.Desktop.Controls.Renderer.Abstractions.Generators;
+using Foxtaur.Desktop.Controls.Renderer.Models;
 using Foxtaur.Helpers;
 using Foxtaur.LibGeo.Constants;
 using Foxtaur.LibGeo.Models;
@@ -69,6 +70,55 @@ public class EarthGenerator : IEarthGenerator
         }
 
         return earthMesh;
+    }
+
+    public EarthSegment GenerateEarthSegment(GeoSegment segment, float gridStep)
+    {
+        var segmentMesh = new Mesh();
+        
+        for (var lat = segment.SouthLat; lat < segment.NorthLat; lat += gridStep)
+        {
+            var latNorther = lat + gridStep;
+
+            // First two points of a stripe
+            var firstPair = GenerateAndAddPointsPair(segmentMesh, lat, segment.WestLon, latNorther, segment.WestLon);
+            var i3D0 = firstPair.Item1;
+            var i3D1 = firstPair.Item2;
+
+            // Intermediate triangles
+            for (var lon = segment.WestLon - gridStep; lon > segment.EastLon; lon -= gridStep)
+            {
+                var intermediatePair = GenerateAndAddPointsPair(segmentMesh, lat, lon, latNorther, lon);
+                var i3D2 = intermediatePair.Item1;
+                var i3D3 = intermediatePair.Item2;
+
+                segmentMesh.AddIndex(i3D0);
+                segmentMesh.AddIndex(i3D1);
+                segmentMesh.AddIndex(i3D3);
+
+                segmentMesh.AddIndex(i3D3);
+                segmentMesh.AddIndex(i3D2);
+                segmentMesh.AddIndex(i3D0);
+
+                i3D0 = i3D2;
+                i3D1 = i3D3;
+            }
+            
+            // Two last triangles of a stripe
+            var lastPair = GenerateAndAddPointsPair(segmentMesh, lat, segment.EastLon, latNorther, segment.EastLon);
+            var i3last0 = lastPair.Item1;
+            var i3last1 = lastPair.Item2;
+
+            segmentMesh.AddIndex(i3D0);
+            segmentMesh.AddIndex(i3D1);
+            segmentMesh.AddIndex(i3last1);
+
+            segmentMesh.AddIndex(i3last1);
+            segmentMesh.AddIndex(i3last0);
+            segmentMesh.AddIndex(i3D0);
+        }
+
+        return new EarthSegment(segment, segmentMesh);
     }
 
     public Sphere GenerateEarthSphere()
