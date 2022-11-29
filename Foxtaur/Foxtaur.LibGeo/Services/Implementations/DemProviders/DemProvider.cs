@@ -9,7 +9,9 @@ namespace Foxtaur.LibGeo.Services.Implementations.DemProviders;
 
 public class DemProvider : IDemProvider
 {
-    private IFragmentedResourcesProvider _demResourcesProvider;
+    private readonly IFragmentedResourcesProvider _demResourcesProvider;
+
+    public event IDemProvider.OnRegenerateDemFragmentHandler? OnRegenerateDemFragment;
 
     public DemProvider()
     {
@@ -25,9 +27,8 @@ public class DemProvider : IDemProvider
             // We don't have DEM for this coordinates at all
             return GeoConstants.EarthRadius;
         }
-
-        // TODO: Move this into threads pool
-        Task.WaitAll(fragment.DownloadAsync());
+        
+        fragment.DownloadAsync(OnFragmentLoaded); // Running in separate task
 
         var h = fragment.GetHeight(lat, lon);
         if (h == null)
@@ -36,5 +37,14 @@ public class DemProvider : IDemProvider
         }
 
         return GeoConstants.EarthRadius + GeoConstants.DemAltitudeMultiplicator * ResourcesConstants.DemScalingFactor * (h.Value - ResourcesConstants.DemSeaLevel);
+    }
+
+    public void OnFragmentLoaded(FragmentedResourceBase fragment)
+    {
+        var demFragment = fragment as DemFragment;
+        _ = demFragment ?? throw new InvalidOperationException();
+
+        // Requesting DEM regeneration
+        OnRegenerateDemFragment?.Invoke(this, new OnRegenerateDemFragmentArgs(demFragment.NorthLat, demFragment.WestLon, demFragment.SouthLat, demFragment.EastLon));
     }
 }

@@ -1,6 +1,7 @@
 using Foxtaur.LibResources.Constants;
 using Foxtaur.LibResources.Services.Abstractions.Readers;
 using Foxtaur.LibResources.Services.Implementations.Readers;
+using NLog;
 
 namespace Foxtaur.LibResources.Models;
 
@@ -9,6 +10,11 @@ namespace Foxtaur.LibResources.Models;
 /// </summary>
 public class DemFragment : FragmentedResourceBase
 {
+    /// <summary>
+    /// Logger
+    /// </summary>
+    private Logger _logger = LogManager.GetCurrentClassLogger();
+    
     private IGeoTiffReader _reader;
 
     private bool _isDownloaded;
@@ -23,13 +29,17 @@ public class DemFragment : FragmentedResourceBase
         return ResourcesConstants.LocalDemFragmentsDirectory + Path.DirectorySeparatorChar + ResourceName;
     }
 
-    public override async Task DownloadAsync()
+    public override async Task DownloadAsync(OnFragmentedResourceLoaded onLoad)
     {
+        _onLoad = onLoad ?? throw new ArgumentNullException(nameof(onLoad));
+        
         if (_isDownloaded)
         {
             // Fragment already downloaded
             return;
         }
+        
+        _logger.Info($"Loading { ResourceName }...");
 
         if (!IsLocal)
         {
@@ -37,10 +47,14 @@ public class DemFragment : FragmentedResourceBase
         }
 
         // Now file is downloaded, we are ready to process
+        _logger.Info($"Processing { ResourceName }...");
         _reader = new GeoTiffReader();
         _reader.Open(GetLocalPath());
 
         _isDownloaded = true;
+
+        _logger.Info($"{ ResourceName } is ready.");
+        _onLoad(this);
     }
 
     /// <summary>
@@ -50,7 +64,7 @@ public class DemFragment : FragmentedResourceBase
     {
         if (!_isDownloaded)
         {
-            throw new InvalidOperationException($"Download {ResourceName} first!");
+            return ResourcesConstants.DemSeaLevel;
         }
 
         var height =  _reader.GetPixelByGeoCoords(ResourcesConstants.DemBand, lat, lon);

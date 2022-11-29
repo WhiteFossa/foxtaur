@@ -13,6 +13,8 @@ using Foxtaur.LibGeo.Constants;
 using Foxtaur.LibGeo.Helpers;
 using Foxtaur.LibGeo.Models;
 using Foxtaur.LibGeo.Services.Abstractions.CoordinateProviders;
+using Foxtaur.LibGeo.Services.Abstractions.DemProviders;
+using Foxtaur.LibGeo.Services.Implementations.DemProviders;
 using Foxtaur.LibRenderer.Constants;
 using Foxtaur.LibRenderer.Helpers;
 using Foxtaur.LibRenderer.Models;
@@ -166,6 +168,7 @@ public class DesktopRenderer : OpenGlControlBase
     private ICoordinatesProvider _sphereCoordinatesProvider = Program.Di.GetService<ISphereCoordinatesProvider>();
     private IEarthGenerator _earthGenerator = Program.Di.GetService<IEarthGenerator>();
     private IUi _ui = Program.Di.GetService<IUi>();
+    private IDemProvider _demProvider = Program.Di.GetService<IDemProvider>();
 
     #endregion
 
@@ -174,32 +177,13 @@ public class DesktopRenderer : OpenGlControlBase
     /// </summary>
     public DesktopRenderer()
     {
-        // Generating the Earth
-        _earthSphere = _earthGenerator.GenerateEarthSphere();
-        _earthMesh = _earthGenerator.GenerateFullEarth((float)Math.PI / 900.0f);
-
-        // Creating camera
-        _camera.Lat = 0.0f;
-        _camera.Lon = 0.0f;
-        _camera.H = RendererConstants.CameraOrbitHeight;
-        _camera.Zoom = RendererConstants.CameraMinZoom;
-
-        // Targetting camera
-        _camera.Target = GeoConstants.EarthCenter.AsPlanarPoint3D();
-
-        // UI
-        _uiData = new UiData();
-
         // Listening for properties changes to process resize
         PropertyChanged += OnPropertyChangedListener;
-
-        // Setting-up input events
-        PointerWheelChanged += OnWheel;
-        PointerPressed += OnMousePressed;
-        PointerReleased += OnMouseReleased;
-        PointerMoved += OnMouseMoved;
+        
+        // We need to regenerate meshes on DEM updates.
+        _demProvider.OnRegenerateDemFragment += OnDemChanged;
     }
-
+    
     private void OnPropertyChangedListener(object sender, AvaloniaPropertyChangedEventArgs e)
     {
         if (e.Property.Name.Equals("Bounds"))
@@ -233,6 +217,32 @@ public class DesktopRenderer : OpenGlControlBase
         base.OnOpenGlInit(gl, fb);
 
         _silkGlContext = GL.GetApi(gl.GetProcAddress);
+        
+        #region Initialization
+
+        // Generating the Earth
+        _earthSphere = _earthGenerator.GenerateEarthSphere();
+        _earthMesh = _earthGenerator.GenerateFullEarth((float)Math.PI / 90.0f);
+
+        // Creating camera
+        _camera.Lat = 0.0f;
+        _camera.Lon = 0.0f;
+        _camera.H = RendererConstants.CameraOrbitHeight;
+        _camera.Zoom = RendererConstants.CameraMinZoom;
+
+        // Targetting camera
+        _camera.Target = GeoConstants.EarthCenter.AsPlanarPoint3D();
+
+        // UI
+        _uiData = new UiData();
+
+        // Setting-up input events
+        PointerWheelChanged += OnWheel;
+        PointerPressed += OnMousePressed;
+        PointerReleased += OnMouseReleased;
+        PointerMoved += OnMouseMoved;
+        
+        #endregion
 
         // Generating buffers
         _earthMesh.GenerateBuffers(_silkGlContext);
@@ -245,8 +255,7 @@ public class DesktopRenderer : OpenGlControlBase
         //_earthTexture = new Texture(_silkGLContext, @"Resources/Textures/davydovo.png");
 
         // UI
-        _ui.Initialize(_silkGlContext, _viewportWidth, _viewportHeight,
-            _uiData); // We also need to re-initialize on viewport size change
+        _ui.Initialize(_silkGlContext, _viewportWidth, _viewportHeight, _uiData); // We also need to re-initialize on viewport size change
 
         _fpsTimer = new Timer(1000);
         _fpsTimer.Elapsed += OnFpsTimer;
@@ -539,6 +548,14 @@ public class DesktopRenderer : OpenGlControlBase
         }
 
         return _sphereCoordinatesProvider.Planar3DToGeo(closestIntersection);
+    }
+
+    /// <summary>
+    /// Called when DEM fragment is regenerated, we have to regenerate all related meshes after it
+    /// </summary>
+    private void OnDemChanged(object sender, OnRegenerateDemFragmentArgs args)
+    {
+        _earthMesh = _earthGenerator.GenerateFullEarth((float)Math.PI / 90.0f);
     }
 
     /*/// <summary>

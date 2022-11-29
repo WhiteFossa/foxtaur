@@ -1,6 +1,11 @@
 namespace Foxtaur.LibResources.Models;
 
 /// <summary>
+/// Delegate for OnLoaded() event
+/// </summary>
+public delegate void OnFragmentedResourceLoaded(FragmentedResourceBase fragment);
+
+/// <summary>
 /// Fragmented resource base class
 /// Fragmented resource is a resource, limited by geocoordinates
 /// </summary>
@@ -35,6 +40,11 @@ public abstract class FragmentedResourceBase
     /// If true, then RemotePath points to a local file, so no need to download anything
     /// </summary>
     public bool IsLocal { get; private set; }
+
+    /// <summary>
+    /// Call this when resource load is completed
+    /// </summary>
+    protected OnFragmentedResourceLoaded _onLoad;
 
     public FragmentedResourceBase(float northLat,
         float southLat,
@@ -91,5 +101,5 @@ public abstract class FragmentedResourceBase
     /// <summary>
     /// Download resource
     /// </summary>
-    public abstract Task DownloadAsync();
+    public abstract Task DownloadAsync(OnFragmentedResourceLoaded onLoad);
 }

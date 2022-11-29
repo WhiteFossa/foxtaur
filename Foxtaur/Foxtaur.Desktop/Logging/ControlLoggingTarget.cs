@@ -22,6 +22,10 @@ public class ControlLoggingTarget : TargetWithLayout
     {
         var logMessage = Layout.Render(logEvent);
 
-        ((MainWindowViewModel)Program.GetMainWindow().DataContext).AddLineToConsole(logMessage);
+        var dataContext = Program.GetMainWindow()?.DataContext;
+        if (dataContext != null)
+        {
+            (dataContext as MainWindowViewModel).AddLineToConsole(logMessage);
+        }
     }
 }
