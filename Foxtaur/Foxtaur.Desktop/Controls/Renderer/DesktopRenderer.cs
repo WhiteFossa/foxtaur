@@ -78,6 +78,11 @@ public class DesktopRenderer : OpenGlControlBase
     /// Earth segments
     /// </summary>
     private List<EarthSegment> _earthSegments = new List<EarthSegment>();
+
+    /// <summary>
+    /// Currently visible Earth segments
+    /// </summary>
+    private List<EarthSegment> _visibleEarthSegments = new List<EarthSegment>();
     
     /// <summary>
     /// Earth segment size
@@ -316,6 +321,9 @@ public class DesktopRenderer : OpenGlControlBase
 
         //_silkGlContext.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Line);
 
+        // Work only with those segments
+        FindVisibleEarthSegments();
+        
         // Regenerating Earth segments
         RegenerateEarthSegments(silkGlContext);
 
@@ -599,7 +607,7 @@ public class DesktopRenderer : OpenGlControlBase
 
     private void RegenerateEarthSegments(GL silkGl)
     {
-        var toRegenerateInThisFrame = _earthSegments
+        var toRegenerateInThisFrame = _visibleEarthSegments
             .Where(es => es.IsRegenerationNeeded)
             .TakeLast(RendererConstants.MaxSegmentsPerFrameRegeneration)
             .ToList();
@@ -622,7 +630,7 @@ public class DesktopRenderer : OpenGlControlBase
         _earthTexture.Bind();
         
         // For now we treat all segments as visible
-        foreach (var earthSegment in _earthSegments)
+        foreach (var earthSegment in _visibleEarthSegments)
         {
             if (earthSegment.Mesh == null)
             {
@@ -631,6 +639,42 @@ public class DesktopRenderer : OpenGlControlBase
             
             earthSegment.Mesh.BindBuffers(silkGl);
             silkGl.DrawElements(PrimitiveType.Triangles, (uint)earthSegment.Mesh.Indices.Count, DrawElementsType.UnsignedInt, null);   
+        }
+    }
+    
+    private void FindVisibleEarthSegments()
+    {
+        _visibleEarthSegments.Clear();
+
+        var candidates = new List<EarthSegment>(_earthSegments);
+        
+        for (var y = 0; y < _viewportHeight; y += RendererConstants.VisibleSegmentsScanStep)
+        {
+            for (var x = 0; x < _viewportWidth; x += RendererConstants.VisibleSegmentsScanStep)
+            {
+                var geoCoordinates = GetMouseGeoCoordinates(x, y);
+                if (geoCoordinates == null)
+                {
+                    continue;
+                }
+                
+                // Do we hit any segments?
+                var hitSegments = candidates
+                    .Where(cs => cs.GeoSegment.IsInSegment(geoCoordinates))
+                    .ToList();
+
+                if (!hitSegments.Any())
+                {
+                    continue;
+                }
+                
+                hitSegments
+                    .ForEach(hs =>
+                    {
+                        candidates.Remove(hs);
+                        _visibleEarthSegments.Add(hs);
+                    });
+            }
         }
     }
 

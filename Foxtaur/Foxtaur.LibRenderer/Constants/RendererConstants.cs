@@ -106,4 +106,9 @@ public static class RendererConstants
     /// Regenerate no more than this amount of segments per frame
     /// </summary>
     public const int MaxSegmentsPerFrameRegeneration = 20;
+
+    /// <summary>
+    /// Visible segments scan step (in viewport pixels)
+    /// </summary>
+    public const int VisibleSegmentsScanStep = 20;
 }
