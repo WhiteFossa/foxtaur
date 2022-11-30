@@ -46,26 +46,24 @@ public class GeoSegment
     /// <summary>
     /// Is point withing segment (H is ignored). Lat / lon wrap is not supported
     /// </summary>
-    public bool IsInSegment(GeoPoint point)
+    public bool IsInSegment(float lat, float lon)
     {
-        _ = point ?? throw new ArgumentNullException(nameof(point));
-        
-        if (point.Lat < SouthLat)
+        if (lat < SouthLat)
         {
             return false;
         }
 
-        if (point.Lat > NorthLat)
+        if (lat > NorthLat)
         {
             return false;
         }
         
-        if (point.Lon > WestLon)
+        if (lon > WestLon)
         {
             return false;
         }
 
-        if (point.Lon < EastLon)
+        if (lon < EastLon)
         {
             return false;
         }
@@ -79,18 +77,13 @@ public class GeoSegment
     public bool IsCoveredBy(GeoSegment segment)
     {
         _ = segment ?? throw new ArgumentNullException(nameof(segment));
-        
-        var p1 = new GeoPoint(SouthLat, WestLon, 1.0f);
-        var p2 = new GeoPoint(NorthLat, WestLon, 1.0f);
-        var p3 = new GeoPoint(NorthLat, EastLon, 1.0f);
-        var p4 = new GeoPoint(SouthLat, EastLon, 1.0f);
 
-        return segment.IsInSegment(p1)
+        return segment.IsInSegment(SouthLat, WestLon)
                ||
-               segment.IsInSegment(p2)
+               segment.IsInSegment(NorthLat, WestLon)
                ||
-               segment.IsInSegment(p3)
+               segment.IsInSegment(NorthLat, EastLon)
                ||
-               segment.IsInSegment(p4);
+               segment.IsInSegment(SouthLat, EastLon);
     }
 }

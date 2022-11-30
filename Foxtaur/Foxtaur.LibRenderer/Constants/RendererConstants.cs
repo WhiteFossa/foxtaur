@@ -110,5 +110,5 @@ public static class RendererConstants
     /// <summary>
     /// Visible segments scan step (in viewport pixels)
     /// </summary>
-    public const int VisibleSegmentsScanStep = 20;
+    public const int VisibleSegmentsScanStep = 10;
 }

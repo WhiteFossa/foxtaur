@@ -642,11 +642,17 @@ public class DesktopRenderer : OpenGlControlBase
         }
     }
     
+    // Highly optimized, edit with care!
     private void FindVisibleEarthSegments()
     {
         _visibleEarthSegments.Clear();
 
-        var candidates = new List<EarthSegment>(_earthSegments);
+        var candidates = _earthSegments
+            .Select(es => es.GeoSegment)
+            .ToArray();
+
+        var visibleSegmentsIndicesIndex = 0;
+        var visibleSegmentsIndices = new int?[candidates.Length];
         
         for (var y = 0; y < _viewportHeight; y += RendererConstants.VisibleSegmentsScanStep)
         {
@@ -659,23 +665,36 @@ public class DesktopRenderer : OpenGlControlBase
                 }
                 
                 // Do we hit any segments?
-                var hitSegments = candidates
-                    .Where(cs => cs.GeoSegment.IsInSegment(geoCoordinates))
-                    .ToList();
-
-                if (!hitSegments.Any())
+                for (var candidateIndex = 0; candidateIndex < candidates.Length; candidateIndex++)
                 {
-                    continue;
-                }
-                
-                hitSegments
-                    .ForEach(hs =>
+                    var candidate = candidates[candidateIndex];
+                    if (candidate == null)
                     {
-                        candidates.Remove(hs);
-                        _visibleEarthSegments.Add(hs);
-                    });
+                        continue;
+                    }
+                    
+                    if (candidate.IsInSegment(geoCoordinates.Lat, geoCoordinates.Lon))
+                    {
+                        visibleSegmentsIndices[visibleSegmentsIndicesIndex] = candidateIndex;
+                        visibleSegmentsIndicesIndex++;
+                        candidates[candidateIndex] = null;
+                        break; // Point can hit only one segment
+                    }
+                }
             }
         }
+
+        for (var visibleSegmentIndex = 0; visibleSegmentIndex < visibleSegmentsIndices.Length; visibleSegmentIndex++)
+        {
+            var index = visibleSegmentsIndices[visibleSegmentIndex];
+            if (!index.HasValue)
+            {
+                break;
+            }
+            
+            _visibleEarthSegments.Add(_earthSegments[index.Value]);
+        }
+
     }
 
     /*/// <summary>
