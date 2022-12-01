@@ -663,8 +663,6 @@ public class DesktopRenderer : OpenGlControlBase
                 _visibleEarthSegments.Add(earthSegment);
             }
         }
-        
-        _logger.Info($"Visible segments: { _visibleEarthSegments.Count }");
     }
 
     /*/// <summary>
