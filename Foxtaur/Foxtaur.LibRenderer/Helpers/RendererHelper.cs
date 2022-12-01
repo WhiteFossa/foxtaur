@@ -1,5 +1,6 @@
 using System.Numerics;
 using Foxtaur.LibGeo.Models;
+using Foxtaur.LibRenderer.Constants;
 using MathNet.Numerics.LinearAlgebra;
 using NLog;
 
@@ -103,5 +104,29 @@ public static class RendererHelper
         var result = mnMatrix * mnVector;
 
         return new Vector4(result[0], result[1], result[2], result[3]);
+    }
+    
+    /// <summary>
+    /// Is point in culling viewport?
+    /// </summary>
+    public static bool IsPointInCullingViewport(this PlanarPoint2D point)
+    {
+        return point.X >= -1.0f * RendererConstants.CullingViewportSize
+               &&
+               point.X <= RendererConstants.CullingViewportSize
+               &&
+               point.Y >= -1.0f * RendererConstants.CullingViewportSize
+               &&
+               point.Y <= RendererConstants.CullingViewportSize;
+    }
+
+    /// <summary>
+    /// Is culling viewport covered by given segment?
+    /// </summary>
+    public static bool IsCullingViewpointCoveredBySegment(this PlanarSegment segment)
+    {
+        return (segment.Left <= -1.0f * RendererConstants.CullingViewportSize && segment.Right >= RendererConstants.CullingViewportSize)
+               ||
+               (segment.Top >= RendererConstants.CullingViewportSize && segment.Bottom <= -1.0f * RendererConstants.CullingViewportSize);
     }
 }

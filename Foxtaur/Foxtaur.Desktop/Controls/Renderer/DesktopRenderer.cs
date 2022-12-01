@@ -658,7 +658,7 @@ public class DesktopRenderer : OpenGlControlBase
             var c3 = new PlanarPoint2D(viewportSegment.Right, viewportSegment.Top);
             var c4 = new PlanarPoint2D(viewportSegment.Right, viewportSegment.Bottom);
 
-            if (IsPointInViewport(c1) || IsPointInViewport(c2) || IsPointInViewport(c3) || IsPointInViewport(c4) || IsViewpointCoveredBySegment(viewportSegment))
+            if (c1.IsPointInCullingViewport() || c2.IsPointInCullingViewport() || c3.IsPointInCullingViewport() || c4.IsPointInCullingViewport() || viewportSegment.IsCullingViewpointCoveredBySegment())
             {
                 _visibleEarthSegments.Add(earthSegment);
             }
@@ -666,71 +666,6 @@ public class DesktopRenderer : OpenGlControlBase
         
         _logger.Info($"Visible segments: { _visibleEarthSegments.Count }");
     }
-
-    private bool IsPointInViewport(PlanarPoint2D point)
-    {
-        return point.X >= -1 && point.X <= 1 && point.Y >= -1 && point.Y <= 1;
-    }
-
-    private bool IsViewpointCoveredBySegment(PlanarSegment segment)
-    {
-        return (segment.Left <= -1 && segment.Right >= 1) || (segment.Top >= 1 && segment.Bottom <= -1);
-    }
-    
-    /*// Highly optimized, edit with care! But still slow
-    private void FindVisibleEarthSegments()
-    {
-        _visibleEarthSegments.Clear();
-
-        var candidates = _earthSegments
-            .Select(es => es.GeoSegment)
-            .ToArray();
-
-        var visibleSegmentsIndicesIndex = 0;
-        var visibleSegmentsIndices = new int?[candidates.Length];
-        
-        for (var y = 0; y < _viewportHeight; y += RendererConstants.VisibleSegmentsScanStep)
-        {
-            for (var x = 0; x < _viewportWidth; x += RendererConstants.VisibleSegmentsScanStep)
-            {
-                var geoCoordinates = GetMouseGeoCoordinates(x, y);
-                if (geoCoordinates == null)
-                {
-                    continue;
-                }
-                
-                // Do we hit any segments?
-                for (var candidateIndex = 0; candidateIndex < candidates.Length; candidateIndex++)
-                {
-                    var candidate = candidates[candidateIndex];
-                    if (candidate == null)
-                    {
-                        continue;
-                    }
-                    
-                    if (candidate.IsInSegment(geoCoordinates.Lat, geoCoordinates.Lon))
-                    {
-                        visibleSegmentsIndices[visibleSegmentsIndicesIndex] = candidateIndex;
-                        visibleSegmentsIndicesIndex++;
-                        candidates[candidateIndex] = null;
-                        break; // Point can hit only one segment
-                    }
-                }
-            }
-        }
-
-        for (var visibleSegmentIndex = 0; visibleSegmentIndex < visibleSegmentsIndices.Length; visibleSegmentIndex++)
-        {
-            var index = visibleSegmentsIndices[visibleSegmentIndex];
-            if (!index.HasValue)
-            {
-                break;
-            }
-            
-            _visibleEarthSegments.Add(_earthSegments[index.Value]);
-        }
-
-    }*/
 
     /*/// <summary>
     /// Draw debug vector

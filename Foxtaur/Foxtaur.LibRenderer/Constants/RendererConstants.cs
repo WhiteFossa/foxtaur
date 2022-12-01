@@ -108,7 +108,7 @@ public static class RendererConstants
     public const int MaxSegmentsPerFrameRegeneration = 20;
 
     /// <summary>
-    /// Visible segments scan step (in viewport pixels)
+    /// Virtual viewport size for the purporse of culling (because of the strange bug exact 1.0f is not big enough)
     /// </summary>
-    public const int VisibleSegmentsScanStep = 10;
+    public const float CullingViewportSize = 1.5f;
 }

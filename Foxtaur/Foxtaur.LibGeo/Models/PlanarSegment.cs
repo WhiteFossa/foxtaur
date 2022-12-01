@@ -27,6 +27,16 @@ public class PlanarSegment
 
     public PlanarSegment(float top, float left, float bottom, float right)
     {
+        if (top < bottom) // Not <= because we can have degenerate segments. The same is for left - right
+        {
+            throw new ArgumentException();
+        }
+
+        if (left > right)
+        {
+            throw new ArgumentException();
+        }
+
         Top = top;
         Bottom = bottom;
         Left = left;
