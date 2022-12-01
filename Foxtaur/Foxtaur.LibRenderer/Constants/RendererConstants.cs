@@ -32,16 +32,11 @@ public static class RendererConstants
     /// Camera orbit height
     /// </summary>
     public const float CameraOrbitHeight = 2.0f * GeoConstants.EarthRadius;
-
-    /// <summary>
-    ///  Camera height over Earth surface in surface walk mode
-    /// </summary>
-    public const float SurfaceModeCameraHeight = 0.001f * GeoConstants.EarthRadius;
     
     /// <summary>
     /// Camera height for surface walk mode
     /// </summary>
-    public const float SurfaceModeCameraOrbitHeight = GeoConstants.EarthRadius + SurfaceModeCameraHeight;
+    public const float SurfaceModeCameraOrbitHeight = GeoConstants.EarthRadius + 0.001f * GeoConstants.EarthRadius;
 
     /// <summary>
     /// Head rotation speed (latitudal) in surface run mode
@@ -116,4 +111,9 @@ public static class RendererConstants
     /// Virtual viewport size for the purporse of culling (because of the strange bug exact 1.0f is not big enough)
     /// </summary>
     public const float CullingViewportSize = 1.5f;
+    
+    /// <summary>
+    /// Underground plane height for surface walk mode segments culling
+    /// </summary>
+    public const float SurfaceWalkUndergroundPlaneHeight = GeoConstants.EarthRadius - 0.001f * GeoConstants.EarthRadius;
 }

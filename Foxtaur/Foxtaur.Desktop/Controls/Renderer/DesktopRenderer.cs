@@ -646,7 +646,7 @@ public class DesktopRenderer : OpenGlControlBase
     {
         _visibleEarthSegments.Clear();
         
-        var undergroundPoint = _isSurfaceRunMode ? _sphereCoordinatesProvider.GeoToPlanar3D(new GeoPoint(_camera.Lat, _camera.Lon, GeoConstants.EarthRadius - RendererConstants.SurfaceModeCameraHeight))
+        var undergroundPoint = _isSurfaceRunMode ? _sphereCoordinatesProvider.GeoToPlanar3D(new GeoPoint(_camera.Lat, _camera.Lon, RendererConstants.SurfaceWalkUndergroundPlaneHeight))
             : new PlanarPoint3D(GeoConstants.EarthCenter.X, GeoConstants.EarthCenter.Y, GeoConstants.EarthCenter.Z);
         
         foreach (var earthSegment in _earthSegments)
