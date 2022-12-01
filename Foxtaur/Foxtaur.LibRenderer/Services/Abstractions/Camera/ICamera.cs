@@ -92,4 +92,9 @@ public interface ICamera
     /// Project geo segment to planar segment (in viewport coordinates)
     /// </summary>
     PlanarSegment ProjectSegmentToViewport(GeoSegment segment);
+
+    /// <summary>
+    /// Is point on camera's side of Earth (for culling)
+    /// </summary>
+    bool IsPointOnCameraSideOfEarth(PlanarPoint3D point);
 }

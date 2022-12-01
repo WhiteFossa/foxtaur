@@ -87,7 +87,7 @@ public class DesktopRenderer : OpenGlControlBase
     /// <summary>
     /// Earth segment size
     /// </summary>
-    private float _earthSegmentSize = 20.0f.ToRadians();
+    private float _earthSegmentSize = 5.0f.ToRadians();
 
     /// <summary>
     /// Earth texture
@@ -226,7 +226,7 @@ public class DesktopRenderer : OpenGlControlBase
     /// <summary>
     /// OpenGL initialization
     /// </summary>
-    protected unsafe override void OnOpenGlInit(GlInterface gl, int fb)
+    protected override void OnOpenGlInit(GlInterface gl, int fb)
     {
         base.OnOpenGlInit(gl, fb);
 
@@ -286,7 +286,7 @@ public class DesktopRenderer : OpenGlControlBase
     /// <summary>
     /// Called when frame have to be rendered
     /// </summary>
-    protected unsafe override void OnOpenGlRender(GlInterface gl, int fb)
+    protected override void OnOpenGlRender(GlInterface gl, int fb)
     {
         var silkGlContext = GL.GetApi(gl.GetProcAddress);
         
@@ -319,7 +319,7 @@ public class DesktopRenderer : OpenGlControlBase
         // Setting shader parameters (fragments)
         _defaultShader.SetUniform1i("ourTexture", 0);
 
-        //_silkGlContext.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Line);
+        //silkGlContext.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Line);
 
         // Work only with those segments
         FindVisibleEarthSegments();
@@ -603,8 +603,6 @@ public class DesktopRenderer : OpenGlControlBase
                     _earthSegmentSize / RendererConstants.SegmentStepsMultiplier));
             }
         }
-
-        //_earthSegments = new List<EarthSegment>() { _earthSegments[100] }; // TODO: Debug, remove me
     }
 
     private void RegenerateEarthSegments(GL silkGl)
@@ -660,7 +658,16 @@ public class DesktopRenderer : OpenGlControlBase
 
             if (c1.IsPointInCullingViewport() || c2.IsPointInCullingViewport() || c3.IsPointInCullingViewport() || c4.IsPointInCullingViewport() || viewportSegment.IsCullingViewpointCoveredBySegment())
             {
-                _visibleEarthSegments.Add(earthSegment);
+                // Removing far-side segments
+                var p1 = _sphereCoordinatesProvider.GeoToPlanar3D(new GeoPoint(earthSegment.GeoSegment.SouthLat, earthSegment.GeoSegment.WestLon, GeoConstants.EarthRadius));
+                var p2 = _sphereCoordinatesProvider.GeoToPlanar3D(new GeoPoint(earthSegment.GeoSegment.NorthLat, earthSegment.GeoSegment.WestLon, GeoConstants.EarthRadius));
+                var p3 = _sphereCoordinatesProvider.GeoToPlanar3D(new GeoPoint(earthSegment.GeoSegment.NorthLat, earthSegment.GeoSegment.EastLon, GeoConstants.EarthRadius));
+                var p4 = _sphereCoordinatesProvider.GeoToPlanar3D(new GeoPoint(earthSegment.GeoSegment.SouthLat, earthSegment.GeoSegment.EastLon, GeoConstants.EarthRadius));
+
+                if (_camera.IsPointOnCameraSideOfEarth(p1) || _camera.IsPointOnCameraSideOfEarth(p2) || _camera.IsPointOnCameraSideOfEarth(p3) || _camera.IsPointOnCameraSideOfEarth(p4))
+                {
+                    _visibleEarthSegments.Add(earthSegment);    
+                }
             }
         }
     }

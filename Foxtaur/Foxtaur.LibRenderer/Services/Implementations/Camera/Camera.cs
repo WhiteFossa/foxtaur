@@ -226,6 +226,19 @@ public class Camera : ICamera
         return new PlanarSegment(Math.Max(vp1.Y, vp3.Y), Math.Min(vp1.X, vp3.X), Math.Min(vp1.Y, vp3.Y), Math.Max(vp1.X, vp3.X));
     }
 
+    public bool IsPointOnCameraSideOfEarth(PlanarPoint3D point)
+    {
+        _ = point ?? throw new ArgumentNullException(nameof(point));
+
+        var normalizedCameraVector = Vector3.Normalize(new Vector3(Position3D.X, Position3D.Y, Position3D.Z));
+
+        var planeEquationSolution = normalizedCameraVector.X * (point.X - GeoConstants.EarthCenter.X)
+                            + normalizedCameraVector.Y * (point.Y - GeoConstants.EarthCenter.Y)
+                            + normalizedCameraVector.Z * (point.Z - GeoConstants.EarthCenter.Z);
+
+        return planeEquationSolution > 0;
+    }
+
     private void CalculateCameraPosition()
     {
         Position3D = _sphereCoordinatesProvider.GeoToPlanar3D(new GeoPoint(Lat, Lon, H));

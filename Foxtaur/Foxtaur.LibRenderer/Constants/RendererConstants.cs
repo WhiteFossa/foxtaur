@@ -105,7 +105,7 @@ public static class RendererConstants
     /// <summary>
     /// Regenerate no more than this amount of segments per frame
     /// </summary>
-    public const int MaxSegmentsPerFrameRegeneration = 20;
+    public const int MaxSegmentsPerFrameRegeneration = 10;
 
     /// <summary>
     /// Virtual viewport size for the purporse of culling (because of the strange bug exact 1.0f is not big enough)
