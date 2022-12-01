@@ -147,6 +147,8 @@ public class Camera : ICamera
 
     public Matrix4x4 ProjectionMatrix { get; private set; } = new Matrix4x4();
 
+    public Matrix4x4 ForwardProjectionMatrix { get; private set; } = new Matrix4x4();
+    
     public Matrix4x4 BackProjectionMatrix { get; private set; } = new Matrix4x4();
 
     public float AspectRatio
@@ -197,6 +199,33 @@ public class Camera : ICamera
         Zoom = Zoom * (float)Math.Pow(RendererConstants.CameraZoomOutMultiplier, steps);
     }
 
+    public PlanarPoint2D ProjectPointToViewport(PlanarPoint3D point)
+    {
+        _ = point ?? throw new ArgumentNullException(nameof(point));
+
+        var projectedPoint = Vector4.Transform(new Vector4(point.X, point.Y, point.Z, 1.0f), ForwardProjectionMatrix);
+        
+        return new PlanarPoint2D(projectedPoint.X, projectedPoint.Y);
+    }
+
+    public PlanarSegment ProjectSegmentToViewport(GeoSegment segment)
+    {
+        _ = segment ?? throw new ArgumentNullException(nameof(segment));
+        
+        var gp1 = new GeoPoint(segment.NorthLat, segment.WestLon, GeoConstants.EarthRadius);
+        var gp3 = new GeoPoint(segment.SouthLat, segment.EastLon, GeoConstants.EarthRadius);
+        
+        // To 3D
+        var p1 = _sphereCoordinatesProvider.GeoToPlanar3D(gp1);
+        var p3 = _sphereCoordinatesProvider.GeoToPlanar3D(gp3);
+        
+        // To viewport
+        var vp1 = ProjectPointToViewport(p1);
+        var vp3 = ProjectPointToViewport(p3);
+
+        return new PlanarSegment(Math.Max(vp1.Y, vp3.Y), Math.Min(vp1.X, vp3.X), Math.Min(vp1.Y, vp3.Y), Math.Max(vp1.X, vp3.X));
+    }
+
     private void CalculateCameraPosition()
     {
         Position3D = _sphereCoordinatesProvider.GeoToPlanar3D(new GeoPoint(Lat, Lon, H));
@@ -216,10 +245,12 @@ public class Camera : ICamera
                       Matrix4x4.CreateRotationX(0.0f); // Rotation
         ViewMatrix = Matrix4x4.CreateLookAt(Position3D.AsVector3(), Target.AsVector3(), Up); // Camera position
         ProjectionMatrix = Matrix4x4.CreatePerspectiveFieldOfView(Zoom, AspectRatio, 0.0005f, 100.0f); // Zoom
-
+        
+        ForwardProjectionMatrix = ModelMatrix * ViewMatrix * ProjectionMatrix;
+        
         // Back-projection matrix (for raycasting)
         var forwardProjection = ViewMatrix * ProjectionMatrix;
-
+        
         Matrix4x4 backProjection;
         if (!Matrix4x4.Invert(forwardProjection, out backProjection))
         {

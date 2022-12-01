@@ -83,4 +83,25 @@ public static class RendererHelper
 
         return new Vector3(rotated[0], rotated[1], rotated[2]);
     }
+
+    /// <summary>
+    /// Multiply Matrix4x4 by Vector
+    /// </summary>
+    public static Vector4 MultiplyMatrix4x4ByVector4(Matrix4x4 matrix, Vector4 vector)
+    {
+        var mnMatrix = Matrix<float>.Build.DenseOfArray(
+            new float[,]
+            {
+                { matrix.M11, matrix.M12, matrix.M13, matrix.M14 },
+                { matrix.M21, matrix.M22, matrix.M23, matrix.M24 },
+                { matrix.M31, matrix.M32, matrix.M33, matrix.M34 },
+                { matrix.M41, matrix.M42, matrix.M43, matrix.M44 }
+            });
+
+        var mnVector = MathNet.Numerics.LinearAlgebra.Vector<float>.Build.Dense(new float[] { vector.X, vector.Y, vector.Z, vector.W });
+
+        var result = mnMatrix * mnVector;
+
+        return new Vector4(result[0], result[1], result[2], result[3]);
+    }
 }

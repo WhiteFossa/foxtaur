@@ -87,7 +87,7 @@ public class DesktopRenderer : OpenGlControlBase
     /// <summary>
     /// Earth segment size
     /// </summary>
-    private float _earthSegmentSize = 10.0f.ToRadians();
+    private float _earthSegmentSize = 20.0f.ToRadians();
 
     /// <summary>
     /// Earth texture
@@ -603,6 +603,8 @@ public class DesktopRenderer : OpenGlControlBase
                     _earthSegmentSize / RendererConstants.SegmentStepsMultiplier));
             }
         }
+
+        //_earthSegments = new List<EarthSegment>() { _earthSegments[100] }; // TODO: Debug, remove me
     }
 
     private void RegenerateEarthSegments(GL silkGl)
@@ -641,8 +643,41 @@ public class DesktopRenderer : OpenGlControlBase
             silkGl.DrawElements(PrimitiveType.Triangles, (uint)earthSegment.Mesh.Indices.Count, DrawElementsType.UnsignedInt, null);   
         }
     }
+
+    private void FindVisibleEarthSegments()
+    {
+        _visibleEarthSegments.Clear();
+        
+        foreach (var earthSegment in _earthSegments)
+        {
+            var viewportSegment = _camera.ProjectSegmentToViewport(earthSegment.GeoSegment);
+            
+            // Segment corners
+            var c1 = new PlanarPoint2D(viewportSegment.Left, viewportSegment.Bottom);
+            var c2 = new PlanarPoint2D(viewportSegment.Left, viewportSegment.Top);
+            var c3 = new PlanarPoint2D(viewportSegment.Right, viewportSegment.Top);
+            var c4 = new PlanarPoint2D(viewportSegment.Right, viewportSegment.Bottom);
+
+            if (IsPointInViewport(c1) || IsPointInViewport(c2) || IsPointInViewport(c3) || IsPointInViewport(c4) || IsViewpointCoveredBySegment(viewportSegment))
+            {
+                _visibleEarthSegments.Add(earthSegment);
+            }
+        }
+        
+        _logger.Info($"Visible segments: { _visibleEarthSegments.Count }");
+    }
+
+    private bool IsPointInViewport(PlanarPoint2D point)
+    {
+        return point.X >= -1 && point.X <= 1 && point.Y >= -1 && point.Y <= 1;
+    }
+
+    private bool IsViewpointCoveredBySegment(PlanarSegment segment)
+    {
+        return (segment.Left <= -1 && segment.Right >= 1) || (segment.Top >= 1 && segment.Bottom <= -1);
+    }
     
-    // Highly optimized, edit with care!
+    /*// Highly optimized, edit with care! But still slow
     private void FindVisibleEarthSegments()
     {
         _visibleEarthSegments.Clear();
@@ -695,7 +730,7 @@ public class DesktopRenderer : OpenGlControlBase
             _visibleEarthSegments.Add(_earthSegments[index.Value]);
         }
 
-    }
+    }*/
 
     /*/// <summary>
     /// Draw debug vector

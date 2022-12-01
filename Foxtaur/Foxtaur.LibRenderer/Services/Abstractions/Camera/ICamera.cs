@@ -54,6 +54,11 @@ public interface ICamera
     Matrix4x4 ProjectionMatrix { get; }
 
     /// <summary>
+    /// Forward projection matrix (for projection from 3D space to screen)
+    /// </summary>
+    Matrix4x4 ForwardProjectionMatrix { get; }
+
+    /// <summary>
     /// Matrix for raycasting
     /// </summary>
     Matrix4x4 BackProjectionMatrix { get; }
@@ -77,4 +82,14 @@ public interface ICamera
     /// Zoom out
     /// </summary>
     void ZoomOut(float steps);
+
+    /// <summary>
+    /// Project point from 3D space to viewport coordinates [-1; 1]
+    /// </summary>
+    PlanarPoint2D ProjectPointToViewport(PlanarPoint3D point);
+
+    /// <summary>
+    /// Project geo segment to planar segment (in viewport coordinates)
+    /// </summary>
+    PlanarSegment ProjectSegmentToViewport(GeoSegment segment);
 }
