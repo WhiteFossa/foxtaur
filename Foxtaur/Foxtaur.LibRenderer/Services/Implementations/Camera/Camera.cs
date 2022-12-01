@@ -226,15 +226,16 @@ public class Camera : ICamera
         return new PlanarSegment(Math.Max(vp1.Y, vp3.Y), Math.Min(vp1.X, vp3.X), Math.Min(vp1.Y, vp3.Y), Math.Max(vp1.X, vp3.X));
     }
 
-    public bool IsPointOnCameraSideOfEarth(PlanarPoint3D point)
+    public bool IsPointOnCameraSideOfEarth(PlanarPoint3D undergroundPoint, PlanarPoint3D point)
     {
         _ = point ?? throw new ArgumentNullException(nameof(point));
+        _ = undergroundPoint ?? throw new ArgumentNullException(nameof(undergroundPoint));
 
         var normalizedCameraVector = Vector3.Normalize(new Vector3(Position3D.X, Position3D.Y, Position3D.Z));
 
-        var planeEquationSolution = normalizedCameraVector.X * (point.X - GeoConstants.EarthCenter.X)
-                            + normalizedCameraVector.Y * (point.Y - GeoConstants.EarthCenter.Y)
-                            + normalizedCameraVector.Z * (point.Z - GeoConstants.EarthCenter.Z);
+        var planeEquationSolution = normalizedCameraVector.X * (point.X - undergroundPoint.X)
+                            + normalizedCameraVector.Y * (point.Y - undergroundPoint.Y)
+                            + normalizedCameraVector.Z * (point.Z - undergroundPoint.Z);
 
         return planeEquationSolution > 0;
     }

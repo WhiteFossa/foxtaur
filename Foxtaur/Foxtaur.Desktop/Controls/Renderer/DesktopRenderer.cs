@@ -646,6 +646,9 @@ public class DesktopRenderer : OpenGlControlBase
     {
         _visibleEarthSegments.Clear();
         
+        var undergroundPoint = _isSurfaceRunMode ? _sphereCoordinatesProvider.GeoToPlanar3D(new GeoPoint(_camera.Lat, _camera.Lon, GeoConstants.EarthRadius - RendererConstants.SurfaceModeCameraHeight))
+            : new PlanarPoint3D(GeoConstants.EarthCenter.X, GeoConstants.EarthCenter.Y, GeoConstants.EarthCenter.Z);
+        
         foreach (var earthSegment in _earthSegments)
         {
             var viewportSegment = _camera.ProjectSegmentToViewport(earthSegment.GeoSegment);
@@ -664,7 +667,10 @@ public class DesktopRenderer : OpenGlControlBase
                 var p3 = _sphereCoordinatesProvider.GeoToPlanar3D(new GeoPoint(earthSegment.GeoSegment.NorthLat, earthSegment.GeoSegment.EastLon, GeoConstants.EarthRadius));
                 var p4 = _sphereCoordinatesProvider.GeoToPlanar3D(new GeoPoint(earthSegment.GeoSegment.SouthLat, earthSegment.GeoSegment.EastLon, GeoConstants.EarthRadius));
 
-                if (_camera.IsPointOnCameraSideOfEarth(p1) || _camera.IsPointOnCameraSideOfEarth(p2) || _camera.IsPointOnCameraSideOfEarth(p3) || _camera.IsPointOnCameraSideOfEarth(p4))
+                if (_camera.IsPointOnCameraSideOfEarth(undergroundPoint, p1)
+                    || _camera.IsPointOnCameraSideOfEarth(undergroundPoint, p2)
+                    || _camera.IsPointOnCameraSideOfEarth(undergroundPoint, p3)
+                    || _camera.IsPointOnCameraSideOfEarth(undergroundPoint, p4))
                 {
                     _visibleEarthSegments.Add(earthSegment);    
                 }

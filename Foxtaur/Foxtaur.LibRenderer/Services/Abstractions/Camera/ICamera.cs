@@ -94,7 +94,8 @@ public interface ICamera
     PlanarSegment ProjectSegmentToViewport(GeoSegment segment);
 
     /// <summary>
-    /// Is point on camera's side of Earth (for culling)
+    /// Is point on camera's side of Earth (for culling). Earth divided by the plane, passing through
+    /// underground point
     /// </summary>
-    bool IsPointOnCameraSideOfEarth(PlanarPoint3D point);
+    bool IsPointOnCameraSideOfEarth(PlanarPoint3D undergroundPoint, PlanarPoint3D point);
 }
