@@ -81,11 +81,6 @@ public class DesktopRenderer : OpenGlControlBase
     private List<EarthSegment> _visibleEarthSegments = new List<EarthSegment>();
 
     /// <summary>
-    /// Earth segment size
-    /// </summary>
-    private float _earthSegmentSize;
-
-    /// <summary>
     /// Earth texture
     /// </summary>
     private Texture _earthTexture;
@@ -231,9 +226,6 @@ public class DesktopRenderer : OpenGlControlBase
         var silkGlContext = GL.GetApi(gl.GetProcAddress);
         
         #region Initialization
-
-        // Initial zoom
-        _earthSegmentSize = _zoomService.ZoomLevelData.SegmentSize;
         
         // Generating the Earth
         _earthSphere = _earthGenerator.GenerateEarthSphere();
@@ -600,17 +592,17 @@ public class DesktopRenderer : OpenGlControlBase
     {
         _earthSegments.Clear();
         
-        for (var lat = -0.5f * (float)Math.PI; lat < GeoPoint.SumLatitudesWithWrap(0.5f * (float)Math.PI, -1.0f * _earthSegmentSize); lat += _earthSegmentSize)
+        for (var lat = -0.5f * (float)Math.PI; lat < GeoPoint.SumLatitudesWithWrap(0.5f * (float)Math.PI, -1.0f * _zoomService.ZoomLevelData.SegmentSize); lat += _zoomService.ZoomLevelData.SegmentSize)
         {
-            for (var lon = (float)Math.PI; lon > GeoPoint.SumLongitudesWithWrap(-1.0f * (float)Math.PI, _earthSegmentSize); lon -= _earthSegmentSize)
+            for (var lon = (float)Math.PI; lon > GeoPoint.SumLongitudesWithWrap(-1.0f * (float)Math.PI, _zoomService.ZoomLevelData.SegmentSize); lon -= _zoomService.ZoomLevelData.SegmentSize)
             {
                 _earthSegments.Add(_earthGenerator.GenerateEarthSegment(
                     new GeoSegment(
-                        GeoPoint.SumLatitudesWithWrap(lat, _earthSegmentSize),
+                        GeoPoint.SumLatitudesWithWrap(lat, _zoomService.ZoomLevelData.SegmentSize),
                         lon,
                         lat,
-                        GeoPoint.SumLongitudesWithWrap(lon, -1.0f * _earthSegmentSize)),
-                    _earthSegmentSize / RendererConstants.SegmentStepsMultiplier));
+                        GeoPoint.SumLongitudesWithWrap(lon, -1.0f * _zoomService.ZoomLevelData.SegmentSize)),
+                    _zoomService.ZoomLevelData.SegmentSize / _zoomService.ZoomLevelData.SegmentSteps));
             }
         }
     }
@@ -704,8 +696,6 @@ public class DesktopRenderer : OpenGlControlBase
         DisposeEarthSegments();
         _earthSegments.Clear();
 
-        _earthSegmentSize = _zoomService.ZoomLevelData.SegmentSize;
-        
         GenerateEarthSegments();
     }
 

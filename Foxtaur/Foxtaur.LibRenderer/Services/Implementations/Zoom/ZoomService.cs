@@ -79,15 +79,15 @@ public class ZoomService : IZoomService
         
         new(ZoomLevel.ZoomLevel1,
             0.3f,
-            0.1f,
+            0.05f,
             2.0f.ToRadians(),
             50.0f),
         
         new(ZoomLevel.ZoomLevel2,
-            0.1f,
+            0.05f,
             0.0f,
             1.0f.ToRadians(),
-            500.0f)
+            100.0f)
     };
 
     public ZoomService()
