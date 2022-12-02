@@ -36,7 +36,7 @@ public static class RendererConstants
     /// <summary>
     /// Camera height for surface walk mode
     /// </summary>
-    public const float SurfaceModeCameraOrbitHeight = GeoConstants.EarthRadius + 0.005f * GeoConstants.EarthRadius;
+    public const float SurfaceModeCameraOrbitHeight = GeoConstants.EarthRadius + 0.001f * GeoConstants.EarthRadius;
 
     /// <summary>
     /// Head rotation speed (latitudal) in surface run mode
@@ -101,7 +101,7 @@ public static class RendererConstants
     /// <summary>
     /// Regenerate no more than this amount of segments per frame
     /// </summary>
-    public const int MaxSegmentsPerFrameRegeneration = 10;
+    public const int MaxSegmentsPerFrameRegeneration = 2;
 
     /// <summary>
     /// Virtual viewport size for the purporse of culling (because of the strange bug exact 1.0f is not big enough)
