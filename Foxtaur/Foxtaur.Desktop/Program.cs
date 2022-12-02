@@ -15,8 +15,10 @@ using Foxtaur.LibGeo.Services.Implementations.CoordinateProviders;
 using Foxtaur.LibGeo.Services.Implementations.DemProviders;
 using Foxtaur.LibRenderer.Services.Abstractions.Camera;
 using Foxtaur.LibRenderer.Services.Abstractions.Drawers;
+using Foxtaur.LibRenderer.Services.Abstractions.Zoom;
 using Foxtaur.LibRenderer.Services.Implementations.Camera;
 using Foxtaur.LibRenderer.Services.Implementations.Drawers;
+using Foxtaur.LibRenderer.Services.Implementations.Zoom;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using NLog;
@@ -82,6 +84,7 @@ namespace Foxtaur.Desktop
             services.AddSingleton<ITextDrawer, TextDrawer>();
             services.AddSingleton<IUi, Ui>();
             services.AddSingleton<IDemProvider, DemProvider>();
+            services.AddSingleton<IZoomService, ZoomService>();
 
             return services;
         }

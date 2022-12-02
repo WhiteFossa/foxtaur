@@ -3,6 +3,16 @@ using Foxtaur.LibGeo.Models;
 
 namespace Foxtaur.LibRenderer.Services.Abstractions.Camera;
 
+public class OnZoomChangedArgs
+{
+    public float Zoom { get; private set; }
+
+    public OnZoomChangedArgs(float zoom)
+    {
+        Zoom = zoom;
+    }
+}
+
 /// <summary>
 /// Camera
 /// </summary>
@@ -72,6 +82,16 @@ public interface ICamera
     /// Camera up vector
     /// </summary>
     Vector3 Up { get; set; }
+    
+    /// <summary>
+    /// Called when zoom changed
+    /// </summary>
+    delegate void OnZoomChangedHandler(object sender, OnZoomChangedArgs args);
+    
+    /// <summary>
+    /// Event for zoom change
+    /// </summary>
+    event OnZoomChangedHandler OnZoomChanged;
 
     /// <summary>
     /// Zoom in

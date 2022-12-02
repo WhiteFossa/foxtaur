@@ -138,6 +138,8 @@ public class Camera : ICamera
             }
 
             CalculateMatrices();
+            
+            OnZoomChanged?.Invoke(this, new OnZoomChangedArgs(_zoom));
         }
     }
 
@@ -188,6 +190,8 @@ public class Camera : ICamera
         CalculateCameraPosition();
         CalculateMatrices();
     }
+
+    public event ICamera.OnZoomChangedHandler OnZoomChanged;
 
     public void ZoomIn(float steps)
     {

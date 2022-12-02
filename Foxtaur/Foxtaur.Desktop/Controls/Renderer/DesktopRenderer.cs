@@ -24,6 +24,7 @@ using Foxtaur.LibRenderer.Helpers;
 using Foxtaur.LibRenderer.Models;
 using Foxtaur.LibRenderer.Models.UI;
 using Foxtaur.LibRenderer.Services.Abstractions.Camera;
+using Foxtaur.LibRenderer.Services.Abstractions.Zoom;
 using Microsoft.Extensions.DependencyInjection;
 using NLog;
 using Silk.NET.OpenGL;
@@ -56,12 +57,7 @@ public class DesktopRenderer : OpenGlControlBase
     /// Default shader
     /// </summary>
     private Shader _defaultShader;
-
-    /// <summary>
-    /// Camera
-    /// </summary>
-    private readonly ICamera _camera = Program.Di.GetService<ICamera>();
-
+    
     #region Earth
 
     /// <summary>
@@ -83,11 +79,11 @@ public class DesktopRenderer : OpenGlControlBase
     /// Currently visible Earth segments
     /// </summary>
     private List<EarthSegment> _visibleEarthSegments = new List<EarthSegment>();
-    
+
     /// <summary>
     /// Earth segment size
     /// </summary>
-    private float _earthSegmentSize = 5.0f.ToRadians();
+    private float _earthSegmentSize;
 
     /// <summary>
     /// Earth texture
@@ -178,11 +174,13 @@ public class DesktopRenderer : OpenGlControlBase
     #endregion
 
     #region DI
-
+    
+    private readonly ICamera _camera = Program.Di.GetService<ICamera>();
     private ICoordinatesProvider _sphereCoordinatesProvider = Program.Di.GetService<ISphereCoordinatesProvider>();
     private IEarthGenerator _earthGenerator = Program.Di.GetService<IEarthGenerator>();
     private IUi _ui = Program.Di.GetService<IUi>();
     private IDemProvider _demProvider = Program.Di.GetService<IDemProvider>();
+    private IZoomService _zoomService = Program.Di.GetService<IZoomService>();
 
     #endregion
 
@@ -234,6 +232,9 @@ public class DesktopRenderer : OpenGlControlBase
         
         #region Initialization
 
+        // Initial zoom
+        _earthSegmentSize = _zoomService.ZoomLevelData.SegmentSize;
+        
         // Generating the Earth
         _earthSphere = _earthGenerator.GenerateEarthSphere();
         GenerateEarthSegments();
@@ -256,6 +257,10 @@ public class DesktopRenderer : OpenGlControlBase
         PointerReleased += OnMouseReleased;
         PointerMoved += OnMouseMoved;
         
+        // Zoom events
+        _camera.OnZoomChanged += OnZoomChanged;
+        _zoomService.OnZoomLevelChanged += OnZoomLevelChanged;
+
         #endregion
         
 
@@ -274,7 +279,7 @@ public class DesktopRenderer : OpenGlControlBase
         _fpsTimer.AutoReset = true;
         _fpsTimer.Enabled = true;
     }
-
+    
     private void OnFpsTimer(object sender, ElapsedEventArgs e)
     {
         _uiData.Fps = _framesDrawn * (1000 / (float)_fpsTimer.Interval);
@@ -347,6 +352,17 @@ public class DesktopRenderer : OpenGlControlBase
         _ui.DeInitialize();
 
         // Cleaning Earth segments
+        DisposeEarthSegments();
+        
+        _earthTexture.Dispose();
+
+        _defaultShader.Dispose();
+
+        base.OnOpenGlDeinit(gl, fb);
+    }
+
+    private void DisposeEarthSegments()
+    {
         foreach (var earthSegment in _earthSegments)
         {
             if (earthSegment.Mesh != null)
@@ -354,12 +370,6 @@ public class DesktopRenderer : OpenGlControlBase
                 earthSegment.Mesh.Dispose();   
             }
         }
-        
-        _earthTexture.Dispose();
-
-        _defaultShader.Dispose();
-
-        base.OnOpenGlDeinit(gl, fb);
     }
 
     /// <summary>
@@ -676,6 +686,27 @@ public class DesktopRenderer : OpenGlControlBase
                 }
             }
         }
+    }
+
+    /// <summary>
+    /// Called when camera zoom changed
+    /// </summary>
+    private void OnZoomChanged(object sender, OnZoomChangedArgs args)
+    {
+        _zoomService.Zoom = args.Zoom;
+    }
+    
+    /// <summary>
+    /// Called when zoom level (i.e. segments sizes, DEM resolution and so on) changed
+    /// </summary>
+    private void OnZoomLevelChanged(object sender, OnZoomLevelChangedArgs args)
+    {
+        DisposeEarthSegments();
+        _earthSegments.Clear();
+
+        _earthSegmentSize = _zoomService.ZoomLevelData.SegmentSize;
+        
+        GenerateEarthSegments();
     }
 
     /*/// <summary>
