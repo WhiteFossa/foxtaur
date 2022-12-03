@@ -26,11 +26,6 @@ public class DemFragment : FragmentedResourceBase
     {
     }
 
-    public override string GetLocalPath()
-    {
-        return ResourcesConstants.LocalDemFragmentsDirectory + Path.DirectorySeparatorChar + ResourceName;
-    }
-
     public override async Task DownloadAsync(OnFragmentedResourceLoaded onLoad)
     {
         _onLoad = onLoad ?? throw new ArgumentNullException(nameof(onLoad));
@@ -51,14 +46,14 @@ public class DemFragment : FragmentedResourceBase
         
         _logger.Info($"Loading { ResourceName }...");
 
-        if (!IsLocal)
-        {
-            // TODO: Put download code here
-        }
-
-        // Decompressing
         try
         {
+            if (!IsLocal)
+            {
+                await LoadFromUrlToFileAsync(ResourceName);
+            }
+
+            // Decompressing
             _logger.Info($"Decompressing { ResourceName }...");
             using (var decompressedStream = LoadZstdFile(GetLocalPath()))
             {

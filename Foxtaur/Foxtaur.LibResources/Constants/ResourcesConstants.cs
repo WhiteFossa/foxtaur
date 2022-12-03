@@ -6,11 +6,6 @@ namespace Foxtaur.LibResources.Constants;
 public class ResourcesConstants
 {
     /// <summary>
-    /// Put downloaded DEM fragments here (relative to application for now)
-    /// </summary>
-    public const string LocalDemFragmentsDirectory = "Resources/DEMs/GMTED2010/LowResolution";
-
-    /// <summary>
     /// Read DEM data from this band
     /// </summary>
     public const int DemBand = 1;
@@ -29,4 +24,19 @@ public class ResourcesConstants
     /// DEM scaling factor (full swipe / Earth radius)
     /// </summary>
     public const float DemScalingFactor = 65.535f / 6371.0f;
+
+    /// <summary>
+    /// Base URL for resources
+    /// </summary>
+    public const string ResourcesBaseUrl = "https://foxtaur.me/static/";
+
+    /// <summary>
+    /// Put downloaded resources here (relative to executable)
+    /// </summary>
+    public const string DownloadedDirectory = "Downloaded/";
+
+    /// <summary>
+    /// DEM is here on server
+    /// </summary>
+    public const string DemRemotePath = "DEMs/GMTED2010/";
 }
