@@ -30,19 +30,22 @@ public class DemFragment : FragmentedResourceBase
     {
         _onLoad = onLoad ?? throw new ArgumentNullException(nameof(onLoad));
         
-        if (_isLoaded)
+        lock (this)
         {
-            // Fragment already downloaded
-            return;
-        }
-        
-        if (_isLoading)
-        {
-            // Loading in progress
-            return;
-        }
+            if (_isLoaded)
+            {
+                // Fragment already downloaded
+                return;
+            }
+            
+            if (_isLoading)
+            {
+                // Loading in progress
+                return;
+            }
 
-        _isLoading = true;
+            _isLoading = true;
+        }
         
         _logger.Info($"Loading { ResourceName }...");
 
@@ -50,7 +53,12 @@ public class DemFragment : FragmentedResourceBase
         {
             if (!IsLocal)
             {
-                await LoadFromUrlToFileAsync(ResourceName);
+                // Do we have already downloaded file?
+                var localPath = GetResourceLocalPath(ResourceName);
+                if (!File.Exists(localPath))
+                {
+                    await LoadFromUrlToFileAsync(ResourceName);    
+                }
             }
 
             // Decompressing

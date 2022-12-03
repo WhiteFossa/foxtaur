@@ -12,6 +12,8 @@ public class DemProvider : IDemProvider
     private readonly IFragmentedResourcesProvider _demResourcesProvider;
 
     public event IDemProvider.OnRegenerateDemFragmentHandler? OnRegenerateDemFragment;
+    
+    private object _regenerationLock = new object();
 
     public DemProvider()
     {
@@ -28,8 +30,7 @@ public class DemProvider : IDemProvider
             return GeoConstants.EarthRadius;
         }
 
-        //Task.Run(() => fragment.DownloadAsync(OnFragmentLoaded));
-        fragment.DownloadAsync(OnFragmentLoaded); // Running in separate task
+        Task.Run(() => fragment.DownloadAsync(OnFragmentLoaded)); // Running in separate task
 
         var h = fragment.GetHeight(lat, lon);
         if (h == null)
@@ -46,6 +47,9 @@ public class DemProvider : IDemProvider
         _ = demFragment ?? throw new InvalidOperationException();
 
         // Requesting DEM regeneration
-        OnRegenerateDemFragment?.Invoke(this, new OnRegenerateDemFragmentArgs(demFragment.NorthLat, demFragment.WestLon, demFragment.SouthLat, demFragment.EastLon));
+        lock (_regenerationLock)
+        {
+            OnRegenerateDemFragment?.Invoke(this, new OnRegenerateDemFragmentArgs(demFragment.NorthLat, demFragment.WestLon, demFragment.SouthLat, demFragment.EastLon));    
+        }
     }
 }
