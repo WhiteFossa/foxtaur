@@ -39,4 +39,9 @@ public class ResourcesConstants
     /// DEM is here on server
     /// </summary>
     public const string DemRemotePath = "DEMs/GMTED2010/";
+
+    /// <summary>
+    /// How many active downloading threads can be
+    /// </summary>
+    public const int MaxActiveDownloadingThreads = 5;
 }

@@ -48,7 +48,12 @@ public abstract class FragmentedResourceBase
     /// <summary>
     /// Call this when resource load is completed
     /// </summary>
-    protected OnFragmentedResourceLoaded _onLoad;
+    protected OnFragmentedResourceLoaded OnLoad;
+
+    /// <summary>
+    /// Semaphore for limit the number of active downloading threads
+    /// </summary>
+    protected static Semaphore DownloadThreadsLimiter = new Semaphore(ResourcesConstants.MaxActiveDownloadingThreads, ResourcesConstants.MaxActiveDownloadingThreads); 
 
     private readonly HttpClient _httpClient = new HttpClient();
     private Logger _logger = LogManager.GetCurrentClassLogger();
@@ -127,15 +132,28 @@ public abstract class FragmentedResourceBase
             throw new ArgumentException(nameof(relativeUrl));
         }
 
-        _logger.Info($"Downloading from {uriResult}");
-
-        using (var downloadStream = await _httpClient.GetStreamAsync(uriResult))
+        try
         {
-            var resultStream = new MemoryStream();
-            downloadStream.CopyTo(resultStream);
+            _logger.Info($"Waiting for download from {uriResult}");
+            
+            DownloadThreadsLimiter.WaitOne();
+            
+            _logger.Info($"Downloading from {uriResult}");
 
-            return resultStream;
+            using (var downloadStream = await _httpClient.GetStreamAsync(uriResult))
+            {
+                var resultStream = new MemoryStream();
+                downloadStream.CopyTo(resultStream);
+
+                return resultStream;
+            }
         }
+        finally
+        {
+            DownloadThreadsLimiter.Release();
+        }
+        
+        
     }
 
     protected async Task LoadFromUrlToFileAsync(string relativeUrl)

@@ -28,7 +28,7 @@ public class DemFragment : FragmentedResourceBase
 
     public override async Task DownloadAsync(OnFragmentedResourceLoaded onLoad)
     {
-        _onLoad = onLoad ?? throw new ArgumentNullException(nameof(onLoad));
+        OnLoad = onLoad ?? throw new ArgumentNullException(nameof(onLoad));
         
         lock (this)
         {
@@ -81,7 +81,7 @@ public class DemFragment : FragmentedResourceBase
         _isLoaded = true;
 
         _logger.Info($"{ ResourceName } is ready.");
-        _onLoad(this);
+        OnLoad(this);
     }
 
     /// <summary>
