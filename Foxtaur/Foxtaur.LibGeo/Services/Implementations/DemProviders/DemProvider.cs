@@ -102,7 +102,6 @@ public class DemProvider : IDemProvider
         // Requesting DEM regeneration
         lock (_regenerationLock)
         {
-            _logger.Info($"Regenerating: Lat: {demFragment.NorthLat}-{demFragment.SouthLat}, Lon: {demFragment.WestLon}-{demFragment.EastLon}");
             OnRegenerateDemFragment?.Invoke(this, new OnRegenerateDemFragmentArgs(demFragment.NorthLat, demFragment.WestLon, demFragment.SouthLat, demFragment.EastLon));    
         }
     }
