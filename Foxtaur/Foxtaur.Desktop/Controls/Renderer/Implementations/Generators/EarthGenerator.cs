@@ -7,6 +7,7 @@ using Foxtaur.LibGeo.Models;
 using Foxtaur.LibGeo.Services.Abstractions.CoordinateProviders;
 using Foxtaur.LibGeo.Services.Abstractions.DemProviders;
 using Foxtaur.LibRenderer.Models;
+using Foxtaur.LibResources.Enums;
 using Silk.NET.OpenGL;
 
 namespace Foxtaur.Desktop.Controls.Renderer.Implementations.Generators;
@@ -22,63 +23,13 @@ public class EarthGenerator : IEarthGenerator
         _sphereCoordinatesProvider = sphereCoordinatesProvider;
         _demProvider = demProvider;
     }
-
-    public Mesh GenerateFullEarth(float gridStep)
-    {
-        var earthMesh = new Mesh();
-
-        for (var lat = (float)Math.PI / -2.0f; lat < (float)Math.PI / 2.0f; lat += gridStep)
-        {
-            var latNorther = lat + gridStep;
-
-            // First two points of a stripe
-            var firstPair = GenerateAndAddPointsPair(earthMesh, lat, (float)Math.PI, latNorther, (float)Math.PI);
-            var i3D0 = firstPair.Item1;
-            var i3D1 = firstPair.Item2;
-
-            // Intermediate triangles
-            for (var lon = (float)Math.PI - gridStep; lon > -1.0f * (float)Math.PI; lon -= gridStep)
-            {
-                var intermediatePair = GenerateAndAddPointsPair(earthMesh, lat, lon, latNorther, lon);
-                var i3D2 = intermediatePair.Item1;
-                var i3D3 = intermediatePair.Item2;
-
-                earthMesh.AddIndex(i3D0);
-                earthMesh.AddIndex(i3D1);
-                earthMesh.AddIndex(i3D3);
-
-                earthMesh.AddIndex(i3D3);
-                earthMesh.AddIndex(i3D2);
-                earthMesh.AddIndex(i3D0);
-
-                i3D0 = i3D2;
-                i3D1 = i3D3;
-            }
-
-            // Two last triangles of a stripe
-            var lastPair = GenerateAndAddPointsPair(earthMesh, lat, -1.0f * (float)Math.PI, latNorther,
-                -1.0f * (float)Math.PI);
-            var i3last0 = lastPair.Item1;
-            var i3last1 = lastPair.Item2;
-
-            earthMesh.AddIndex(i3D0);
-            earthMesh.AddIndex(i3D1);
-            earthMesh.AddIndex(i3last1);
-
-            earthMesh.AddIndex(i3last1);
-            earthMesh.AddIndex(i3last0);
-            earthMesh.AddIndex(i3D0);
-        }
-
-        return earthMesh;
-    }
-
+    
     public EarthSegment GenerateEarthSegment(GeoSegment segment, float gridStep)
     {
         return new EarthSegment(segment, gridStep);
     }
 
-    public void GenerateMeshForSegment(EarthSegment segment)
+    public void GenerateMeshForSegment(EarthSegment segment, ZoomLevel desiredZoomLevel)
     {
         _ = segment ?? throw new ArgumentNullException(nameof(segment));
         
@@ -89,14 +40,14 @@ public class EarthGenerator : IEarthGenerator
             var latNorther = lat + segment.GridStep;
 
             // First two points of a stripe
-            var firstPair = GenerateAndAddPointsPair(segmentMesh, lat, segment.GeoSegment.WestLon, latNorther, segment.GeoSegment.WestLon);
+            var firstPair = GenerateAndAddPointsPair(segmentMesh, lat, segment.GeoSegment.WestLon, latNorther, segment.GeoSegment.WestLon, desiredZoomLevel);
             var i3D0 = firstPair.Item1;
             var i3D1 = firstPair.Item2;
 
             // Intermediate triangles
             for (var lon = segment.GeoSegment.WestLon - segment.GridStep; lon > segment.GeoSegment.EastLon; lon -= segment.GridStep)
             {
-                var intermediatePair = GenerateAndAddPointsPair(segmentMesh, lat, lon, latNorther, lon);
+                var intermediatePair = GenerateAndAddPointsPair(segmentMesh, lat, lon, latNorther, lon, desiredZoomLevel);
                 var i3D2 = intermediatePair.Item1;
                 var i3D3 = intermediatePair.Item2;
 
@@ -113,7 +64,7 @@ public class EarthGenerator : IEarthGenerator
             }
             
             // Two last triangles of a stripe
-            var lastPair = GenerateAndAddPointsPair(segmentMesh, lat, segment.GeoSegment.EastLon, latNorther, segment.GeoSegment.EastLon);
+            var lastPair = GenerateAndAddPointsPair(segmentMesh, lat, segment.GeoSegment.EastLon, latNorther, segment.GeoSegment.EastLon, desiredZoomLevel);
             var i3last0 = lastPair.Item1;
             var i3last1 = lastPair.Item2;
 
@@ -138,16 +89,20 @@ public class EarthGenerator : IEarthGenerator
     /// Generates a pair of points (geo), converts them to planars and add them to mesh.
     /// Returns pair of generated points indices 
     /// </summary>
-    private ValueTuple<uint, uint> GenerateAndAddPointsPair(Mesh mesh, float p0Lat, float p0Lon, float p1Lat,
-        float p1Lon)
+    private ValueTuple<uint, uint> GenerateAndAddPointsPair(Mesh mesh,
+        float p0Lat,
+        float p0Lon,
+        float p1Lat,
+        float p1Lon,
+        ZoomLevel desiredZoomLevel)
     {
         _ = mesh ?? throw new ArgumentNullException(nameof(mesh));
 
         // Geopoints
-        var altitude0 = _demProvider.GetSurfaceAltitude(p0Lat, p0Lon);
+        var altitude0 = _demProvider.GetSurfaceAltitude(p0Lat, p0Lon, desiredZoomLevel);
         var geoPoint0 = new GeoPoint(p0Lat, p0Lon, altitude0);
 
-        var altitude1 = _demProvider.GetSurfaceAltitude(p1Lat, p1Lon);
+        var altitude1 = _demProvider.GetSurfaceAltitude(p1Lat, p1Lon, desiredZoomLevel);
         var geoPoint1 = new GeoPoint(p1Lat, p1Lon, altitude1);
 
         // Planar coordinates (3D + Texture)

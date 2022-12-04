@@ -8,7 +8,7 @@ public class ZoomLevel
     /// <summary>
     /// Level
     /// </summary>
-    public Enums.ZoomLevel Level { get; }
+    public LibResources.Enums.ZoomLevel Level { get; }
 
     /// <summary>
     /// Minimal zoom for this level
@@ -30,7 +30,7 @@ public class ZoomLevel
     /// </summary>
     public float SegmentSteps { get; }
 
-    public ZoomLevel(Enums.ZoomLevel level, float minZoom, float maxZoom, float segmentSize, float segmentSteps)
+    public ZoomLevel(LibResources.Enums.ZoomLevel level, float minZoom, float maxZoom, float segmentSize, float segmentSteps)
     {
         Level = level;
         MinZoom = minZoom;

@@ -1,6 +1,7 @@
 using Foxtaur.LibGeo.Constants;
 using Foxtaur.LibGeo.Services.Abstractions.DemProviders;
 using Foxtaur.LibResources.Constants;
+using Foxtaur.LibResources.Enums;
 using Foxtaur.LibResources.Models;
 using Foxtaur.LibResources.Services.Abstractions;
 using Foxtaur.LibResources.Services.Implementations;
@@ -20,10 +21,10 @@ public class DemProvider : IDemProvider
         _demResourcesProvider = new DemResourcesProvider();
     }
 
-    public float GetSurfaceAltitude(float lat, float lon)
+    public float GetSurfaceAltitude(float lat, float lon, ZoomLevel desiredZoomLevel)
     {
         // Searching for fragment
-        var fragment = _demResourcesProvider.GetResource(lat, lon) as DemFragment;
+        var fragment = _demResourcesProvider.GetResource(lat, lon, desiredZoomLevel) as DemFragment;
         if (fragment == null)
         {
             // We don't have DEM for this coordinates at all

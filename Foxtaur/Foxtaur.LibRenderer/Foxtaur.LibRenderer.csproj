@@ -24,4 +24,8 @@
       <ProjectReference Include="..\Foxtaur.LibGeo\Foxtaur.LibGeo.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="Enums" />
+    </ItemGroup>
+
 </Project>

@@ -1,4 +1,5 @@
 using Foxtaur.LibGeo.Models;
+using Foxtaur.LibResources.Enums;
 
 namespace Foxtaur.LibGeo.Services.Abstractions.DemProviders;
 
@@ -23,7 +24,7 @@ public interface IDemProvider
     /// <summary>
     /// Get surface altitude (in ideal Earth radiuses)
     /// </summary>
-    float GetSurfaceAltitude(float lat, float lon);
+    float GetSurfaceAltitude(float lat, float lon, ZoomLevel desiredZoomLevel);
     
     /// <summary>
     /// Event for DEM fragment regeneration

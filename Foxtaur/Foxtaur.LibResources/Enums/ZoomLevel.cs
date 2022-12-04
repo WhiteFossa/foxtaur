@@ -1,4 +1,4 @@
-namespace Foxtaur.LibRenderer.Enums;
+namespace Foxtaur.LibResources.Enums;
 
 /// <summary>
 /// Possible zoom levels

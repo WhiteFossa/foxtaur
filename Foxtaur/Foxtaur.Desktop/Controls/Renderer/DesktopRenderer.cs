@@ -616,7 +616,7 @@ public class DesktopRenderer : OpenGlControlBase
 
         // Regenerating meshes
         toRegenerateInThisFrame
-            .ForEach(es => _earthGenerator.GenerateMeshForSegment(es));
+            .ForEach(es => _earthGenerator.GenerateMeshForSegment(es, _zoomService.ZoomLevel));
         
         // Regenerating buffers
         toRegenerateInThisFrame

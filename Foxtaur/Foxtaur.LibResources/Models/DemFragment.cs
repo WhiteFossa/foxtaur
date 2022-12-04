@@ -1,4 +1,5 @@
 using Foxtaur.LibResources.Constants;
+using Foxtaur.LibResources.Enums;
 using Foxtaur.LibResources.Services.Abstractions.Readers;
 using Foxtaur.LibResources.Services.Implementations.Readers;
 using NLog;
@@ -8,11 +9,8 @@ namespace Foxtaur.LibResources.Models;
 /// <summary>
 /// Digital Elevation Map fragment
 /// </summary>
-public class DemFragment : FragmentedResourceBase
+public class DemFragment : ZoomedFragmentedResourceBase
 {
-    /// <summary>
-    /// Logger
-    /// </summary>
     private Logger _logger = LogManager.GetCurrentClassLogger();
     
     private IGeoTiffReader _reader;
@@ -21,8 +19,8 @@ public class DemFragment : FragmentedResourceBase
     
     private bool _isLoaded;
 
-    public DemFragment(float northLat, float southLat, float westLon, float eastLon, string resourceName, bool isLocal)
-        : base(northLat, southLat, westLon, eastLon, resourceName, isLocal)
+    public DemFragment(float northLat, float southLat, float westLon, float eastLon, ZoomLevel zoomLevel, string resourceName, bool isLocal)
+        : base(northLat, southLat, westLon, eastLon, zoomLevel, resourceName, isLocal)
     {
     }
 

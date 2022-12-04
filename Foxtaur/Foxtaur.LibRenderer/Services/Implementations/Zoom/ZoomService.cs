@@ -1,7 +1,7 @@
 using Foxtaur.Helpers;
 using Foxtaur.LibRenderer.Constants;
-using Foxtaur.LibRenderer.Enums;
 using Foxtaur.LibRenderer.Services.Abstractions.Zoom;
+using Foxtaur.LibResources.Enums;
 
 namespace Foxtaur.LibRenderer.Services.Implementations.Zoom;
 
