@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Numerics;
+using System.Threading.Tasks;
 using System.Timers;
 using Avalonia;
 using Avalonia.Input;
@@ -178,6 +179,12 @@ public class DesktopRenderer : OpenGlControlBase
     private IZoomService _zoomService = Program.Di.GetService<IZoomService>();
 
     #endregion
+    
+    #region Locks
+
+    private object _demRegenerationLock = new object();
+
+    #endregion
 
     /// <summary>
     /// Constructor
@@ -323,7 +330,7 @@ public class DesktopRenderer : OpenGlControlBase
         
         // Regenerating Earth segments
         RegenerateEarthSegments(silkGlContext);
-
+        
         // Draw Earth
         DrawEarth(silkGlContext);
 
@@ -584,10 +591,16 @@ public class DesktopRenderer : OpenGlControlBase
     /// </summary>
     private void OnDemChanged(object sender, OnRegenerateDemFragmentArgs args)
     {
-        _earthSegments
-            .Where(es => es.GeoSegment.IsCoveredBy(args.Segment))
-            .ToList()
-            .ForEach(s => s.MarkToRegeneration());
+        Dispatcher.UIThread.InvokeAsync(() =>
+        {
+            lock (_demRegenerationLock)
+            {
+                _earthSegments
+                    .Where(es => es.GeoSegment.IsCoveredBy(args.Segment))
+                    .ToList()
+                    .ForEach(s => s.MarkToRegeneration());    
+            }
+        });
     }
 
     private void GenerateEarthSegments()

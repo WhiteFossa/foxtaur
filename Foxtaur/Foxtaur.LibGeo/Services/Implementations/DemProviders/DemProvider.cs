@@ -38,43 +38,49 @@ public class DemProvider : IDemProvider
 
     public float GetSurfaceAltitude(float lat, float lon, ZoomLevel desiredZoomLevel)
     {
-        // Returning the best available zoom level
-        int desiredZoomLevelIndex = -1;
-        for (var zoomLevelIndex = 0; zoomLevelIndex < _orderedZoomLevels.Count; zoomLevelIndex++)
+        lock (this)
         {
-            if (_orderedZoomLevels[zoomLevelIndex] == desiredZoomLevel)
+            // Returning the best available zoom level
+            int desiredZoomLevelIndex = -1;
+            for (var zoomLevelIndex = 0; zoomLevelIndex < _orderedZoomLevels.Count; zoomLevelIndex++)
             {
-                desiredZoomLevelIndex = zoomLevelIndex;
-                break;
+                if (_orderedZoomLevels[zoomLevelIndex] == desiredZoomLevel)
+                {
+                    desiredZoomLevelIndex = zoomLevelIndex;
+                    break;
+                }
             }
-        }
 
-        DemFragment fragment = null;
-        for (var zoomLevelIndex = desiredZoomLevelIndex; zoomLevelIndex < _orderedZoomLevels.Count; zoomLevelIndex++)
-        {
-            fragment = StartFragmentLoad(lat, lon, _orderedZoomLevels[zoomLevelIndex]);
-            if (fragment == null)
+            DemFragment fragment = null;
+            for (var zoomLevelIndex = desiredZoomLevelIndex;
+                 zoomLevelIndex < _orderedZoomLevels.Count;
+                 zoomLevelIndex++)
             {
-                // We don't have DEM for this coordinates at all
+                fragment = StartFragmentLoad(lat, lon, _orderedZoomLevels[zoomLevelIndex]);
+                if (fragment == null)
+                {
+                    // We don't have DEM for this coordinates at all
+                    return GeoConstants.EarthRadius;
+                }
+
+                if (fragment.IsLoaded)
+                {
+                    // Fragment is ready, go to get coordinates
+                    break;
+                }
+
+                // Fragment is not ready, maybe lower resolution fragment is ready? We will know it on next iteration
+            }
+
+            var h = fragment.GetHeight(lat, lon);
+            if (h == null)
+            {
                 return GeoConstants.EarthRadius;
             }
 
-            if (fragment.IsLoaded)
-            {
-                // Fragment is ready, go to get coordinates
-                break;
-            }
-            
-            // Fragment is not ready, maybe lower resolution fragment is ready? We will know it on next iteration
+            return GeoConstants.EarthRadius + GeoConstants.DemAltitudeMultiplicator *
+                ResourcesConstants.DemScalingFactor * (h.Value - ResourcesConstants.DemSeaLevel);
         }
-
-        var h = fragment.GetHeight(lat, lon);
-        if (h == null)
-        {
-            return GeoConstants.EarthRadius;
-        }
-
-        return GeoConstants.EarthRadius + GeoConstants.DemAltitudeMultiplicator * ResourcesConstants.DemScalingFactor * (h.Value - ResourcesConstants.DemSeaLevel);
     }
 
     private DemFragment? StartFragmentLoad(float lat, float lon, ZoomLevel zoomLevel)
