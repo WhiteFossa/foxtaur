@@ -16,6 +16,8 @@ public class DemProvider : IDemProvider
     public event IDemProvider.OnRegenerateDemFragmentHandler? OnRegenerateDemFragment;
     
     private object _regenerationLock = new object();
+
+    private object _startDownloadLock = new object();
     
     private Logger _logger = LogManager.GetCurrentClassLogger();
 
@@ -84,7 +86,10 @@ public class DemProvider : IDemProvider
             return null;
         }
 
-        Task.Run(() => fragment.DownloadAsync(OnFragmentLoaded)); // Running in separate thread
+        lock (_startDownloadLock)
+        {
+            Task.Run(() => fragment.DownloadAsync(OnFragmentLoaded)); // Running in separate thread
+        }
 
         return fragment;
     }

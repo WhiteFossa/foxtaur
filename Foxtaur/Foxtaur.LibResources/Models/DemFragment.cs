@@ -30,8 +30,8 @@ public class DemFragment : ZoomedFragmentedResourceBase
         }
     }
 
-    public DemFragment(float northLat, float southLat, float westLon, float eastLon, ZoomLevel zoomLevel, string resourceName, bool isLocal)
-        : base(northLat, southLat, westLon, eastLon, zoomLevel, resourceName, isLocal)
+    public DemFragment(float northLat, float southLat, float westLon, float eastLon, List<ZoomLevel> zoomLevels, string resourceName, bool isLocal)
+        : base(northLat, southLat, westLon, eastLon, zoomLevels, resourceName, isLocal)
     {
     }
 

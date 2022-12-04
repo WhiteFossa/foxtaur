@@ -8,19 +8,19 @@ namespace Foxtaur.LibResources.Models;
 public class ZoomedFragmentedResourceBase : FragmentedResourceBase
 {
     /// <summary>
-    /// Zoom level
+    /// Fragment provides data for those zoom levels
     /// </summary>
-    public ZoomLevel ZoomLevel { get; private set; }
+    public List<ZoomLevel> ZoomLevels { get; private set; }
 
     public ZoomedFragmentedResourceBase(float northLat,
         float southLat,
         float westLon,
         float eastLon,
-        ZoomLevel zoomLevel,
+        List<ZoomLevel> zoomLevels,
         string resourceName,
         bool isLocal) : base(northLat, southLat, westLon, eastLon, resourceName, isLocal)
     {
-        ZoomLevel = zoomLevel;
+        ZoomLevels = zoomLevels;
     }
 
     public override Task DownloadAsync(OnFragmentedResourceLoaded onLoad)
