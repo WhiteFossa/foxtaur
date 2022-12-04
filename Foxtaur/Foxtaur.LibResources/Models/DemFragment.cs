@@ -19,6 +19,17 @@ public class DemFragment : ZoomedFragmentedResourceBase
     
     private bool _isLoaded;
 
+    /// <summary>
+    /// Is fragment loaded?
+    /// </summary>
+    public bool IsLoaded
+    {
+        get
+        {
+            return _isLoaded;
+        }
+    }
+
     public DemFragment(float northLat, float southLat, float westLon, float eastLon, ZoomLevel zoomLevel, string resourceName, bool isLocal)
         : base(northLat, southLat, westLon, eastLon, zoomLevel, resourceName, isLocal)
     {

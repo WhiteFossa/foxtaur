@@ -5,6 +5,7 @@ using Foxtaur.LibResources.Enums;
 using Foxtaur.LibResources.Models;
 using Foxtaur.LibResources.Services.Abstractions;
 using Foxtaur.LibResources.Services.Implementations;
+using NLog;
 
 namespace Foxtaur.LibGeo.Services.Implementations.DemProviders;
 
@@ -15,6 +16,18 @@ public class DemProvider : IDemProvider
     public event IDemProvider.OnRegenerateDemFragmentHandler? OnRegenerateDemFragment;
     
     private object _regenerationLock = new object();
+    
+    private Logger _logger = LogManager.GetCurrentClassLogger();
+
+    /// <summary>
+    /// Zoom levels, ordered from higher to lower resolution
+    /// </summary>
+    private List<ZoomLevel> _orderedZoomLevels = new List<ZoomLevel>()
+    {
+        ZoomLevel.ZoomLevel2,
+        ZoomLevel.ZoomLevel1,
+        ZoomLevel.ZoomLevel0
+    };
 
     public DemProvider()
     {
@@ -23,15 +36,35 @@ public class DemProvider : IDemProvider
 
     public float GetSurfaceAltitude(float lat, float lon, ZoomLevel desiredZoomLevel)
     {
-        // Searching for fragment
-        var fragment = _demResourcesProvider.GetResource(lat, lon, desiredZoomLevel) as DemFragment;
-        if (fragment == null)
+        // Returning the best available zoom level
+        int desiredZoomLevelIndex = -1;
+        for (var zoomLevelIndex = 0; zoomLevelIndex < _orderedZoomLevels.Count; zoomLevelIndex++)
         {
-            // We don't have DEM for this coordinates at all
-            return GeoConstants.EarthRadius;
+            if (_orderedZoomLevels[zoomLevelIndex] == desiredZoomLevel)
+            {
+                desiredZoomLevelIndex = zoomLevelIndex;
+                break;
+            }
         }
 
-        Task.Run(() => fragment.DownloadAsync(OnFragmentLoaded)); // Running in separate task
+        DemFragment fragment = null;
+        for (var zoomLevelIndex = desiredZoomLevelIndex; zoomLevelIndex >= 0; zoomLevelIndex--)
+        {
+            fragment = StartFragmentLoad(lat, lon, _orderedZoomLevels[zoomLevelIndex]);
+            if (fragment == null)
+            {
+                // We don't have DEM for this coordinates at all
+                return GeoConstants.EarthRadius;
+            }
+
+            if (fragment.IsLoaded)
+            {
+                // Fragment is ready, go to get coordinates
+                break;
+            }
+            
+            // Fragment is not ready, maybe lower resolution fragment is ready? We will know it on next iteration
+        }
 
         var h = fragment.GetHeight(lat, lon);
         if (h == null)
@@ -40,6 +73,20 @@ public class DemProvider : IDemProvider
         }
 
         return GeoConstants.EarthRadius + GeoConstants.DemAltitudeMultiplicator * ResourcesConstants.DemScalingFactor * (h.Value - ResourcesConstants.DemSeaLevel);
+    }
+
+    private DemFragment? StartFragmentLoad(float lat, float lon, ZoomLevel zoomLevel)
+    {
+        // Searching for fragment
+        var fragment = _demResourcesProvider.GetResource(lat, lon, zoomLevel) as DemFragment;
+        if (fragment == null)
+        {
+            return null;
+        }
+
+        Task.Run(() => fragment.DownloadAsync(OnFragmentLoaded)); // Running in separate thread
+
+        return fragment;
     }
 
     public void OnFragmentLoaded(FragmentedResourceBase fragment)

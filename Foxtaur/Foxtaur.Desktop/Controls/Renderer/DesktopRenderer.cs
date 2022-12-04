@@ -582,10 +582,17 @@ public class DesktopRenderer : OpenGlControlBase
     /// </summary>
     private void OnDemChanged(object sender, OnRegenerateDemFragmentArgs args)
     {
-        _earthSegments
-            .Where(es => es.GeoSegment.IsCoveredBy(args.Segment))
-            .ToList()
-            .ForEach(s => s.MarkToRegeneration());
+        try
+        {
+            _earthSegments
+                .Where(es => es.GeoSegment.IsCoveredBy(args.Segment))
+                .ToList()
+                .ForEach(s => s.MarkToRegeneration());
+        }
+        catch (Exception e)
+        {
+            _logger.Error(e.Message);
+        }
     }
 
     private void GenerateEarthSegments()
