@@ -50,7 +50,7 @@ public class DemProvider : IDemProvider
         }
 
         DemFragment fragment = null;
-        for (var zoomLevelIndex = desiredZoomLevelIndex; zoomLevelIndex >= 0; zoomLevelIndex--)
+        for (var zoomLevelIndex = desiredZoomLevelIndex; zoomLevelIndex < _orderedZoomLevels.Count; zoomLevelIndex++)
         {
             fragment = StartFragmentLoad(lat, lon, _orderedZoomLevels[zoomLevelIndex]);
             if (fragment == null)
@@ -102,6 +102,7 @@ public class DemProvider : IDemProvider
         // Requesting DEM regeneration
         lock (_regenerationLock)
         {
+            _logger.Info($"Regenerating: Lat: {demFragment.NorthLat}-{demFragment.SouthLat}, Lon: {demFragment.WestLon}-{demFragment.EastLon}");
             OnRegenerateDemFragment?.Invoke(this, new OnRegenerateDemFragmentArgs(demFragment.NorthLat, demFragment.WestLon, demFragment.SouthLat, demFragment.EastLon));    
         }
     }
