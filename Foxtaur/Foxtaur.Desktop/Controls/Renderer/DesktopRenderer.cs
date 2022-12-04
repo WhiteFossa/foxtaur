@@ -370,6 +370,10 @@ public class DesktopRenderer : OpenGlControlBase
     private void SurfaceRunPositionCamera()
     {
         LimitSurfaceRunViewAngles();
+        
+        // Camera height
+        var cameraH = RendererConstants.SurfaceRunModeCameraOrbitHeight + _demProvider.GetSurfaceAltitude(_camera.Lat, _camera.Lon, _zoomService.ZoomLevel);
+        _camera.H = cameraH;
 
         // Up
         var nadirVector = GeoConstants.EarthCenter - _camera.Position3D.AsVector3();
@@ -442,8 +446,6 @@ public class DesktopRenderer : OpenGlControlBase
             // Middle click - surface mode
             if (!_isSurfaceRunMode)
             {
-                _camera.H = RendererConstants.SurfaceModeCameraOrbitHeight;
-
                 _isSurfaceRunMode = true;
             }
             else
@@ -655,7 +657,7 @@ public class DesktopRenderer : OpenGlControlBase
     {
         _visibleEarthSegments.Clear();
         
-        var undergroundPoint = _isSurfaceRunMode ? _sphereCoordinatesProvider.GeoToPlanar3D(new GeoPoint(_camera.Lat, _camera.Lon, RendererConstants.SurfaceWalkUndergroundPlaneHeight))
+        var undergroundPoint = _isSurfaceRunMode ? _sphereCoordinatesProvider.GeoToPlanar3D(new GeoPoint(_camera.Lat, _camera.Lon, RendererConstants.SurfaceRunModeUndergroundPlaneHeight))
             : new PlanarPoint3D(GeoConstants.EarthCenter.X, GeoConstants.EarthCenter.Y, GeoConstants.EarthCenter.Z);
         
         foreach (var earthSegment in _earthSegments)
