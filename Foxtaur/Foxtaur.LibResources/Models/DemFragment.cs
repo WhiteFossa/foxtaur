@@ -30,6 +30,8 @@ public class DemFragment : ZoomedFragmentedResourceBase
         }
     }
 
+    private static object _processingLock = new object();
+
     public DemFragment(float northLat, float southLat, float westLon, float eastLon, List<ZoomLevel> zoomLevels, string resourceName, bool isLocal)
         : base(northLat, southLat, westLon, eastLon, zoomLevels, resourceName, isLocal)
     {
@@ -72,15 +74,18 @@ public class DemFragment : ZoomedFragmentedResourceBase
 
             // Decompressing
             _logger.Info($"Decompressing { ResourceName }...");
-            using (var decompressedStream = LoadZstdFile(GetLocalPath()))
+            lock(_processingLock)
             {
-                // Processing
-                _logger.Info($"Processing { ResourceName }...");
-                
-                _reader = new GeoTiffReader();
-                _reader.Open(decompressedStream);
-                
-                _logger.Info($"Processed { ResourceName }...");
+                using (var decompressedStream = LoadZstdFile(GetLocalPath()))
+                {
+                    // Processing
+                    _logger.Info($"Processing { ResourceName }...");
+                    
+                    _reader = new GeoTiffReader();
+                    _reader.Open(decompressedStream);
+                    
+                    _logger.Info($"Processed { ResourceName }...");
+                }
             }
         }
         catch (Exception e)
