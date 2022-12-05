@@ -79,6 +79,8 @@ public class DemFragment : ZoomedFragmentedResourceBase
                 
                 _reader = new GeoTiffReader();
                 _reader.Open(decompressedStream);
+                
+                _logger.Info($"Processed { ResourceName }...");
             }
         }
         catch (Exception e)
