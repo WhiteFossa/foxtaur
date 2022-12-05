@@ -52,7 +52,10 @@ public class GeoTiffReader : IGeoTiffReader
 
     public GeoTiffReader()
     {
-        Gdal.AllRegister(); // Registering GDAL drivers
+        lock (_gdalLock)
+        {
+            Gdal.AllRegister(); // Registering GDAL drivers
+        }
     }
 
     public void Open(string path)
