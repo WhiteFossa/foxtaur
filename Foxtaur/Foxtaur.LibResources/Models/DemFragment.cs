@@ -18,7 +18,7 @@ public class DemFragment : ZoomedFragmentedResourceBase
     private bool _isLoading;
     
     private bool _isLoaded;
-
+    
     /// <summary>
     /// Is fragment loaded?
     /// </summary>
@@ -76,8 +76,9 @@ public class DemFragment : ZoomedFragmentedResourceBase
             {
                 // Processing
                 _logger.Info($"Processing { ResourceName }...");
+                
                 _reader = new GeoTiffReader();
-                _reader.Open(decompressedStream);    
+                _reader.Open(decompressedStream);
             }
         }
         catch (Exception e)
