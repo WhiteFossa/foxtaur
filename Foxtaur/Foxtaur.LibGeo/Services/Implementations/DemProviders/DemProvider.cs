@@ -94,8 +94,8 @@ public class DemProvider : IDemProvider
 
         lock (_startDownloadLock)
         {
-            //fragment.DownloadAsync(OnFragmentLoaded);
-            Task.Run(() => fragment.DownloadAsync(OnFragmentLoaded)); // Running in separate thread
+            fragment.DownloadAsync(OnFragmentLoaded);
+            //Task.Run(() => fragment.DownloadAsync(OnFragmentLoaded)); // Running in separate thread
         }
 
         return fragment;
