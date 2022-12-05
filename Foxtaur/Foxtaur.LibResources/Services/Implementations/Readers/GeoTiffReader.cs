@@ -171,75 +171,63 @@ public class GeoTiffReader : IGeoTiffReader
 
     public float GetPixel(int band, int x, int y)
     {
-        lock (_gdalLock)
+        _ = _dataset ?? throw new InvalidOperationException("File not opened!");
+
+        if (band < 0 || band > _dataset.RasterCount)
         {
-            _ = _dataset ?? throw new InvalidOperationException("File not opened!");
+            throw new ArgumentException(nameof(band));
+        }
 
-            if (band < 0 || band > _dataset.RasterCount)
-            {
-                throw new ArgumentException(nameof(band));
-            }
+        if (x < 0 || x >= _dataset.RasterXSize || y < 0 || y > _dataset.RasterYSize)
+        {
+            throw new ArgumentException("Incorrect coordinates");
+        }
 
-            if (x < 0 || x >= _dataset.RasterXSize || y < 0 || y > _dataset.RasterYSize)
-            {
-                throw new ArgumentException("Incorrect coordinates");
-            }
+        var bandIndex = band - 1;
+        if (_bytesPerPixel == 1)
+        {
+            return _rasters[bandIndex][y * _dataset.RasterXSize + x] / (float)byte.MaxValue;
+        }
+        else if (_bytesPerPixel == 2)
+        {
+            var baseIndex = 2 * (y * _dataset.RasterXSize + x);
 
-            var bandIndex = band - 1;
-            if (_bytesPerPixel == 1)
-            {
-                return _rasters[bandIndex][y * _dataset.RasterXSize + x] / (float)byte.MaxValue;
-            }
-            else if (_bytesPerPixel == 2)
-            {
-                var baseIndex = 2 * (y * _dataset.RasterXSize + x);
+            var lowerByte = _rasters[bandIndex][baseIndex];
+            var higherByte = _rasters[bandIndex][baseIndex + 1];
 
-                var lowerByte = _rasters[bandIndex][baseIndex];
-                var higherByte = _rasters[bandIndex][baseIndex + 1];
-
-                return BitConverter.ToInt16(new byte[] { lowerByte, higherByte }, 0) / (float)UInt16.MaxValue + 0.5f;
-            }
-            else
-            {
-                throw new NotSupportedException("Only byte and int16 datatypes are supported");
-            }    
+            return BitConverter.ToInt16(new byte[] { lowerByte, higherByte }, 0) / (float)UInt16.MaxValue + 0.5f;
+        }
+        else
+        {
+            throw new NotSupportedException("Only byte and int16 datatypes are supported");
         }
     }
 
     public int GetWidth()
     {
-        lock (_gdalLock)
-        {
-            _ = _dataset ?? throw new InvalidOperationException("File not opened!");
-            return _dataset.RasterXSize;    
-        }
+        _ = _dataset ?? throw new InvalidOperationException("File not opened!");
+        return _dataset.RasterXSize;
     }
 
     public int GetHeight()
     {
-        lock (_gdalLock)
-        {
-            _ = _dataset ?? throw new InvalidOperationException("File not opened!");
-            return _dataset.RasterYSize;    
-        }
+        _ = _dataset ?? throw new InvalidOperationException("File not opened!");
+        return _dataset.RasterYSize;
     }
 
     public float? GetPixelByGeoCoords(int band, float lat, float lon)
     {
-        lock (_gdalLock)
+        var latDegrees = lat.ToDegrees();
+        var lonDegrees = -1.0f * lon.ToDegrees(); // GeoTIFF use negative west, we use negative east
+
+        var y = (latDegrees - _geoCoefficients[3] + _geoK3 - _geoK1 * lonDegrees) / _geoK2;
+        var x = lonDegrees / _geoCoefficients[1] - _geoK4 - _geoK5 * y;
+
+        if (x < 0 || y < 0 || x >= _dataset.RasterXSize || y >= _dataset.RasterYSize)
         {
-            var latDegrees = lat.ToDegrees();
-            var lonDegrees = -1.0f * lon.ToDegrees(); // GeoTIFF use negative west, we use negative east
-
-            var y = (latDegrees - _geoCoefficients[3] + _geoK3 - _geoK1 * lonDegrees) / _geoK2;
-            var x = lonDegrees / _geoCoefficients[1] - _geoK4 - _geoK5 * y;
-
-            if (x < 0 || y < 0 || x >= _dataset.RasterXSize || y >= _dataset.RasterYSize)
-            {
-                return null;
-            }
-
-            return GetPixel(band, (int)x, (int)y); // TODO: Add bilinear interpolation    
+            return null;
         }
+
+        return GetPixel(band, (int)x, (int)y); // TODO: Add bilinear interpolation    
     }
 }

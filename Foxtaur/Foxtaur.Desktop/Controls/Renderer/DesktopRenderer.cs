@@ -66,11 +66,6 @@ public class DesktopRenderer : OpenGlControlBase
     /// </summary>
     private Sphere _earthSphere;
 
-    /*/// <summary>
-    /// Earth mesh
-    /// </summary>
-    private Mesh _earthMesh;*/
-
     /// <summary>
     /// Earth segments
     /// </summary>
@@ -110,6 +105,11 @@ public class DesktopRenderer : OpenGlControlBase
     /// </summary>
     private GeoPoint _pressGeoPoint;
 
+    /// <summary>
+    /// If true, then zoom level changed and we have to regenerate related stuff
+    /// </summary>
+    private bool _isZoomLevelChanged;
+    
     #endregion
 
     #region Surface run
@@ -325,6 +325,15 @@ public class DesktopRenderer : OpenGlControlBase
 
         //silkGlContext.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Line);
 
+        // If zoom level changed, we have to regenerate everything Earth-related
+        if (_isZoomLevelChanged)
+        {
+            DisposeEarthSegments();
+            GenerateEarthSegments();
+            
+            _isZoomLevelChanged = false;
+        }
+        
         // Work only with those segments
         FindVisibleEarthSegments();
         
@@ -708,10 +717,7 @@ public class DesktopRenderer : OpenGlControlBase
     /// </summary>
     private void OnZoomLevelChanged(object sender, OnZoomLevelChangedArgs args)
     {
-        DisposeEarthSegments();
-        _earthSegments.Clear();
-
-        GenerateEarthSegments();
+        _isZoomLevelChanged = true;
     }
 
     /*/// <summary>

@@ -74,18 +74,15 @@ public class DemFragment : ZoomedFragmentedResourceBase
 
             // Decompressing
             _logger.Info($"Decompressing { ResourceName }...");
-            lock(_processingLock)
+            using (var decompressedStream = LoadZstdFile(GetLocalPath()))
             {
-                using (var decompressedStream = LoadZstdFile(GetLocalPath()))
-                {
-                    // Processing
-                    _logger.Info($"Processing { ResourceName }...");
-                    
-                    _reader = new GeoTiffReader();
-                    _reader.Open(decompressedStream);
-                    
-                    _logger.Info($"Processed { ResourceName }...");
-                }
+                // Processing
+                _logger.Info($"Processing { ResourceName }...");
+                
+                _reader = new GeoTiffReader();
+                _reader.Open(decompressedStream);
+                
+                _logger.Info($"Processed { ResourceName }...");
             }
         }
         catch (Exception e)
