@@ -50,12 +50,9 @@ public class GeoTiffReader : IGeoTiffReader
     /// </summary>
     private static object _gdalLock = new object();
 
-    public GeoTiffReader()
+    static GeoTiffReader()
     {
-        lock (_gdalLock)
-        {
-            Gdal.AllRegister(); // Registering GDAL drivers
-        }
+        Gdal.AllRegister(); // Registering GDAL drivers
     }
 
     public void Open(string path)
