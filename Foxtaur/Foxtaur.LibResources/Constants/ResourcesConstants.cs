@@ -28,7 +28,7 @@ public class ResourcesConstants
     /// <summary>
     /// Base URL for resources
     /// </summary>
-    public const string ResourcesBaseUrl = "https://foxtaur.me/static/";
+    public const string ResourcesBaseUrl = "https://static.foxtaur.me/";
 
     /// <summary>
     /// Put downloaded resources here (relative to executable)
