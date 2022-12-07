@@ -389,6 +389,7 @@ public class DesktopRenderer : OpenGlControlBase
         
         // Camera height
         var cameraH = RendererConstants.SurfaceRunModeCameraOrbitHeight + _demProvider.GetSurfaceAltitude(_camera.Lat, _camera.Lon, _zoomService.ZoomLevel);
+        //var cameraH = GeoConstants.EarthRadius + RendererConstants.SurfaceRunModeCameraOrbitHeight;
         _camera.H = cameraH;
 
         // Up
