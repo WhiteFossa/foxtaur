@@ -21,6 +21,11 @@ public interface IGeoTiffReader
     float GetPixel(int band, int x, int y);
 
     /// <summary>
+    /// Get pixel by planar coordinates (with bilinear interpolation). Result is normalized to [0; 1]
+    /// </summary>
+    float GetPixelWithInterpolation(int band, float x, float y); 
+
+    /// <summary>
     /// Get image width
     /// </summary>
     int GetWidth();
@@ -30,6 +35,11 @@ public interface IGeoTiffReader
     /// </summary>
     /// <returns></returns>
     int GetHeight();
+
+    /// <summary>
+    /// Get data size, occupied by reader (coarse)
+    /// </summary>
+    long GetDataSize();
 
     /// <summary>
     /// Get pixel by geocoordinates

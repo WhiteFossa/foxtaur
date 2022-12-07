@@ -19,6 +19,24 @@ public class DemFragment : ZoomedFragmentedResourceBase
     
     private bool _isLoaded;
     
+    private static object _processingLock = new object();
+
+    /// <summary>
+    /// Last time, when height was get from fragment
+    /// </summary>
+    public DateTime LastAccessTime { get; private set; }
+
+    /// <summary>
+    /// Size of cache, associated with fragment. 0 if fragment is not loaded
+    /// </summary>
+    public long CacheSize
+    {
+        get
+        {
+            return _isLoaded ? _reader.GetDataSize() : 0;
+        }
+    }
+
     /// <summary>
     /// Is fragment loaded?
     /// </summary>
@@ -30,11 +48,10 @@ public class DemFragment : ZoomedFragmentedResourceBase
         }
     }
 
-    private static object _processingLock = new object();
-
     public DemFragment(float northLat, float southLat, float westLon, float eastLon, List<ZoomLevel> zoomLevels, string resourceName, bool isLocal)
         : base(northLat, southLat, westLon, eastLon, zoomLevels, resourceName, isLocal)
     {
+        LastAccessTime = DateTime.UtcNow;
     }
 
     public override async Task DownloadAsync(OnFragmentedResourceLoaded onLoad)
@@ -99,10 +116,34 @@ public class DemFragment : ZoomedFragmentedResourceBase
     }
 
     /// <summary>
+    /// Unload fragment from memory
+    /// </summary>
+    public void Unload()
+    {
+        lock (this)
+        {
+            if (!_isLoaded)
+            {
+                _logger.Info($"Attempt to unload not loaded fragment: { ResourceName }!");   
+                throw new InvalidOperationException($"Attempt to unload not loaded fragment: { ResourceName }!");
+            }
+            
+            _logger.Info($"Unloading { ResourceName }...");
+
+            _isLoaded = false;
+            _reader = null;
+            
+            _logger.Info($"Unloaded { ResourceName }...");
+        }
+    }
+    
+    /// <summary>
     /// Get height by geocoodrinates
     /// </summary>
     public float? GetHeight(float lat, float lon)
     {
+        LastAccessTime = DateTime.UtcNow;
+        
         if (!_isLoaded)
         {
             return ResourcesConstants.DemSeaLevel;

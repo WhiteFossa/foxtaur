@@ -44,4 +44,14 @@ public class ResourcesConstants
     /// How many active downloading threads can be
     /// </summary>
     public const int MaxActiveDownloadingThreads = 5;
+
+    /// <summary>
+    /// Bytes in GiB
+    /// </summary>
+    public const long BytesInGiB = 1073741824;
+
+    /// <summary>
+    /// Start to clear DEM cache is it's size greater than this value
+    /// </summary>
+    public const long MaxDemCacheSize = 2 * BytesInGiB;
 }

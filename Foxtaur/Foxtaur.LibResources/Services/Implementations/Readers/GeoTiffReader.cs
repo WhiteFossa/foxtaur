@@ -30,6 +30,11 @@ public class GeoTiffReader : IGeoTiffReader
     private int _rasterSize;
 
     /// <summary>
+    /// Total size of all rasters
+    /// </summary>
+    private long _totalRastersSize;
+    
+    /// <summary>
     /// Raster data
     /// </summary>
     private byte[][] _rasters;
@@ -95,6 +100,8 @@ public class GeoTiffReader : IGeoTiffReader
 
             _rasterSize = _dataset.RasterXSize * _dataset.RasterYSize * _bytesPerPixel;
 
+            _totalRastersSize = _rasterSize * _dataset.RasterCount;
+            
             _rasters = new byte[_dataset.RasterCount][];
             for (var band = 1; band <= _dataset.RasterCount; band++)
             {
@@ -203,6 +210,39 @@ public class GeoTiffReader : IGeoTiffReader
         }
     }
 
+    public float GetPixelWithInterpolation(int band, float x, float y)
+    {
+        var x1 = (int)x;
+        var y1 = (int)y;
+
+        if (x1 == _dataset.RasterXSize - 1 || y1 == _dataset.RasterYSize - 1)
+        {
+            // Edge pixel
+            return GetPixel(band, x1, y1);
+        }
+        
+        var x2 = x1 + 1;
+        var y2 = y1 + 1;
+
+        var p1 = GetPixel(band, x1, y1);
+        var p2 = GetPixel(band, x2, y1);
+        var p3 = GetPixel(band, x2, y2);
+        var p4 = GetPixel(band, x1, y2);
+        
+        // y2 - y1 is always 1
+        var k1 = y - y1;
+        var k2 = y2 - y;
+
+        var q1 = k1 * p4 + k2 * p1;
+        var q2 = k1 * p3 + k2 * p2;
+        
+        // x2 - x1 is always 1
+        var k3 = x - x1;
+        var k4 = x2 - x;
+
+        return q1 * k4 + q2 * k3;
+    }
+
     public int GetWidth()
     {
         _ = _dataset ?? throw new InvalidOperationException("File not opened!");
@@ -213,6 +253,11 @@ public class GeoTiffReader : IGeoTiffReader
     {
         _ = _dataset ?? throw new InvalidOperationException("File not opened!");
         return _dataset.RasterYSize;
+    }
+
+    public long GetDataSize()
+    {
+        return _totalRastersSize;
     }
 
     public float? GetPixelByGeoCoords(int band, float lat, float lon)
@@ -228,6 +273,6 @@ public class GeoTiffReader : IGeoTiffReader
             return null;
         }
 
-        return GetPixel(band, (int)x, (int)y); // TODO: Add bilinear interpolation    
+        return GetPixelWithInterpolation(band, (float)x, (float)y);    
     }
 }

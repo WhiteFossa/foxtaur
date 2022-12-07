@@ -1,8 +1,11 @@
+using System.Timers;
 using Foxtaur.Helpers;
 using Foxtaur.LibResources.Constants;
 using Foxtaur.LibResources.Enums;
 using Foxtaur.LibResources.Models;
 using Foxtaur.LibResources.Services.Abstractions;
+using NLog;
+using Timer = System.Threading.Timer;
 
 namespace Foxtaur.LibResources.Services.Implementations;
 
@@ -12,6 +15,15 @@ namespace Foxtaur.LibResources.Services.Implementations;
 public class DemResourcesProvider : IFragmentedResourcesProvider
 {
     private IList<DemFragment> _fragments;
+    
+    /// <summary>
+    /// Cache clear timer
+    /// </summary>
+    private System.Timers.Timer _cacheClearTimer;
+    
+    private Logger _logger = LogManager.GetCurrentClassLogger();
+
+    private object _clearCacheLock = new object();
 
     public DemResourcesProvider()
     {
@@ -1577,6 +1589,37 @@ public class DemResourcesProvider : IFragmentedResourcesProvider
 
         #endregion
         
+        // Starting cache clear timer
+        _cacheClearTimer = new System.Timers.Timer(1000);
+        _cacheClearTimer.Elapsed += OnCacheClearTimer;
+        _cacheClearTimer.AutoReset = true;
+        _cacheClearTimer.Enabled = true;
+
+    }
+
+    private void OnCacheClearTimer(object? sender, ElapsedEventArgs e)
+    {
+        lock (_clearCacheLock)
+        {
+            var loadedFragments = _fragments
+                .Where(f => f.IsLoaded);
+
+            var size = loadedFragments
+                .Sum(lf => lf.CacheSize);
+            
+            // Cleaning one fragment per timer call
+            if (size > ResourcesConstants.MaxDemCacheSize)
+            {
+                var orderedFragments = loadedFragments
+                    .Where(lf => !lf.ZoomLevels.Contains(ZoomLevel.ZoomLevel0)) // We can unload only high-resolution fragments
+                    .Where(lf => !lf.ZoomLevels.Contains(ZoomLevel.ZoomLevel1))
+                    .OrderBy(lf => lf.LastAccessTime);
+
+                orderedFragments
+                    .FirstOrDefault()
+                    .Unload();
+            }   
+        }
     }
 
     public FragmentedResourceBase GetResource(float lat, float lon, ZoomLevel zoomLevel)
