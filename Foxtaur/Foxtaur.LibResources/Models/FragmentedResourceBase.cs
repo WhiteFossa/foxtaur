@@ -135,9 +135,9 @@ public abstract class FragmentedResourceBase
         try
         {
             _logger.Info($"Waiting for download from {uriResult}");
-            
+
             DownloadThreadsLimiter.WaitOne();
-            
+
             _logger.Info($"Downloading from {uriResult}");
 
             using (var downloadStream = await _httpClient.GetStreamAsync(uriResult))
@@ -148,12 +148,15 @@ public abstract class FragmentedResourceBase
                 return resultStream;
             }
         }
+        catch (Exception ex)
+        {
+            _logger.Error(ex.Message);
+            throw;
+        }
         finally
         {
             DownloadThreadsLimiter.Release();
         }
-        
-        
     }
 
     protected async Task LoadFromUrlToFileAsync(string relativeUrl)

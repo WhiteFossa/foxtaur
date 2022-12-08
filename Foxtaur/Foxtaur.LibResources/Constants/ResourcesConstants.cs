@@ -54,4 +54,9 @@ public class ResourcesConstants
     /// Start to clear DEM cache is it's size greater than this value
     /// </summary>
     public const long MaxDemCacheSize = 4 * BytesInGiB;
+    
+    /// <summary>
+    /// Maps is here on server
+    /// </summary>
+    public const string MapsRemotePath = "Maps/";
 }

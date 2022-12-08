@@ -16,10 +16,11 @@ public class DemFragment : ZoomedFragmentedResourceBase
     private IGeoTiffReader _reader;
 
     private bool _isLoading;
-    
-    private bool _isLoaded;
-    
-    private static object _processingLock = new object();
+
+    /// <summary>
+    /// Is fragment data loaded?
+    /// </summary>
+    public bool IsLoaded { get; private set; }
 
     /// <summary>
     /// Last time, when height was get from fragment
@@ -33,21 +34,10 @@ public class DemFragment : ZoomedFragmentedResourceBase
     {
         get
         {
-            return _isLoaded ? _reader.GetDataSize() : 0;
+            return IsLoaded ? _reader.GetDataSize() : 0;
         }
     }
-
-    /// <summary>
-    /// Is fragment loaded?
-    /// </summary>
-    public bool IsLoaded
-    {
-        get
-        {
-            return _isLoaded;
-        }
-    }
-
+    
     public DemFragment(float northLat, float southLat, float westLon, float eastLon, List<ZoomLevel> zoomLevels, string resourceName, bool isLocal)
         : base(northLat, southLat, westLon, eastLon, zoomLevels, resourceName, isLocal)
     {
@@ -60,7 +50,7 @@ public class DemFragment : ZoomedFragmentedResourceBase
         
         lock (this)
         {
-            if (_isLoaded)
+            if (IsLoaded)
             {
                 // Fragment already downloaded
                 return;
@@ -98,8 +88,6 @@ public class DemFragment : ZoomedFragmentedResourceBase
                 
                 _reader = new GeoTiffReader();
                 _reader.Open(decompressedStream);
-                
-                _logger.Info($"Processed { ResourceName }...");
             }
         }
         catch (Exception e)
@@ -109,7 +97,7 @@ public class DemFragment : ZoomedFragmentedResourceBase
         }
 
         _isLoading = false;
-        _isLoaded = true;
+        IsLoaded = true;
 
         _logger.Info($"{ ResourceName } is ready.");
         OnLoad(this);
@@ -122,7 +110,7 @@ public class DemFragment : ZoomedFragmentedResourceBase
     {
         lock (this)
         {
-            if (!_isLoaded)
+            if (!IsLoaded)
             {
                 _logger.Info($"Attempt to unload not loaded fragment: { ResourceName }!");   
                 throw new InvalidOperationException($"Attempt to unload not loaded fragment: { ResourceName }!");
@@ -130,7 +118,7 @@ public class DemFragment : ZoomedFragmentedResourceBase
             
             _logger.Info($"Unloading { ResourceName }...");
 
-            _isLoaded = false;
+            IsLoaded = false;
             _reader = null;
             
             _logger.Info($"Unloaded { ResourceName }...");
@@ -144,7 +132,7 @@ public class DemFragment : ZoomedFragmentedResourceBase
     {
         LastAccessTime = DateTime.UtcNow;
         
-        if (!_isLoaded)
+        if (!IsLoaded)
         {
             return ResourcesConstants.DemSeaLevel;
         }

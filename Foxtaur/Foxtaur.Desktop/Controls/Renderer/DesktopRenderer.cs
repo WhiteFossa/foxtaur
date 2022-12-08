@@ -26,6 +26,9 @@ using Foxtaur.LibRenderer.Models;
 using Foxtaur.LibRenderer.Models.UI;
 using Foxtaur.LibRenderer.Services.Abstractions.Camera;
 using Foxtaur.LibRenderer.Services.Abstractions.Zoom;
+using Foxtaur.LibResources.Constants;
+using Foxtaur.LibResources.Models;
+using Foxtaur.LibResources.Models.HighResMap;
 using Microsoft.Extensions.DependencyInjection;
 using NLog;
 using Silk.NET.OpenGL;
@@ -185,6 +188,17 @@ public class DesktopRenderer : OpenGlControlBase
     private object _demRegenerationLock = new object();
 
     #endregion
+    
+    #region Debug
+
+    private HighResMapFragment _davydovo = new HighResMapFragment(54.807812457f.ToRadians(),
+        54.757759918f.ToRadians(),
+        -39.823302090f.ToRadians(),
+        -39.879142801f.ToRadians(),
+        ResourcesConstants.MapsRemotePath + @"Davydovo/Davydovo.tif.zst",
+        false);
+    
+    #endregion
 
     /// <summary>
     /// Constructor
@@ -194,8 +208,15 @@ public class DesktopRenderer : OpenGlControlBase
         // Listening for properties changes to process resize
         PropertyChanged += OnPropertyChangedListener;
         
-        // We need to regenerate meshes on DEM updates.
+        // We need to regenerate meshes on DEM updates
         _demProvider.OnRegenerateDemFragment += OnDemChanged;
+        
+        // Debug
+        Task.WaitAll(_davydovo.DownloadAsync(OnDavydovoLoad));
+    }
+
+    private void OnDavydovoLoad(FragmentedResourceBase davydovo)
+    {
     }
     
     private void OnPropertyChangedListener(object sender, AvaloniaPropertyChangedEventArgs e)

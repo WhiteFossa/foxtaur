@@ -165,7 +165,7 @@ public class GeoTiffReader : IGeoTiffReader
                 (IntPtr)bufferPtr,
                 _dataset.RasterXSize,
                 _dataset.RasterYSize,
-                DataType.GDT_Int16,
+                _pixelType,
                 0,
                 0);
         }
