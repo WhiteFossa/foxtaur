@@ -197,8 +197,6 @@ public class DesktopRenderer : OpenGlControlBase
         -39.879142801f.ToRadians(),
         ResourcesConstants.MapsRemotePath + @"Davydovo/Davydovo.tif.zst",
         false);
-
-    private bool _isReloadEarthTexture;
     
     #endregion
 
@@ -219,7 +217,6 @@ public class DesktopRenderer : OpenGlControlBase
 
     private void OnDavydovoLoad(FragmentedResourceBase davydovo)
     {
-        _isReloadEarthTexture = true;
     }
     
     private void OnPropertyChangedListener(object sender, AvaloniaPropertyChangedEventArgs e)
@@ -362,13 +359,6 @@ public class DesktopRenderer : OpenGlControlBase
         
         // Regenerating Earth segments
         RegenerateEarthSegments(silkGlContext);
-        
-        // DEBUG
-        if (_isReloadEarthTexture)
-        {
-            _earthTexture.Dispose();
-            _earthTexture = new Texture(silkGlContext, _davydovo.GetImage());
-        }
         
         // Draw Earth
         DrawEarth(silkGlContext);

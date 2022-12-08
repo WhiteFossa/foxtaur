@@ -247,13 +247,11 @@ public class GeoTiffReader : IGeoTiffReader
 
     public int GetWidth()
     {
-        _ = _dataset ?? throw new InvalidOperationException("File not opened!");
         return _width;
     }
 
     public int GetHeight()
     {
-        _ = _dataset ?? throw new InvalidOperationException("File not opened!");
         return _height;
     }
 
@@ -262,7 +260,7 @@ public class GeoTiffReader : IGeoTiffReader
         return _totalRastersSize;
     }
 
-    public float? GetPixelByGeoCoords(int band, float lat, float lon)
+    public Tuple<float, float> GetPixelCoordsByGeoCoords(float lat, float lon)
     {
         var latDegrees = lat.ToDegrees();
         var lonDegrees = -1.0f * lon.ToDegrees(); // GeoTIFF use negative west, we use negative east
@@ -275,6 +273,17 @@ public class GeoTiffReader : IGeoTiffReader
             return null;
         }
 
-        return GetPixelWithInterpolation(band, (float)x, (float)y);    
+        return new Tuple<float, float>((float)x, (float)y);
+    }
+
+    public float? GetPixelByGeoCoords(int band, float lat, float lon)
+    {
+        var planarCoords = GetPixelCoordsByGeoCoords(lat, lon);
+        if (planarCoords == null)
+        {
+            return null;
+        }
+
+        return GetPixelWithInterpolation(band, planarCoords.Item1, planarCoords.Item2);    
     }
 }

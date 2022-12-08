@@ -82,11 +82,6 @@ public class HighResMapFragment : FragmentedResourceBase
                 
                 for (var y = 0; y < height; y++)
                 {
-                    if (y % 100 == 0)
-                    {
-                        _logger.Info($"Processing map { ResourceName } line { y }...");    
-                    }
-
                     for (var x = 0; x < width; x++)
                     {
                         raster[pixelBaseIndex + 0] = (byte)(_reader.GetPixel(1, x, y) * 255);
@@ -100,8 +95,8 @@ public class HighResMapFragment : FragmentedResourceBase
                 
                 var readSettings = new MagickReadSettings();
                 readSettings.ColorType = ColorType.TrueColorAlpha;
-                readSettings.Width = _reader.GetWidth();
-                readSettings.Height = _reader.GetHeight();
+                readSettings.Width = width;
+                readSettings.Height = height;
                 readSettings.Format = MagickFormat.Rgba;
                 
                 _image = new MagickImage(raster, readSettings);
@@ -131,5 +126,27 @@ public class HighResMapFragment : FragmentedResourceBase
         }
 
         return _image;
+    }
+
+    /// <summary>
+    /// Get texture coordinates by geo coordinates. May return null if coordinates are outside the map
+    /// </summary>
+    public Tuple<float, float> GetTextureCoordinates(float lat, float lon)
+    {
+        if (!IsLoaded)
+        {
+            return null;
+        }
+
+        var planarCoords = _reader.GetPixelCoordsByGeoCoords(lat, lon);
+        if (planarCoords == null)
+        {
+            return null;
+        }
+
+        var x = planarCoords.Item1 / _reader.GetWidth();
+        var y = 1 - planarCoords.Item2 / _reader.GetHeight();
+
+        return new Tuple<float, float>(x, y);
     }
 }
