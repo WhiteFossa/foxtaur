@@ -105,7 +105,7 @@ public class GeoTiffReader : IGeoTiffReader
             }
             else
             {
-                throw new NotSupportedException("Only byte and int16 datatypes are supported");
+                throw new NotSupportedException("Open file: Only byte and int16 datatypes are supported");
             }
 
             _width = _dataset.RasterXSize;
@@ -191,24 +191,27 @@ public class GeoTiffReader : IGeoTiffReader
 
     public float GetPixel(int band, int x, int y)
     {
-        // No params checks for speedup
-        var bandIndex = band - 1;
-        if (_bytesPerPixel == 1)
+        lock (_gdalLock)
         {
-            return _rasters[bandIndex][y * _width + x] / (float)byte.MaxValue;
-        }
-        else if (_bytesPerPixel == 2)
-        {
-            var baseIndex = 2 * (y * _width + x);
+            // No params checks for speedup
+            var bandIndex = band - 1;
+            if (_bytesPerPixel == 1)
+            {
+                return _rasters[bandIndex][y * _width + x] / (float)byte.MaxValue;
+            }
+            else if (_bytesPerPixel == 2)
+            {
+                var baseIndex = 2 * (y * _width + x);
 
-            var lowerByte = _rasters[bandIndex][baseIndex];
-            var higherByte = _rasters[bandIndex][baseIndex + 1];
+                var lowerByte = _rasters[bandIndex][baseIndex];
+                var higherByte = _rasters[bandIndex][baseIndex + 1];
 
-            return BitConverter.ToInt16(new byte[] { lowerByte, higherByte }, 0) / (float)UInt16.MaxValue + 0.5f;
-        }
-        else
-        {
-            throw new NotSupportedException("Only byte and int16 datatypes are supported");
+                return BitConverter.ToInt16(new byte[] { lowerByte, higherByte }, 0) / (float)UInt16.MaxValue + 0.5f;
+            }
+            else
+            {
+                throw new NotSupportedException("Get pixel: Only byte and int16 datatypes are supported");
+            }
         }
     }
 
@@ -268,9 +271,24 @@ public class GeoTiffReader : IGeoTiffReader
         var y = (latDegrees - _geoCoefficients[3] + _geoK3 - _geoK1 * lonDegrees) / _geoK2;
         var x = lonDegrees / _geoCoefficients[1] - _geoK4 - _geoK5 * y;
 
-        if (x < 0 || y < 0 || x >= _width || y >= _height)
+        if (y < 0)
         {
-            return null;
+            y = 0;
+        }
+
+        if (y >= _height)
+        {
+            y = _height - 1;
+        }
+
+        if (x < 0)
+        {
+            x = 0;
+        }
+
+        if (x >= _width)
+        {
+            x = _width - 1;
         }
 
         return new Tuple<float, float>((float)x, (float)y);

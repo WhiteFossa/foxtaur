@@ -137,7 +137,7 @@ public class DemFragment : ZoomedFragmentedResourceBase
             return ResourcesConstants.DemSeaLevel;
         }
 
-        var height =  _reader.GetPixelByGeoCoords(ResourcesConstants.DemBand, lat, lon);
+        var height = _reader.GetPixelByGeoCoords(ResourcesConstants.DemBand, lat, lon);
         
         // If we have "no data", then it's sea level
         if (height < ResourcesConstants.DemNoData)

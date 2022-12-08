@@ -145,7 +145,7 @@ public class HighResMapFragment : FragmentedResourceBase
         }
 
         var x = planarCoords.Item1 / _reader.GetWidth();
-        var y = 1 - planarCoords.Item2 / _reader.GetHeight();
+        var y = planarCoords.Item2 / _reader.GetHeight();
 
         return new Tuple<float, float>(x, y);
     }

@@ -180,6 +180,7 @@ public class DesktopRenderer : OpenGlControlBase
     private IUi _ui = Program.Di.GetService<IUi>();
     private IDemProvider _demProvider = Program.Di.GetService<IDemProvider>();
     private IZoomService _zoomService = Program.Di.GetService<IZoomService>();
+    private IMapSegmentGenerator _mapSegmentGenerator = Program.Di.GetService<IMapSegmentGenerator>();
 
     #endregion
     
@@ -191,13 +192,19 @@ public class DesktopRenderer : OpenGlControlBase
     
     #region Debug
 
-    private HighResMapFragment _davydovo = new HighResMapFragment(54.807812457f.ToRadians(),
+    private HighResMapFragment _davydovoFragment = new HighResMapFragment(54.807812457f.ToRadians(),
         54.757759918f.ToRadians(),
         -39.823302090f.ToRadians(),
         -39.879142801f.ToRadians(),
         ResourcesConstants.MapsRemotePath + @"Davydovo/Davydovo.tif.zst",
         false);
-    
+
+    private HighResMap _davydovoHighResMap;
+
+    private MapSegment _davydovoMapSegment;
+
+    private bool _isDavydovoLoaded;
+
     #endregion
 
     /// <summary>
@@ -212,11 +219,16 @@ public class DesktopRenderer : OpenGlControlBase
         _demProvider.OnRegenerateDemFragment += OnDemChanged;
         
         // Debug
-        Task.Run(() => _davydovo.DownloadAsync(OnDavydovoLoad));
+        _davydovoHighResMap = new HighResMap(Guid.NewGuid(), "Davydovo", _davydovoFragment);
+
+        //Task.Run(() => _davydovoFragment.DownloadAsync(OnDavydovoLoad));
+        Task.WaitAll(_davydovoFragment.DownloadAsync(OnDavydovoLoad));
     }
 
     private void OnDavydovoLoad(FragmentedResourceBase davydovo)
     {
+        // Now we have texture loaded, time to generate map segment
+        _isDavydovoLoaded = true;
     }
     
     private void OnPropertyChangedListener(object sender, AvaloniaPropertyChangedEventArgs e)
@@ -310,7 +322,7 @@ public class DesktopRenderer : OpenGlControlBase
     /// <summary>
     /// Called when frame have to be rendered
     /// </summary>
-    protected override void OnOpenGlRender(GlInterface gl, int fb)
+    protected override unsafe void OnOpenGlRender(GlInterface gl, int fb)
     {
         var silkGlContext = GL.GetApi(gl.GetProcAddress);
         
@@ -363,6 +375,30 @@ public class DesktopRenderer : OpenGlControlBase
         // Draw Earth
         DrawEarth(silkGlContext);
 
+        // Draw maps
+        if (_isDavydovoLoaded)
+        {
+            if (_davydovoMapSegment == null)
+            {
+                _davydovoMapSegment = _mapSegmentGenerator.Generate(_davydovoHighResMap);
+            }
+            
+            // Do we have texture?
+            if (_davydovoMapSegment.Texture == null)
+            {
+                _davydovoMapSegment.UpdateTexture(new Texture(silkGlContext, _davydovoMapSegment.Map.Fragment.GetImage()));
+            }
+
+            if (_davydovoMapSegment.Mesh.VerticesBufferObject == null)
+            {
+                _davydovoMapSegment.Mesh.GenerateBuffers(silkGlContext);
+            }
+            
+            _davydovoMapSegment.Texture.Bind();
+            _davydovoMapSegment.Mesh.BindBuffers(silkGlContext);
+            silkGlContext.DrawElements(PrimitiveType.Triangles, (uint)_davydovoMapSegment.Mesh.Indices.Count, DrawElementsType.UnsignedInt, null);
+        }
+        
         // UI
         _ui.DrawUi(silkGlContext, _viewportWidth, _viewportHeight, _uiData);
 

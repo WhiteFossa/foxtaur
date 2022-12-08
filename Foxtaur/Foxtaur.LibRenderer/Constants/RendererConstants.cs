@@ -31,7 +31,7 @@ public static class RendererConstants
     /// <summary>
     /// Camera orbit height
     /// </summary>
-    public const float CameraOrbitHeight = 2.0f * GeoConstants.EarthRadius;
+    public const float CameraOrbitHeight = 1.1f * GeoConstants.EarthRadius;
     
     /// <summary>
     /// Camera height for surface walk mode

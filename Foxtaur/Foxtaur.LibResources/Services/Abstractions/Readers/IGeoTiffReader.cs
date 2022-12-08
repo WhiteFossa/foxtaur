@@ -42,7 +42,7 @@ public interface IGeoTiffReader
     long GetDataSize();
 
     /// <summary>
-    /// Get pixel coordinates by geo coordnates. May return null if coordinates are outside image
+    /// Get pixel coordinates by geo coordnates. Pixel coordinates may be wrong is geo coordinates points outside image
     /// </summary>
     Tuple<float, float> GetPixelCoordsByGeoCoords(float lat, float lon);
     

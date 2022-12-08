@@ -85,6 +85,7 @@ namespace Foxtaur.Desktop
             services.AddSingleton<IUi, Ui>();
             services.AddSingleton<IDemProvider, DemProvider>();
             services.AddSingleton<IZoomService, ZoomService>();
+            services.AddSingleton<IMapSegmentGenerator, MapSegmentGenerator>();
 
             return services;
         }

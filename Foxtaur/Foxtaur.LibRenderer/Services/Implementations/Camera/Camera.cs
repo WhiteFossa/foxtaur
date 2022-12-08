@@ -262,7 +262,7 @@ public class Camera : ICamera
         ModelMatrix = Matrix4x4.CreateRotationZ(0.0f) * Matrix4x4.CreateRotationY(0.0f) *
                       Matrix4x4.CreateRotationX(0.0f); // Rotation
         ViewMatrix = Matrix4x4.CreateLookAt(Position3D.AsVector3(), Target.AsVector3(), Up); // Camera position
-        ProjectionMatrix = Matrix4x4.CreatePerspectiveFieldOfView(Zoom, AspectRatio, 0.001f, 100.0f); // Zoom
+        ProjectionMatrix = Matrix4x4.CreatePerspectiveFieldOfView(Zoom, AspectRatio, 0.01f, 100.0f); // Zoom
         
         ForwardProjectionMatrix = ModelMatrix * ViewMatrix * ProjectionMatrix;
         
