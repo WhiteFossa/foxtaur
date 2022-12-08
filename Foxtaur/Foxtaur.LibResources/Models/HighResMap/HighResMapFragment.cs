@@ -73,29 +73,38 @@ public class HighResMapFragment : FragmentedResourceBase
                 _reader = new GeoTiffReader();
                 _reader.Open(decompressedStream);
                 
-                _image = new MagickImage(new MagickColor(0x00, 0x00, 0x00, 0x00), _reader.GetWidth(), _reader.GetHeight());
-        
-                // Loading image
-                var pixels = _image.GetPixels();
-                var pixelData = new byte[4];
-                pixelData[3] = 0xFF; // No transparency
-        
-                for (var y = 0; y < _reader.GetHeight(); y++)
+                // Combined raster
+                var width = _reader.GetWidth();
+                var height = _reader.GetHeight();
+                var raster = new byte[width * height * 4]; // 4 bytes per pixel - RGBA
+
+                var pixelBaseIndex = 0;
+                
+                for (var y = 0; y < height; y++)
                 {
                     if (y % 100 == 0)
                     {
                         _logger.Info($"Processing map { ResourceName } line { y }...");    
                     }
 
-                    for (var x = 0; x < _reader.GetWidth(); x++)
+                    for (var x = 0; x < width; x++)
                     {
-                        pixelData[0] = (byte)(_reader.GetPixel(1, x, y) * 255);
-                        pixelData[1] = (byte)(_reader.GetPixel(2, x, y) * 255);
-                        pixelData[2] = (byte)(_reader.GetPixel(3, x, y) * 255);
-                
-                        pixels.SetPixel(x, y, pixelData);
+                        raster[pixelBaseIndex + 0] = (byte)(_reader.GetPixel(1, x, y) * 255);
+                        raster[pixelBaseIndex + 1] = (byte)(_reader.GetPixel(2, x, y) * 255);
+                        raster[pixelBaseIndex + 2] = (byte)(_reader.GetPixel(3, x, y) * 255);
+                        raster[pixelBaseIndex + 3] = 255; // No transparency
+
+                        pixelBaseIndex += 4;
                     }
                 }
+                
+                var readSettings = new MagickReadSettings();
+                readSettings.ColorType = ColorType.TrueColorAlpha;
+                readSettings.Width = _reader.GetWidth();
+                readSettings.Height = _reader.GetHeight();
+                readSettings.Format = MagickFormat.Rgba;
+                
+                _image = new MagickImage(raster, readSettings);
             }
         }
         catch (Exception e)

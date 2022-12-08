@@ -49,6 +49,16 @@ public class GeoTiffReader : IGeoTiffReader
     private double _geoK3;
     private double _geoK4;
     private double _geoK5;
+    
+    /// <summary>
+    /// Raster width
+    /// </summary>
+    private int _width;
+
+    /// <summary>
+    /// Raster height
+    /// </summary>
+    private int _height;
 
     /// <summary>
     /// It seems that GDAL is not thread safe
@@ -98,7 +108,10 @@ public class GeoTiffReader : IGeoTiffReader
                 throw new NotSupportedException("Only byte and int16 datatypes are supported");
             }
 
-            _rasterSize = _dataset.RasterXSize * _dataset.RasterYSize * _bytesPerPixel;
+            _width = _dataset.RasterXSize;
+            _height = _dataset.RasterYSize;
+            
+            _rasterSize = _width * _height * _bytesPerPixel;
 
             _totalRastersSize = _rasterSize * _dataset.RasterCount;
             
@@ -160,11 +173,11 @@ public class GeoTiffReader : IGeoTiffReader
         {
             result = dataBand.ReadRaster(0,
                 0,
-                _dataset.RasterXSize,
-                _dataset.RasterYSize,
+                _width,
+                _height,
                 (IntPtr)bufferPtr,
-                _dataset.RasterXSize,
-                _dataset.RasterYSize,
+                _width,
+                _height,
                 _pixelType,
                 0,
                 0);
@@ -178,26 +191,15 @@ public class GeoTiffReader : IGeoTiffReader
 
     public float GetPixel(int band, int x, int y)
     {
-        _ = _dataset ?? throw new InvalidOperationException("File not opened!");
-
-        if (band < 0 || band > _dataset.RasterCount)
-        {
-            throw new ArgumentException(nameof(band));
-        }
-
-        if (x < 0 || x >= _dataset.RasterXSize || y < 0 || y > _dataset.RasterYSize)
-        {
-            throw new ArgumentException("Incorrect coordinates");
-        }
-
+        // No params checks for speedup
         var bandIndex = band - 1;
         if (_bytesPerPixel == 1)
         {
-            return _rasters[bandIndex][y * _dataset.RasterXSize + x] / (float)byte.MaxValue;
+            return _rasters[bandIndex][y * _width + x] / (float)byte.MaxValue;
         }
         else if (_bytesPerPixel == 2)
         {
-            var baseIndex = 2 * (y * _dataset.RasterXSize + x);
+            var baseIndex = 2 * (y * _width + x);
 
             var lowerByte = _rasters[bandIndex][baseIndex];
             var higherByte = _rasters[bandIndex][baseIndex + 1];
@@ -215,7 +217,7 @@ public class GeoTiffReader : IGeoTiffReader
         var x1 = (int)x;
         var y1 = (int)y;
 
-        if (x1 == _dataset.RasterXSize - 1 || y1 == _dataset.RasterYSize - 1)
+        if (x1 == _width - 1 || y1 == _height - 1)
         {
             // Edge pixel
             return GetPixel(band, x1, y1);
@@ -246,13 +248,13 @@ public class GeoTiffReader : IGeoTiffReader
     public int GetWidth()
     {
         _ = _dataset ?? throw new InvalidOperationException("File not opened!");
-        return _dataset.RasterXSize;
+        return _width;
     }
 
     public int GetHeight()
     {
         _ = _dataset ?? throw new InvalidOperationException("File not opened!");
-        return _dataset.RasterYSize;
+        return _height;
     }
 
     public long GetDataSize()
@@ -268,7 +270,7 @@ public class GeoTiffReader : IGeoTiffReader
         var y = (latDegrees - _geoCoefficients[3] + _geoK3 - _geoK1 * lonDegrees) / _geoK2;
         var x = lonDegrees / _geoCoefficients[1] - _geoK4 - _geoK5 * y;
 
-        if (x < 0 || y < 0 || x >= _dataset.RasterXSize || y >= _dataset.RasterYSize)
+        if (x < 0 || y < 0 || x >= _width || y >= _height)
         {
             return null;
         }
