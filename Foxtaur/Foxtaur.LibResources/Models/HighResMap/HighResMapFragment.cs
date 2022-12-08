@@ -16,6 +16,8 @@ public class HighResMapFragment : FragmentedResourceBase
 
     private bool _isLoading;
 
+    private MagickImage _image;
+
     /// <summary>
     /// Is fragment data loaded?
     /// </summary>
@@ -70,6 +72,30 @@ public class HighResMapFragment : FragmentedResourceBase
                 
                 _reader = new GeoTiffReader();
                 _reader.Open(decompressedStream);
+                
+                _image = new MagickImage(new MagickColor(0x00, 0x00, 0x00, 0x00), _reader.GetWidth(), _reader.GetHeight());
+        
+                // Loading image
+                var pixels = _image.GetPixels();
+                var pixelData = new byte[4];
+                pixelData[3] = 0xFF; // No transparency
+        
+                for (var y = 0; y < _reader.GetHeight(); y++)
+                {
+                    if (y % 100 == 0)
+                    {
+                        _logger.Info($"Processing map { ResourceName } line { y }...");    
+                    }
+
+                    for (var x = 0; x < _reader.GetWidth(); x++)
+                    {
+                        pixelData[0] = (byte)(_reader.GetPixel(1, x, y) * 255);
+                        pixelData[1] = (byte)(_reader.GetPixel(2, x, y) * 255);
+                        pixelData[2] = (byte)(_reader.GetPixel(3, x, y) * 255);
+                
+                        pixels.SetPixel(x, y, pixelData);
+                    }
+                }
             }
         }
         catch (Exception e)
@@ -94,23 +120,7 @@ public class HighResMapFragment : FragmentedResourceBase
         {
             return null;
         }
-        
-        var image = new MagickImage(new MagickColor(0x00, 0x00, 0x00, 0x00), _reader.GetWidth(), _reader.GetHeight());
-        
-        // Loading image
-        var pixels = image.GetPixels();
-        for (var y = 0; y < _reader.GetHeight(); y++)
-        {
-            for (var x = 0; x < _reader.GetWidth(); x++)
-            {
-                var r = (byte)(_reader.GetPixel(0, x, y) * 255);
-                var g = (byte)(_reader.GetPixel(1, x, y) * 255);
-                var b = (byte)(_reader.GetPixel(2, x, y) * 255);
-                
-                pixels.SetPixel(x, y, new byte[] { r, g, b, 0xFF });
-            }
-        }
 
-        return image;
+        return _image;
     }
 }
