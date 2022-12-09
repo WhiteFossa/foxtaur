@@ -20,14 +20,7 @@ public static class MeshesHelper
     /// </summary>
     public static float GetClosestLonNodeWest(this float lon, float meshesLonGranularity)
     {
-        if (lon < 0)
-        {
-            return meshesLonGranularity * (float)Math.Ceiling(lon / meshesLonGranularity);
-        }
-        else
-        {
-            return meshesLonGranularity * (float)Math.Floor(lon / meshesLonGranularity);
-        }
+        return meshesLonGranularity * (float)Math.Ceiling(lon / meshesLonGranularity);
     }
     
     /// <summary>
@@ -35,13 +28,6 @@ public static class MeshesHelper
     /// </summary>
     public static float GetClosestLonNodeEast(this float lon, float meshesLonGranularity)
     {
-        if (lon < 0)
-        {
-            return meshesLonGranularity * (float)Math.Floor(lon / meshesLonGranularity);
-        }
-        else
-        {
-            return meshesLonGranularity * (float)Math.Ceiling(lon / meshesLonGranularity);
-        }
+        return meshesLonGranularity * (float)Math.Floor(lon / meshesLonGranularity);
     }
 }

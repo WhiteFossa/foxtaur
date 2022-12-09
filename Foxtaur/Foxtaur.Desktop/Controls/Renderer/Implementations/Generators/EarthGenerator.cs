@@ -1,5 +1,6 @@
 using System;
 using Foxtaur.Desktop.Controls.Renderer.Abstractions.Generators;
+using Foxtaur.Desktop.Controls.Renderer.Helpers;
 using Foxtaur.Desktop.Controls.Renderer.Models;
 using Foxtaur.Helpers;
 using Foxtaur.LibGeo.Constants;
@@ -7,6 +8,7 @@ using Foxtaur.LibGeo.Models;
 using Foxtaur.LibGeo.Services.Abstractions.CoordinateProviders;
 using Foxtaur.LibGeo.Services.Abstractions.DemProviders;
 using Foxtaur.LibRenderer.Models;
+using Foxtaur.LibRenderer.Services.Abstractions.Zoom;
 using Foxtaur.LibResources.Enums;
 using Silk.NET.OpenGL;
 
@@ -16,38 +18,45 @@ public class EarthGenerator : IEarthGenerator
 {
     private readonly ISphereCoordinatesProvider _sphereCoordinatesProvider;
     private readonly IDemProvider _demProvider;
+    private readonly IZoomService _zoomService;
 
     public EarthGenerator(ISphereCoordinatesProvider sphereCoordinatesProvider,
-        IDemProvider demProvider)
+        IDemProvider demProvider,
+        IZoomService zoomService)
     {
         _sphereCoordinatesProvider = sphereCoordinatesProvider;
         _demProvider = demProvider;
+        _zoomService = zoomService;
     }
     
-    public EarthSegment GenerateEarthSegment(GeoSegment segment, float gridStep)
+    public EarthSegment GenerateEarthSegment(GeoSegment segment)
     {
-        return new EarthSegment(segment, gridStep);
+        return new EarthSegment(segment);
     }
 
-    public void GenerateMeshForSegment(EarthSegment segment, ZoomLevel desiredZoomLevel)
+    public void GenerateMeshForSegment(EarthSegment segment)
     {
         _ = segment ?? throw new ArgumentNullException(nameof(segment));
         
         var segmentMesh = new Mesh();
         
-        for (var lat = segment.GeoSegment.SouthLat; lat < segment.GeoSegment.NorthLat; lat += segment.GridStep)
+        for (var lat = segment.GeoSegment.SouthLat.GetClosestLatNode(_zoomService.ZoomLevelData.MeshesStep); lat < segment.GeoSegment.NorthLat; lat += _zoomService.ZoomLevelData.MeshesStep)
         {
-            var latNorther = lat + segment.GridStep;
+            var latNorther = lat + _zoomService.ZoomLevelData.MeshesStep;
+            
+            var granulatedWestLon = segment.GeoSegment.WestLon.GetClosestLonNodeWest(_zoomService.ZoomLevelData.MeshesStep);
 
             // First two points of a stripe
-            var firstPair = GenerateAndAddPointsPair(segmentMesh, lat, segment.GeoSegment.WestLon, latNorther, segment.GeoSegment.WestLon, desiredZoomLevel);
+            var firstPair = GenerateAndAddPointsPair(segmentMesh, lat, granulatedWestLon, latNorther, granulatedWestLon, _zoomService.ZoomLevelData.Level);
             var i3D0 = firstPair.Item1;
             var i3D1 = firstPair.Item2;
 
             // Intermediate triangles
-            for (var lon = segment.GeoSegment.WestLon - segment.GridStep; lon > segment.GeoSegment.EastLon; lon -= segment.GridStep)
+            var granulatedEastLon = segment.GeoSegment.EastLon.GetClosestLonNodeEast(_zoomService.ZoomLevelData.MeshesStep);
+            
+            for (var lon = granulatedWestLon - _zoomService.ZoomLevelData.MeshesStep; lon > granulatedEastLon; lon -= _zoomService.ZoomLevelData.MeshesStep)
             {
-                var intermediatePair = GenerateAndAddPointsPair(segmentMesh, lat, lon, latNorther, lon, desiredZoomLevel);
+                var intermediatePair = GenerateAndAddPointsPair(segmentMesh, lat, lon, latNorther, lon, _zoomService.ZoomLevelData.Level);
                 var i3D2 = intermediatePair.Item1;
                 var i3D3 = intermediatePair.Item2;
 
@@ -64,7 +73,7 @@ public class EarthGenerator : IEarthGenerator
             }
             
             // Two last triangles of a stripe
-            var lastPair = GenerateAndAddPointsPair(segmentMesh, lat, segment.GeoSegment.EastLon, latNorther, segment.GeoSegment.EastLon, desiredZoomLevel);
+            var lastPair = GenerateAndAddPointsPair(segmentMesh, lat, granulatedEastLon, latNorther, granulatedEastLon, _zoomService.ZoomLevelData.Level);
             var i3last0 = lastPair.Item1;
             var i3last1 = lastPair.Item2;
 

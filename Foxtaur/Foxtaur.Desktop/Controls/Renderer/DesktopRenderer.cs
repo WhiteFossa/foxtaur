@@ -685,8 +685,7 @@ public class DesktopRenderer : OpenGlControlBase
                         GeoPoint.SumLatitudesWithWrap(lat, _zoomService.ZoomLevelData.SegmentSize),
                         lon,
                         lat,
-                        GeoPoint.SumLongitudesWithWrap(lon, -1.0f * _zoomService.ZoomLevelData.SegmentSize)),
-                    _zoomService.ZoomLevelData.MeshesStep));
+                        GeoPoint.SumLongitudesWithWrap(lon, -1.0f * _zoomService.ZoomLevelData.SegmentSize))));
             }
         }
     }
@@ -700,7 +699,7 @@ public class DesktopRenderer : OpenGlControlBase
 
         // Regenerating meshes
         toRegenerateInThisFrame
-            .ForEach(es => _earthGenerator.GenerateMeshForSegment(es, _zoomService.ZoomLevel));
+            .ForEach(es => _earthGenerator.GenerateMeshForSegment(es));
         
         // Regenerating buffers
         toRegenerateInThisFrame

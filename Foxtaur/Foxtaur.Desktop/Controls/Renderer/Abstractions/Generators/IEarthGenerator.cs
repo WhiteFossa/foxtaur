@@ -14,12 +14,12 @@ public interface IEarthGenerator
     /// <summary>
     /// Generate Earth segment
     /// </summary>
-    public EarthSegment GenerateEarthSegment(GeoSegment segment, float gridStep);
+    public EarthSegment GenerateEarthSegment(GeoSegment segment);
 
     /// <summary>
     /// Generate mesh for given Earth segment and store it into segment
     /// </summary>
-    public void GenerateMeshForSegment(EarthSegment segment, ZoomLevel desiredZoomLevel);
+    public void GenerateMeshForSegment(EarthSegment segment);
     
     /// <summary>
     /// Generate Earth sphere (for raycasting)

@@ -14,11 +14,6 @@ public class EarthSegment
     public GeoSegment GeoSegment { get; private set; }
 
     /// <summary>
-    /// Segment's mesh step in radians
-    /// </summary>
-    public float GridStep { get; private set; }
-
-    /// <summary>
     /// Mesh for given segment
     /// </summary>
     public Mesh Mesh { get; private set; }
@@ -28,11 +23,10 @@ public class EarthSegment
     /// </summary>
     public bool IsRegenerationNeeded { get; private set; }
 
-    public EarthSegment(GeoSegment geoSegment, float gridStep)
+    public EarthSegment(GeoSegment geoSegment)
     {
         GeoSegment = geoSegment ?? throw new ArgumentNullException(nameof(geoSegment));
-        GridStep = gridStep;
-        
+
         MarkToRegeneration();
     }
 
