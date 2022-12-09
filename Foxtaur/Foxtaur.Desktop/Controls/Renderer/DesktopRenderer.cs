@@ -222,7 +222,7 @@ public class DesktopRenderer : OpenGlControlBase
         _davydovoHighResMap = new HighResMap(Guid.NewGuid(), "Davydovo", _davydovoFragment);
 
         //Task.Run(() => _davydovoFragment.DownloadAsync(OnDavydovoLoad));
-        Task.WaitAll(_davydovoFragment.DownloadAsync(OnDavydovoLoad));
+        _davydovoFragment.DownloadAsync(OnDavydovoLoad);
     }
 
     private void OnDavydovoLoad(FragmentedResourceBase davydovo)
@@ -396,6 +396,7 @@ public class DesktopRenderer : OpenGlControlBase
             
             _davydovoMapSegment.Texture.Bind();
             _davydovoMapSegment.Mesh.BindBuffers(silkGlContext);
+            
             silkGlContext.DrawElements(PrimitiveType.Triangles, (uint)_davydovoMapSegment.Mesh.Indices.Count, DrawElementsType.UnsignedInt, null);
         }
         

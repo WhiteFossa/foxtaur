@@ -16,7 +16,7 @@ public class DemFragment : ZoomedFragmentedResourceBase
     private IGeoTiffReader _reader;
 
     private bool _isLoading;
-
+    
     /// <summary>
     /// Is fragment data loaded?
     /// </summary>
@@ -66,41 +66,36 @@ public class DemFragment : ZoomedFragmentedResourceBase
         }
         
         _logger.Info($"Loading { ResourceName }...");
-
-        try
+        
+        if (!IsLocal)
         {
-            if (!IsLocal)
+            // Do we have already downloaded file?
+            var localPath = GetResourceLocalPath(ResourceName);
+            if (!File.Exists(localPath))
             {
-                // Do we have already downloaded file?
-                var localPath = GetResourceLocalPath(ResourceName);
-                if (!File.Exists(localPath))
-                {
-                    await LoadFromUrlToFileAsync(ResourceName);    
-                }
+                await LoadFromUrlToFileAsync(ResourceName);    
             }
+        }
 
+        lock (this)
+        {
             // Decompressing
             _logger.Info($"Decompressing { ResourceName }...");
             using (var decompressedStream = LoadZstdFile(GetLocalPath()))
             {
                 // Processing
                 _logger.Info($"Processing { ResourceName }...");
-                
+            
                 _reader = new GeoTiffReader();
                 _reader.Open(decompressedStream);
             }
-        }
-        catch (Exception e)
-        {
-            _logger.Error(e.Message);
-            throw;
-        }
 
-        _isLoading = false;
-        IsLoaded = true;
-
-        _logger.Info($"{ ResourceName } is ready.");
-        OnLoad(this);
+            _isLoading = false;
+            IsLoaded = true;
+            
+            _logger.Info($"{ ResourceName } is ready.");
+            OnLoad(this);    
+        }
     }
 
     /// <summary>
@@ -131,14 +126,14 @@ public class DemFragment : ZoomedFragmentedResourceBase
     public float? GetHeight(float lat, float lon)
     {
         LastAccessTime = DateTime.UtcNow;
-        
+
         if (!IsLoaded)
         {
             return ResourcesConstants.DemSeaLevel;
         }
 
         var height = _reader.GetPixelByGeoCoords(ResourcesConstants.DemBand, lat, lon);
-        
+
         // If we have "no data", then it's sea level
         if (height < ResourcesConstants.DemNoData)
         {

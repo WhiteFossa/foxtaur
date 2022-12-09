@@ -2,6 +2,7 @@ using System;
 using Foxtaur.Desktop.Controls.Renderer.Abstractions.Generators;
 using Foxtaur.Desktop.Controls.Renderer.Models;
 using Foxtaur.Helpers;
+using Foxtaur.LibGeo.Constants;
 using Foxtaur.LibGeo.Models;
 using Foxtaur.LibGeo.Services.Abstractions.CoordinateProviders;
 using Foxtaur.LibGeo.Services.Abstractions.DemProviders;
@@ -31,7 +32,7 @@ public class MapSegmentGenerator : IMapSegmentGenerator
         var segmentMesh = new Mesh();
 
         // For now grid step is hardcoded
-        var gridStep = 0.0001f.ToRadians();
+        var gridStep = 0.001f.ToRadians();
         
         for (var lat = geoSegment.SouthLat; lat < geoSegment.NorthLat; lat += gridStep)
         {
