@@ -22,7 +22,7 @@ public class DemProvider : IDemProvider
     private Logger _logger = LogManager.GetCurrentClassLogger();
 
     /// <summary>
-    /// Zoom levels, ordered from higher to lower resolution
+    /// Zoom levels, ordered from higher to lower Fresolution
     /// </summary>
     private List<ZoomLevel> _orderedZoomLevels = new List<ZoomLevel>()
     {

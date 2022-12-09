@@ -345,7 +345,7 @@ public class DesktopRenderer : OpenGlControlBase
         _defaultShader.Use();
 
         // Setting shader parameters (common)
-        _defaultShader.SetUniform2f("resolution", new Vector2(_viewportWidth, _viewportHeight));
+        //_defaultShader.SetUniform2f("resolution", new Vector2(_viewportWidth, _viewportHeight));
 
         // Setting shader parameters (vertices)
         _defaultShader.SetUniform4f("uModel", _camera.ModelMatrix);
@@ -600,10 +600,8 @@ public class DesktopRenderer : OpenGlControlBase
 
         if (_isSurfaceRunMode && _rotateHeadMode)
         {
-            _surfaceRunLatViewAngle =
-                RendererConstants.SurfaceRunHeadRotationSpeedLat * dy + _surfaceRunLatViewAnglePress;
-            _surfaceRunLonViewAngle = RendererConstants.SurfaceRunHeadRotationSpeedLon * 2.0f * dx +
-                                      _surfaceRunLonViewAnglePress; // 2.0f because lat is [-Pi; Pi], but lon is [-2 * Pi; 2 * Pi]
+            _surfaceRunLatViewAngle = RendererConstants.SurfaceRunHeadRotationSpeedLat * dy * _camera.Zoom + _surfaceRunLatViewAnglePress;
+            _surfaceRunLonViewAngle = RendererConstants.SurfaceRunHeadRotationSpeedLon * 2.0f * dx * _camera.Zoom + _surfaceRunLonViewAnglePress; // 2.0f because lat is [-Pi; Pi], but lon is [-2 * Pi; 2 * Pi]
         }
     }
 

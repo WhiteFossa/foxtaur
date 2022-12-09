@@ -7,6 +7,7 @@ using Foxtaur.LibGeo.Constants;
 using Foxtaur.LibGeo.Models;
 using Foxtaur.LibGeo.Services.Abstractions.CoordinateProviders;
 using Foxtaur.LibGeo.Services.Abstractions.DemProviders;
+using Foxtaur.LibRenderer.Constants;
 using Foxtaur.LibRenderer.Services.Abstractions.Zoom;
 using Foxtaur.LibResources.Enums;
 using Foxtaur.LibResources.Models.HighResMap;
@@ -100,10 +101,10 @@ public class MapSegmentGenerator : IMapSegmentGenerator
         _ = mesh ?? throw new ArgumentNullException(nameof(mesh));
 
         // Geopoints
-        var altitude0 = _demProvider.GetSurfaceAltitude(p0Lat, p0Lon, desiredZoomLevel) + 0.0001f; // TODO: Remove me
+        var altitude0 = _demProvider.GetSurfaceAltitude(p0Lat, p0Lon, desiredZoomLevel) + RendererConstants.MapsAltitudeIncrement;
         var geoPoint0 = new GeoPoint(p0Lat, p0Lon, altitude0);
 
-        var altitude1 = _demProvider.GetSurfaceAltitude(p1Lat, p1Lon, desiredZoomLevel) + 0.0001f;
+        var altitude1 = _demProvider.GetSurfaceAltitude(p1Lat, p1Lon, desiredZoomLevel) + RendererConstants.MapsAltitudeIncrement;
         var geoPoint1 = new GeoPoint(p1Lat, p1Lon, altitude1);
 
         // Planar coordinates (3D + Texture)

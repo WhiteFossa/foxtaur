@@ -41,12 +41,12 @@ public static class RendererConstants
     /// <summary>
     /// Head rotation speed (latitudal) in surface run mode
     /// </summary>
-    public const float SurfaceRunHeadRotationSpeedLat = 0.0005f;
+    public const float SurfaceRunHeadRotationSpeedLat = 0.001f;
 
     /// <summary>
     /// Head rotation speed (longitudal) in surface run mode
     /// </summary>
-    public const float SurfaceRunHeadRotationSpeedLon = 0.00005f;
+    public const float SurfaceRunHeadRotationSpeedLon = 0.0001f;
 
     #region UI
 
@@ -112,4 +112,9 @@ public static class RendererConstants
     /// Underground plane height for surface walk mode segments culling
     /// </summary>
     public const float SurfaceRunModeUndergroundPlaneHeight = GeoConstants.EarthRadius - 0.005f * GeoConstants.EarthRadius;
+
+    /// <summary>
+    /// Maps are higher than Earth surface by this value
+    /// </summary>
+    public const float MapsAltitudeIncrement = 0.000001f;
 }
