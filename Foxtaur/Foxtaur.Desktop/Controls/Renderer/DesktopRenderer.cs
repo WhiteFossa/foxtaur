@@ -362,6 +362,8 @@ public class DesktopRenderer : OpenGlControlBase
         {
             DisposeEarthSegments();
             GenerateEarthSegments();
+
+            _davydovoMapSegment = null;
             
             _isZoomLevelChanged = false;
         }
@@ -684,7 +686,7 @@ public class DesktopRenderer : OpenGlControlBase
                         lon,
                         lat,
                         GeoPoint.SumLongitudesWithWrap(lon, -1.0f * _zoomService.ZoomLevelData.SegmentSize)),
-                    _zoomService.ZoomLevelData.SegmentSize / _zoomService.ZoomLevelData.SegmentSteps));
+                    _zoomService.ZoomLevelData.MeshesStep));
             }
         }
     }

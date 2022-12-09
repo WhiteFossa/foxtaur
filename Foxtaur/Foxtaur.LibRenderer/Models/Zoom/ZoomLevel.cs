@@ -26,16 +26,16 @@ public class ZoomLevel
     public float SegmentSize { get; }
 
     /// <summary>
-    /// Each Earth segments will have SegmentSteps ^ 2 vertices
+    /// All meshes MUST use this step (to provide consistent DEM)
     /// </summary>
-    public float SegmentSteps { get; }
+    public float MeshesStep { get; }
 
-    public ZoomLevel(LibResources.Enums.ZoomLevel level, float minZoom, float maxZoom, float segmentSize, float segmentSteps)
+    public ZoomLevel(LibResources.Enums.ZoomLevel level, float minZoom, float maxZoom, float segmentSize, float meshesStep)
     {
         Level = level;
         MinZoom = minZoom;
         MaxZoom = maxZoom;
         SegmentSize = segmentSize;
-        SegmentSteps = segmentSteps;
+        MeshesStep = meshesStep;
     }
 }
