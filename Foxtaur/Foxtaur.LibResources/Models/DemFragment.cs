@@ -16,7 +16,9 @@ public class DemFragment : ZoomedFragmentedResourceBase
     private IGeoTiffReader _reader;
 
     private bool _isLoading;
-    
+
+    private object _processingLock = new object();
+
     /// <summary>
     /// Is fragment data loaded?
     /// </summary>
@@ -48,7 +50,7 @@ public class DemFragment : ZoomedFragmentedResourceBase
     {
         OnLoad = onLoad ?? throw new ArgumentNullException(nameof(onLoad));
         
-        lock (this)
+        lock (_processingLock)
         {
             if (IsLoaded)
             {
@@ -63,22 +65,19 @@ public class DemFragment : ZoomedFragmentedResourceBase
             }
 
             _isLoading = true;
-        }
-        
-        _logger.Info($"Loading { ResourceName }...");
-        
-        if (!IsLocal)
-        {
-            // Do we have already downloaded file?
-            var localPath = GetResourceLocalPath(ResourceName);
-            if (!File.Exists(localPath))
-            {
-                await LoadFromUrlToFileAsync(ResourceName);    
-            }
-        }
 
-        lock (this)
-        {
+            _logger.Info($"Loading { ResourceName }...");
+        
+            if (!IsLocal)
+            {
+                // Do we have already downloaded file?
+                var localPath = GetResourceLocalPath(ResourceName);
+                if (!File.Exists(localPath))
+                {
+                    Task.WaitAll(LoadFromUrlToFileAsync(ResourceName));    
+                }
+            }
+
             // Decompressing
             _logger.Info($"Decompressing { ResourceName }...");
             using (var decompressedStream = LoadZstdFile(GetLocalPath()))
@@ -103,7 +102,7 @@ public class DemFragment : ZoomedFragmentedResourceBase
     /// </summary>
     public void Unload()
     {
-        lock (this)
+        lock (_processingLock)
         {
             if (!IsLoaded)
             {
