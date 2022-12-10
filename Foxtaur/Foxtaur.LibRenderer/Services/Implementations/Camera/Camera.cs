@@ -128,9 +128,13 @@ public class Camera : ICamera
             {
                 _zoom = RendererConstants.CameraMaxZoom;
             }
-            else if (value > RendererConstants.CameraMinZoom)
+            else if (!IsSurfaceRunMode && value > RendererConstants.CameraMinZoom)
             {
                 _zoom = RendererConstants.CameraMinZoom;
+            }
+            else if (IsSurfaceRunMode && value > RendererConstants.SurfaceRunMinZoom)
+            {
+                _zoom = RendererConstants.SurfaceRunMinZoom;
             }
             else
             {
@@ -142,6 +146,8 @@ public class Camera : ICamera
             OnZoomChanged?.Invoke(this, new OnZoomChangedArgs(_zoom));
         }
     }
+
+    public bool IsSurfaceRunMode { get; set; }
 
     public Matrix4x4 ModelMatrix { get; private set; } = new Matrix4x4();
 

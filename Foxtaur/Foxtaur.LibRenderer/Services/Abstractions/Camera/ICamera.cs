@@ -49,6 +49,11 @@ public interface ICamera
     float Zoom { get; set; }
 
     /// <summary>
+    /// If true, then we are in surface run mode, so special limits for zoom are applied
+    /// </summary>
+    bool IsSurfaceRunMode { get; set; }
+
+    /// <summary>
     /// Model matrix
     /// </summary>
     Matrix4x4 ModelMatrix { get; }

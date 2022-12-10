@@ -489,6 +489,8 @@ public class DesktopRenderer : OpenGlControlBase
         {
             _camera.ZoomIn(steps);
         }
+        
+        _logger.Info($"Zoom: { _camera.Zoom }");
     }
 
     /// <summary>
@@ -523,6 +525,7 @@ public class DesktopRenderer : OpenGlControlBase
             if (!_isSurfaceRunMode)
             {
                 _isSurfaceRunMode = true;
+                _camera.Zoom = RendererConstants.SurfaceRunMinZoom;
             }
             else
             {
@@ -532,6 +535,8 @@ public class DesktopRenderer : OpenGlControlBase
 
                 _isSurfaceRunMode = false;
             }
+
+            _camera.IsSurfaceRunMode = _isSurfaceRunMode;
         }
 
         if (e.GetCurrentPoint(this).Properties.IsRightButtonPressed)
