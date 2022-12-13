@@ -12,6 +12,7 @@ public class TextDrawer : ITextDrawer
         _ = image ?? throw new ArgumentNullException(nameof(image));
 
         image.Settings.FontPointsize = size;
+        image.Settings.Font = RendererConstants.UiFontPath;
         return image.FontTypeMetrics(text);
     }
 
