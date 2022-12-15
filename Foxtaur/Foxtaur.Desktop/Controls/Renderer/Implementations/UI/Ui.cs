@@ -56,7 +56,7 @@ public class Ui : IUi
         _ = data ?? throw new ArgumentNullException(nameof(data));
 
         // Top
-        var topPanelRelativeHeight = RendererConstants.UiTopPanelHeight / uiHeight;
+        var topPanelRelativeHeight = RendererConstants.UiTopPanelHeight / (double)uiHeight;
         _uiMeshTop = _rectangleGenerator.GenerateRectangle(
             new PlanarPoint3D(0.0, topPanelRelativeHeight, 0.0),
             new PlanarPoint2D(0.0, 1.0),
@@ -66,7 +66,7 @@ public class Ui : IUi
         _uiMeshTop.GenerateBuffers(silkGlContext);
 
         // Bottom
-        var bottomPanelRelativeHeight = RendererConstants.UiBottomPanelHeight / uiHeight;
+        var bottomPanelRelativeHeight = RendererConstants.UiBottomPanelHeight / (double)uiHeight;
         _uiMeshBottom = _rectangleGenerator.GenerateRectangle(
             new PlanarPoint3D(0.0, 1.0, 0.0),
             new PlanarPoint2D(0.0, 1.0),
