@@ -91,7 +91,7 @@ public class EarthGenerator : IEarthGenerator
 
     public Sphere GenerateEarthSphere()
     {
-        return new Sphere(new PlanarPoint3D(0.0f, 0.0f, 0.0f), GeoConstants.EarthRadius);
+        return new Sphere(new PlanarPoint3D(0.0, 0.0, 0.0), GeoConstants.EarthRadius);
     }
 
     /// <summary>
@@ -99,10 +99,10 @@ public class EarthGenerator : IEarthGenerator
     /// Returns pair of generated points indices 
     /// </summary>
     private ValueTuple<uint, uint> GenerateAndAddPointsPair(Mesh mesh,
-        float p0Lat,
-        float p0Lon,
-        float p1Lat,
-        float p1Lon,
+        double p0Lat,
+        double p0Lon,
+        double p1Lat,
+        double p1Lon,
         ZoomLevel desiredZoomLevel)
     {
         _ = mesh ?? throw new ArgumentNullException(nameof(mesh));

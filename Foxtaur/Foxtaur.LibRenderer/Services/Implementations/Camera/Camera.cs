@@ -16,17 +16,17 @@ public class Camera : ICamera
     /// <summary>
     /// Camera latitude
     /// </summary>
-    private float _lat;
+    private double _lat;
 
     /// <summary>
     /// Camera longitude
     /// </summary>
-    private float _lon;
+    private double _lon;
 
     /// <summary>
     /// Camera height
     /// </summary>
-    private float _h;
+    private double _h;
 
     /// <summary>
     /// Camera position in 3D space
@@ -41,7 +41,7 @@ public class Camera : ICamera
     /// <summary>
     /// Camera zoom
     /// </summary>
-    private float _zoom;
+    private double _zoom;
 
     /// <summary>
     /// Camera up vector
@@ -51,9 +51,9 @@ public class Camera : ICamera
     /// <summary>
     /// Camera aspect ratio
     /// </summary>
-    private float _aspectRatio;
+    private double _aspectRatio;
 
-    public float Lat
+    public double Lat
     {
         get { return _lat; }
 
@@ -65,7 +65,7 @@ public class Camera : ICamera
         }
     }
 
-    public float Lon
+    public double Lon
     {
         get { return _lon; }
 
@@ -77,7 +77,7 @@ public class Camera : ICamera
         }
     }
 
-    public float H
+    public double H
     {
         get { return _h; }
 
@@ -118,7 +118,7 @@ public class Camera : ICamera
         }
     }
 
-    public float Zoom
+    public double Zoom
     {
         get { return _zoom; }
 
@@ -159,7 +159,7 @@ public class Camera : ICamera
     
     public Matrix4x4 BackProjectionMatrix { get; private set; } = new Matrix4x4();
 
-    public float AspectRatio
+    public double AspectRatio
     {
         get { return _aspectRatio; }
 
@@ -189,7 +189,7 @@ public class Camera : ICamera
 
         _zoom = RendererConstants.CameraMinZoom; // To avoid errors during initialization
 
-        AspectRatio = 1.0f;
+        AspectRatio = 1.0;
         Up = new Vector3(0.0f, -1.0f, 0.0f);
         Zoom = RendererConstants.CameraMinZoom;
 
@@ -199,21 +199,21 @@ public class Camera : ICamera
 
     public event ICamera.OnZoomChangedHandler OnZoomChanged;
 
-    public void ZoomIn(float steps)
+    public void ZoomIn(double steps)
     {
-        Zoom = Zoom * (float)Math.Pow(RendererConstants.CameraZoomInMultiplier, steps);
+        Zoom = Zoom * Math.Pow(RendererConstants.CameraZoomInMultiplier, steps);
     }
 
-    public void ZoomOut(float steps)
+    public void ZoomOut(double steps)
     {
-        Zoom = Zoom * (float)Math.Pow(RendererConstants.CameraZoomOutMultiplier, steps);
+        Zoom = Zoom * Math.Pow(RendererConstants.CameraZoomOutMultiplier, steps);
     }
 
     public PlanarPoint2D ProjectPointToViewport(PlanarPoint3D point)
     {
         _ = point ?? throw new ArgumentNullException(nameof(point));
 
-        var projectedPoint = Vector4.Transform(new Vector4(point.X, point.Y, point.Z, 1.0f), ForwardProjectionMatrix);
+        var projectedPoint = Vector4.Transform(new Vector4((float)point.X, (float)point.Y, (float)point.Z, 1.0f), ForwardProjectionMatrix);
         
         return new PlanarPoint2D(projectedPoint.X, projectedPoint.Y);
     }
@@ -241,7 +241,7 @@ public class Camera : ICamera
         _ = point ?? throw new ArgumentNullException(nameof(point));
         _ = undergroundPoint ?? throw new ArgumentNullException(nameof(undergroundPoint));
 
-        var normalizedCameraVector = Vector3.Normalize(new Vector3(Position3D.X, Position3D.Y, Position3D.Z));
+        var normalizedCameraVector = Vector3.Normalize(new Vector3((float)Position3D.X, (float)Position3D.Y, (float)Position3D.Z));
 
         var planeEquationSolution = normalizedCameraVector.X * (point.X - undergroundPoint.X)
                             + normalizedCameraVector.Y * (point.Y - undergroundPoint.Y)
@@ -268,7 +268,7 @@ public class Camera : ICamera
         ModelMatrix = Matrix4x4.CreateRotationZ(0.0f) * Matrix4x4.CreateRotationY(0.0f) *
                       Matrix4x4.CreateRotationX(0.0f); // Rotation
         ViewMatrix = Matrix4x4.CreateLookAt(Position3D.AsVector3(), Target.AsVector3(), Up); // Camera position
-        ProjectionMatrix = Matrix4x4.CreatePerspectiveFieldOfView(Zoom, AspectRatio, 0.001f, 100.0f); // Zoom
+        ProjectionMatrix = Matrix4x4.CreatePerspectiveFieldOfView((float)Zoom, (float)AspectRatio, 0.001f, 100.0f); // Zoom
         
         ForwardProjectionMatrix = ModelMatrix * ViewMatrix * ProjectionMatrix;
         

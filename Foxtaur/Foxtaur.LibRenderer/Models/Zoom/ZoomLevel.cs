@@ -13,24 +13,24 @@ public class ZoomLevel
     /// <summary>
     /// Minimal zoom for this level
     /// </summary>
-    public float MinZoom { get; }
+    public double MinZoom { get; }
 
     /// <summary>
     /// Maximal zoom for this level
     /// </summary>
-    public float MaxZoom { get; }
+    public double MaxZoom { get; }
 
     /// <summary>
     /// Earth segment size
     /// </summary>
-    public float SegmentSize { get; }
+    public double SegmentSize { get; }
 
     /// <summary>
     /// All meshes MUST use this step (to provide consistent DEM)
     /// </summary>
-    public float MeshesStep { get; }
+    public double MeshesStep { get; }
 
-    public ZoomLevel(LibResources.Enums.ZoomLevel level, float minZoom, float maxZoom, float segmentSize, float meshesStep)
+    public ZoomLevel(LibResources.Enums.ZoomLevel level, double minZoom, double maxZoom, double segmentSize, double meshesStep)
     {
         Level = level;
         MinZoom = minZoom;

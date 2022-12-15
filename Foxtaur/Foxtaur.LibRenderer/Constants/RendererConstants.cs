@@ -11,47 +11,47 @@ public static class RendererConstants
     /// <summary>
     /// Camera zoom must be greater than this
     /// </summary>
-    public const float CameraMaxZoom = 0.0f;
+    public const double CameraMaxZoom = 0.0;
 
     /// <summary>
     /// Camera zoom must be lesser than this
     /// </summary>
-    public const float CameraMinZoom = (float)Math.PI / 2.0f;
+    public const double CameraMinZoom = Math.PI / 2.0;
 
     /// <summary>
     /// Min zoom for surcace run mode
     /// </summary>
-    public const float SurfaceRunMinZoom = 1.0f;
+    public const double SurfaceRunMinZoom = 1.0;
 
     /// <summary>
     /// Camera zoom in multiplier
     /// </summary>
-    public const float CameraZoomInMultiplier = 0.95f;
+    public const double CameraZoomInMultiplier = 0.95;
 
     /// <summary>
     /// Camera zoom out multiplier
     /// </summary>
-    public const float CameraZoomOutMultiplier = 1.05f;
+    public const double CameraZoomOutMultiplier = 1.05;
 
     /// <summary>
     /// Camera orbit height
     /// </summary>
-    public const float CameraOrbitHeight = 1.1f * GeoConstants.EarthRadius;
+    public const double CameraOrbitHeight = 1.1 * GeoConstants.EarthRadius;
     
     /// <summary>
     /// Camera height for surface walk mode
     /// </summary>
-    public const float SurfaceRunModeCameraOrbitHeight = 0.0002f * GeoConstants.EarthRadius;
+    public const double SurfaceRunModeCameraOrbitHeight = 0.0002 * GeoConstants.EarthRadius;
 
     /// <summary>
     /// Head rotation speed (latitudal) in surface run mode
     /// </summary>
-    public const float SurfaceRunHeadRotationSpeedLat = 0.001f;
+    public const double SurfaceRunHeadRotationSpeedLat = 0.001;
 
     /// <summary>
     /// Head rotation speed (longitudal) in surface run mode
     /// </summary>
-    public const float SurfaceRunHeadRotationSpeedLon = 0.0001f;
+    public const double SurfaceRunHeadRotationSpeedLon = 0.0001;
 
     #region UI
 
@@ -88,19 +88,19 @@ public static class RendererConstants
     /// <summary>
     /// FPS text X position
     /// </summary>
-    public const float UiFpsTextXPosition = 10;
+    public const double UiFpsTextXPosition = 10;
 
     /// <summary>
     /// Mouse coords text X position
     /// </summary>
-    public const float UiMouseCoordsTextXPosition = 10;
+    public const double UiMouseCoordsTextXPosition = 10;
 
     #endregion
 
     /// <summary>
     /// Precision for finding is point on ray
     /// </summary>
-    public const float TestIsPointOnRayPrecision = 0.00001f;
+    public const double TestIsPointOnRayPrecision = 0.00001;
     
 
     /// <summary>
@@ -109,17 +109,17 @@ public static class RendererConstants
     public const int MaxSegmentsPerFrameRegeneration = 2;
 
     /// <summary>
-    /// Virtual viewport size for the purporse of culling (because of the strange bug exact 1.0f is not big enough)
+    /// Virtual viewport size for the purporse of culling
     /// </summary>
-    public const float CullingViewportSize = 1.0f;
+    public const double CullingViewportSize = 1.0;
     
     /// <summary>
     /// Underground plane height for surface walk mode segments culling
     /// </summary>
-    public const float SurfaceRunModeUndergroundPlaneHeight = GeoConstants.EarthRadius - 0.005f * GeoConstants.EarthRadius;
+    public const double SurfaceRunModeUndergroundPlaneHeight = GeoConstants.EarthRadius - 0.005 * GeoConstants.EarthRadius;
 
     /// <summary>
     /// Maps are higher than Earth surface by this value
     /// </summary>
-    public const float MapsAltitudeIncrement = 0.000005f;
+    public const double MapsAltitudeIncrement = 0.000005;
 }

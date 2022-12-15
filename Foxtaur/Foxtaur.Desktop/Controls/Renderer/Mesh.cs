@@ -84,10 +84,8 @@ public class Mesh : IDisposable
         VerticesArrayObject = new VertexArrayObject<float, uint>(silkGl, VerticesBufferObject, ElementsBufferObject);
 
         //Telling the VAO object how to lay out the attribute pointers
-        VerticesArrayObject.VertexAttributePointer(VerticesPositionLocation, VertexCoordsSize,
-            VertexAttribPointerType.Float, VertexSize, 0);
-        VerticesArrayObject.VertexAttributePointer(VerticesTextureCoordsLocation, TextureCoordsSize,
-            VertexAttribPointerType.Float, VertexSize, VertexCoordsSize);
+        VerticesArrayObject.VertexAttributePointer(VerticesPositionLocation, VertexCoordsSize, VertexAttribPointerType.Float, VertexSize, 0);
+        VerticesArrayObject.VertexAttributePointer(VerticesTextureCoordsLocation, TextureCoordsSize, VertexAttribPointerType.Float, VertexSize, VertexCoordsSize);
 
         VerticesBufferObject.Bind();
         ElementsBufferObject.Bind();
@@ -102,11 +100,11 @@ public class Mesh : IDisposable
         _ = vertexCoords ?? throw new ArgumentNullException(nameof(vertexCoords));
         _ = textureCoords ?? throw new ArgumentNullException(nameof(textureCoords));
 
-        Vertices.Add(vertexCoords.X);
-        Vertices.Add(vertexCoords.Y);
-        Vertices.Add(vertexCoords.Z);
-        Vertices.Add(textureCoords.X);
-        Vertices.Add(textureCoords.Y);
+        Vertices.Add((float)vertexCoords.X);
+        Vertices.Add((float)vertexCoords.Y);
+        Vertices.Add((float)vertexCoords.Z);
+        Vertices.Add((float)textureCoords.X);
+        Vertices.Add((float)textureCoords.Y);
 
         return (uint)(Vertices.Count / VertexSize - 1);
     }

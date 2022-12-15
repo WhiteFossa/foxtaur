@@ -30,7 +30,7 @@ public interface IZoomService
     /// <summary>
     /// Current zoom
     /// </summary>
-    float Zoom { get; set; }
+    double Zoom { get; set; }
 
     /// <summary>
     /// Current zoom level

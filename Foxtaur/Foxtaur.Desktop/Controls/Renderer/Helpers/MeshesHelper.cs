@@ -10,24 +10,24 @@ public static class MeshesHelper
     /// <summary>
     /// Get latitude of closest global meshes node
     /// </summary>
-    public static float GetClosestLatNode(this float lat, float meshesLatGranularity)
+    public static double GetClosestLatNode(this double lat, double meshesLatGranularity)
     {
-        return meshesLatGranularity * (float)Math.Floor(lat / meshesLatGranularity);
+        return meshesLatGranularity * Math.Floor(lat / meshesLatGranularity);
     }
     
     /// <summary>
     /// Get longitude of closest global meshes node (move eastward)
     /// </summary>
-    public static float GetClosestLonNodeWest(this float lon, float meshesLonGranularity)
+    public static double GetClosestLonNodeWest(this double lon, double meshesLonGranularity)
     {
-        return meshesLonGranularity * (float)Math.Ceiling(lon / meshesLonGranularity);
+        return meshesLonGranularity * Math.Ceiling(lon / meshesLonGranularity);
     }
     
     /// <summary>
     /// Get longitude of closest global meshes node (move westward)
     /// </summary>
-    public static float GetClosestLonNodeEast(this float lon, float meshesLonGranularity)
+    public static double GetClosestLonNodeEast(this double lon, double meshesLonGranularity)
     {
-        return meshesLonGranularity * (float)Math.Floor(lon / meshesLonGranularity);
+        return meshesLonGranularity * Math.Floor(lon / meshesLonGranularity);
     }
 }

@@ -42,13 +42,13 @@ public static class RendererHelper
     /// </summary>
     public static Vector3 AsVector3(this PlanarPoint3D point)
     {
-        return new Vector3(point.X, point.Y, point.Z);
+        return new Vector3((float)point.X, (float)point.Y, (float)point.Z);
     }
 
     /// <summary>
     /// Rotate around direction to angle
     /// </summary>
-    public static Vector3 RotateAround(this Vector3 toRotate, Vector3 direction, float a)
+    public static Vector3 RotateAround(this Vector3 toRotate, Vector3 direction, double a)
     {
         var nd = Vector3.Normalize(direction);
 
@@ -56,20 +56,20 @@ public static class RendererHelper
         var oneMinusCosa = 1 - cosa;
         var sina = Math.Sin(a);
 
-        var m11 = (float)(cosa + oneMinusCosa * Math.Pow(nd.X, 2));
-        var m12 = (float)(oneMinusCosa * nd.X * nd.Y - sina * nd.Z);
-        var m13 = (float)(oneMinusCosa * nd.X * nd.Z + sina * nd.Y);
+        var m11 = cosa + oneMinusCosa * Math.Pow(nd.X, 2);
+        var m12 = oneMinusCosa * nd.X * nd.Y - sina * nd.Z;
+        var m13 = oneMinusCosa * nd.X * nd.Z + sina * nd.Y;
 
-        var m21 = (float)(oneMinusCosa * nd.Y * nd.X + sina * nd.Z);
-        var m22 = (float)(cosa + oneMinusCosa * Math.Pow(nd.Y, 2));
-        var m23 = (float)(oneMinusCosa * nd.Y * nd.Z - sina * nd.X);
+        var m21 = oneMinusCosa * nd.Y * nd.X + sina * nd.Z;
+        var m22 = cosa + oneMinusCosa * Math.Pow(nd.Y, 2);
+        var m23 = oneMinusCosa * nd.Y * nd.Z - sina * nd.X;
 
-        var m31 = (float)(oneMinusCosa * nd.Z * nd.X - sina * nd.Y);
-        var m32 = (float)(oneMinusCosa * nd.Z * nd.Y + sina * nd.X);
-        var m33 = (float)(cosa + oneMinusCosa * Math.Pow(nd.Z, 2));
+        var m31 = oneMinusCosa * nd.Z * nd.X - sina * nd.Y;
+        var m32 = oneMinusCosa * nd.Z * nd.Y + sina * nd.X;
+        var m33 = cosa + oneMinusCosa * Math.Pow(nd.Z, 2);
 
-        var rotation = Matrix<float>.Build.DenseOfArray(
-            new float[,]
+        var rotation = Matrix<double>.Build.DenseOfArray(
+            new double[,]
             {
                 { m11, m12, m13 },
                 { m21, m22, m23 },
@@ -77,12 +77,12 @@ public static class RendererHelper
             });
 
         var toRotateMathNet =
-            MathNet.Numerics.LinearAlgebra.Vector<float>.Build.Dense(new float[]
+            MathNet.Numerics.LinearAlgebra.Vector<double>.Build.Dense(new double[]
                 { toRotate.X, toRotate.Y, toRotate.Z });
 
         var rotated = rotation * toRotateMathNet;
 
-        return new Vector3(rotated[0], rotated[1], rotated[2]);
+        return new Vector3((float)rotated[0], (float)rotated[1], (float)rotated[2]);
     }
 
     /// <summary>
@@ -90,8 +90,8 @@ public static class RendererHelper
     /// </summary>
     public static Vector4 MultiplyMatrix4x4ByVector4(Matrix4x4 matrix, Vector4 vector)
     {
-        var mnMatrix = Matrix<float>.Build.DenseOfArray(
-            new float[,]
+        var mnMatrix = Matrix<double>.Build.DenseOfArray(
+            new double[,]
             {
                 { matrix.M11, matrix.M12, matrix.M13, matrix.M14 },
                 { matrix.M21, matrix.M22, matrix.M23, matrix.M24 },
@@ -99,11 +99,11 @@ public static class RendererHelper
                 { matrix.M41, matrix.M42, matrix.M43, matrix.M44 }
             });
 
-        var mnVector = MathNet.Numerics.LinearAlgebra.Vector<float>.Build.Dense(new float[] { vector.X, vector.Y, vector.Z, vector.W });
+        var mnVector = MathNet.Numerics.LinearAlgebra.Vector<double>.Build.Dense(new double[] { vector.X, vector.Y, vector.Z, vector.W });
 
         var result = mnMatrix * mnVector;
 
-        return new Vector4(result[0], result[1], result[2], result[3]);
+        return new Vector4((float)result[0], (float)result[1], (float)result[2], (float)result[3]);
     }
     
     /// <summary>
@@ -111,11 +111,11 @@ public static class RendererHelper
     /// </summary>
     public static bool IsPointInCullingViewport(this PlanarPoint2D point)
     {
-        return point.X >= -1.0f * RendererConstants.CullingViewportSize
+        return point.X >= -1.0 * RendererConstants.CullingViewportSize
                &&
                point.X <= RendererConstants.CullingViewportSize
                &&
-               point.Y >= -1.0f * RendererConstants.CullingViewportSize
+               point.Y >= -1.0 * RendererConstants.CullingViewportSize
                &&
                point.Y <= RendererConstants.CullingViewportSize;
     }
@@ -125,8 +125,8 @@ public static class RendererHelper
     /// </summary>
     public static bool IsCullingViewpointCoveredBySegment(this PlanarSegment segment)
     {
-        return (segment.Left <= -1.0f * RendererConstants.CullingViewportSize && segment.Right >= RendererConstants.CullingViewportSize)
+        return (segment.Left <= -1.0 * RendererConstants.CullingViewportSize && segment.Right >= RendererConstants.CullingViewportSize)
                ||
-               (segment.Top >= RendererConstants.CullingViewportSize && segment.Bottom <= -1.0f * RendererConstants.CullingViewportSize);
+               (segment.Top >= RendererConstants.CullingViewportSize && segment.Bottom <= -1.0 * RendererConstants.CullingViewportSize);
     }
 }

@@ -13,7 +13,7 @@ public class UiData
     /// <summary>
     /// FPS
     /// </summary>
-    public float Fps { get; set; }
+    public double Fps { get; set; }
 
     /// <summary>
     /// Is mouse in Earth (and so have geocoordinates)?
@@ -23,12 +23,12 @@ public class UiData
     /// <summary>
     /// Mouse latitude
     /// </summary>
-    public float MouseLat { get; set; }
+    public double MouseLat { get; set; }
 
     /// <summary>
     /// Mouse longitude
     /// </summary>
-    public float MouseLon { get; set; }
+    public double MouseLon { get; set; }
 
     /// <summary>
     /// Mark UI for regeneration
