@@ -250,7 +250,7 @@ public class DesktopRenderer : OpenGlControlBase
         _viewportWidth = (int)(bounds.Width * _scaling);
         _viewportHeight = (int)(bounds.Height * _scaling);
 
-        _camera.AspectRatio = _viewportWidth / _viewportHeight;
+        _camera.AspectRatio = _viewportWidth / (double)_viewportHeight;
 
         // Marking GUI as requiring re-initialization
         _ui.IsNeedToReinitialize = true;
