@@ -12,10 +12,10 @@ public class ZoomedFragmentedResourceBase : FragmentedResourceBase
     /// </summary>
     public List<ZoomLevel> ZoomLevels { get; private set; }
 
-    public ZoomedFragmentedResourceBase(float northLat,
-        float southLat,
-        float westLon,
-        float eastLon,
+    public ZoomedFragmentedResourceBase(double northLat,
+        double southLat,
+        double westLon,
+        double eastLon,
         List<ZoomLevel> zoomLevels,
         string resourceName,
         bool isLocal) : base(northLat, southLat, westLon, eastLon, resourceName, isLocal)

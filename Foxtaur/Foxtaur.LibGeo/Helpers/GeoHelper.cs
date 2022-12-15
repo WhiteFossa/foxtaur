@@ -12,7 +12,7 @@ public static class GeoHelper
     /// <summary>
     /// Radians to degrees string (sign is discarded)
     /// </summary>
-    public static string ToDegreesStringSignless(this float radians, bool isLat)
+    public static string ToDegreesStringSignless(this double radians, bool isLat)
     {
         var degreesRaw = Math.Abs(radians.ToDegrees());
 
@@ -30,7 +30,7 @@ public static class GeoHelper
     /// <summary>
     /// Radians to latitude string
     /// </summary>
-    public static string ToLatString(this float lat)
+    public static string ToLatString(this double lat)
     {
         var postfix = lat >= 0 ? "N" : "S";
 
@@ -40,7 +40,7 @@ public static class GeoHelper
     /// <summary>
     /// Radians to longitude string
     /// </summary>
-    public static string ToLonString(this float lon)
+    public static string ToLonString(this double lon)
     {
         var postfix = lon >= 0 ? "W" : "E";
 

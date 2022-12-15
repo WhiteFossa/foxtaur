@@ -40,7 +40,7 @@ public class DemFragment : ZoomedFragmentedResourceBase
         }
     }
     
-    public DemFragment(float northLat, float southLat, float westLon, float eastLon, List<ZoomLevel> zoomLevels, string resourceName, bool isLocal)
+    public DemFragment(double northLat, double southLat, double westLon, double eastLon, List<ZoomLevel> zoomLevels, string resourceName, bool isLocal)
         : base(northLat, southLat, westLon, eastLon, zoomLevels, resourceName, isLocal)
     {
         LastAccessTime = DateTime.UtcNow;
@@ -122,7 +122,7 @@ public class DemFragment : ZoomedFragmentedResourceBase
     /// <summary>
     /// Get height by geocoodrinates
     /// </summary>
-    public float? GetHeight(float lat, float lon)
+    public double? GetHeight(double lat, double lon)
     {
         LastAccessTime = DateTime.UtcNow;
 

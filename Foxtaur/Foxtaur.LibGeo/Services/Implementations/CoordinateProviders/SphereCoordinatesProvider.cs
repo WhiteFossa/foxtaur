@@ -12,14 +12,14 @@ public class SphereCoordinatesProvider : ISphereCoordinatesProvider
 {
     public PlanarPoint2D GeoToPlanar2D(GeoPoint geo)
     {
-        return new PlanarPoint2D(-0.5f * (geo.Lon / (float)Math.PI - 1.0f), 1 - (geo.Lat / (float)Math.PI + 0.5f));
+        return new PlanarPoint2D(-0.5 * (geo.Lon / Math.PI - 1.0), 1 - (geo.Lat / Math.PI + 0.5));
     }
 
     public PlanarPoint3D GeoToPlanar3D(GeoPoint geo)
     {
-        var z = geo.H * (float)Math.Cos(geo.Lat) * (float)Math.Cos(geo.Lon);
-        var x = geo.H * (float)Math.Cos(geo.Lat) * (float)Math.Sin(geo.Lon);
-        var y = geo.H * (float)Math.Sin(geo.Lat);
+        var z = geo.H * Math.Cos(geo.Lat) * Math.Cos(geo.Lon);
+        var x = geo.H * Math.Cos(geo.Lat) * Math.Sin(geo.Lon);
+        var y = geo.H * Math.Sin(geo.Lat);
 
         return new PlanarPoint3D(x + GeoConstants.EarthCenter.X, y + GeoConstants.EarthCenter.Y, z + GeoConstants.EarthCenter.Z);
     }
@@ -33,9 +33,9 @@ public class SphereCoordinatesProvider : ISphereCoordinatesProvider
     {
         var h = planar3d.DistanceTo(GeoConstants.EarthCenter.AsPlanarPoint3D());
 
-        var lat = (float)Math.Asin((planar3d.Y - GeoConstants.EarthCenter.Y) / h);
-        var lon = (float)Math.Atan2(planar3d.Z - GeoConstants.EarthCenter.Z, planar3d.X - GeoConstants.EarthCenter.X);
-        lon = -1.0f * GeoPoint.SumLongitudesWithWrap(lon, -1.0f * (float)Math.PI / 2.0f); // Dirty fix
+        var lat = Math.Asin((planar3d.Y - GeoConstants.EarthCenter.Y) / h);
+        var lon = Math.Atan2(planar3d.Z - GeoConstants.EarthCenter.Z, planar3d.X - GeoConstants.EarthCenter.X);
+        lon = -1.0 * GeoPoint.SumLongitudesWithWrap(lon, -1.0 * Math.PI / 2.0); // Dirty fix
 
         return new GeoPoint(lat, lon, h);
     }

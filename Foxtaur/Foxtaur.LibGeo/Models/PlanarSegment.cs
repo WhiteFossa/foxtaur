@@ -8,24 +8,24 @@ public class PlanarSegment
     /// <summary>
     /// Top
     /// </summary>
-    public float Top { get; private set; }
+    public double Top { get; private set; }
 
     /// <summary>
     /// Bottom
     /// </summary>
-    public float Bottom { get; private set; }
+    public double Bottom { get; private set; }
 
     /// <summary>
     /// Left
     /// </summary>
-    public float Left { get; private set; }
+    public double Left { get; private set; }
 
     /// <summary>
     /// Right
     /// </summary>
-    public float Right { get; private set; }
+    public double Right { get; private set; }
 
-    public PlanarSegment(float top, float left, float bottom, float right)
+    public PlanarSegment(double top, double left, double bottom, double right)
     {
         if (top < bottom) // Not <= because we can have degenerate segments. The same is for left - right
         {

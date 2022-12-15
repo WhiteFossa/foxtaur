@@ -8,9 +8,9 @@ public class PlanarPoint3D : PlanarPoint2D
     /// <summary>
     ///     Planar Z
     /// </summary>
-    public float Z { get; }
+    public double Z { get; }
 
-    public PlanarPoint3D(float x, float y, float z) : base(x, y)
+    public PlanarPoint3D(double x, double y, double z) : base(x, y)
     {
         Z = z;
     }
@@ -18,12 +18,11 @@ public class PlanarPoint3D : PlanarPoint2D
     /// <summary>
     /// Calculate distance from this point to a given point
     /// </summary>
-    public float DistanceTo(PlanarPoint3D point)
+    public double DistanceTo(PlanarPoint3D point)
     {
         _ = point ?? throw new ArgumentNullException(nameof(point));
 
-        return (float)Math.Sqrt((float)Math.Pow(point.X - X, 2) + (float)Math.Pow(point.Y - Y, 2) +
-                                (float)Math.Pow(point.Z - Z, 2));
+        return Math.Sqrt(Math.Pow(point.X - X, 2) + Math.Pow(point.Y - Y, 2) + Math.Pow(point.Z - Z, 2));
     }
 
     /// <summary>
@@ -39,7 +38,7 @@ public class PlanarPoint3D : PlanarPoint2D
         }
 
         PlanarPoint3D closestPoint = null;
-        var minDistance = float.MaxValue;
+        var minDistance = double.MaxValue;
 
         foreach (var point in points)
         {

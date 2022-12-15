@@ -3,26 +3,26 @@ using Foxtaur.LibGeo.Constants;
 namespace Foxtaur.LibGeo.Models;
 
 /// <summary>
-///     Geo point (always 3D - lat, lon, h)
+/// Geo point (always 3D - lat, lon, h)
 /// </summary>
 public class GeoPoint
 {
     /// <summary>
     /// Latitude
     /// </summary>
-    public float Lat { get; }
+    public double Lat { get; }
 
     /// <summary>
     /// Longitude
     /// </summary>
-    public float Lon { get; }
+    public double Lon { get; }
 
     /// <summary>
     /// Height
     /// </summary>
-    public float H { get; }
+    public double H { get; }
 
-    public GeoPoint(float lat, float lon, float h)
+    public GeoPoint(double lat, double lon, double h)
     {
         if (lat < GeoConstants.MinLat || lat > GeoConstants.MaxLat)
         {
@@ -42,7 +42,7 @@ public class GeoPoint
     /// <summary>
     /// Add lat + delta, wrap over the Earth
     /// </summary>
-    public static float SumLatitudesWithWrap(float lat, float delta)
+    public static double SumLatitudesWithWrap(double lat, double delta)
     {
         var result = lat + delta;
 
@@ -58,18 +58,18 @@ public class GeoPoint
         return result;
     }
 
-    public static float SumLongitudesWithWrap(float lon, float delta)
+    public static double SumLongitudesWithWrap(double lon, double delta)
     {
         var result = lon + delta;
 
-        while (result > (float)Math.PI)
+        while (result > Math.PI)
         {
-            result -= 2.0f * (float)Math.PI;
+            result -= 2.0 * Math.PI;
         }
 
-        while (result < -1.0f * (float)Math.PI)
+        while (result < -1.0 * Math.PI)
         {
-            result += 2.0f * (float)Math.PI;
+            result += 2.0 * Math.PI;
         }
 
         return result;

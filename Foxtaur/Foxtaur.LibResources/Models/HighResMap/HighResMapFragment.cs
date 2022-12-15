@@ -23,7 +23,7 @@ public class HighResMapFragment : FragmentedResourceBase
     /// </summary>
     public bool IsLoaded { get; private set; }
 
-    public HighResMapFragment(float northLat, float southLat, float westLon, float eastLon, string resourceName, bool isLocal)
+    public HighResMapFragment(double northLat, double southLat, double westLon, double eastLon, string resourceName, bool isLocal)
         : base(northLat, southLat, westLon, eastLon, resourceName, isLocal)
     {
     }
@@ -131,7 +131,7 @@ public class HighResMapFragment : FragmentedResourceBase
     /// <summary>
     /// Get texture coordinates by geo coordinates. May return null if coordinates are outside the map
     /// </summary>
-    public Tuple<float, float> GetTextureCoordinates(float lat, float lon)
+    public Tuple<double, double> GetTextureCoordinates(double lat, double lon)
     {
         if (!IsLoaded)
         {
@@ -147,6 +147,6 @@ public class HighResMapFragment : FragmentedResourceBase
         var x = planarCoords.Item1 / _reader.GetWidth();
         var y = planarCoords.Item2 / _reader.GetHeight();
 
-        return new Tuple<float, float>(x, y);
+        return new Tuple<double, double>(x, y);
     }
 }

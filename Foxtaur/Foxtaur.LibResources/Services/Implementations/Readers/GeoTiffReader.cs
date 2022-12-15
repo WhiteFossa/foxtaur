@@ -189,13 +189,13 @@ public class GeoTiffReader : IGeoTiffReader
         }
     }
 
-    public float GetPixel(int band, int x, int y)
+    public double GetPixel(int band, int x, int y)
     {
         // No params checks for speedup
         var bandIndex = band - 1;
         if (_bytesPerPixel == 1)
         {
-            return _rasters[bandIndex][y * _width + x] / (float)byte.MaxValue;
+            return _rasters[bandIndex][y * _width + x] / (double)byte.MaxValue;
         }
         else if (_bytesPerPixel == 2)
         {
@@ -204,7 +204,7 @@ public class GeoTiffReader : IGeoTiffReader
             var lowerByte = _rasters[bandIndex][baseIndex];
             var higherByte = _rasters[bandIndex][baseIndex + 1];
 
-            return BitConverter.ToInt16(new byte[] { lowerByte, higherByte }, 0) / (float)UInt16.MaxValue + 0.5f;
+            return BitConverter.ToInt16(new byte[] { lowerByte, higherByte }, 0) / (double)UInt16.MaxValue + 0.5;
         }
         else
         {
@@ -212,7 +212,7 @@ public class GeoTiffReader : IGeoTiffReader
         }
     }
 
-    public float GetPixelWithInterpolation(int band, float x, float y)
+    public double GetPixelWithInterpolation(int band, double x, double y)
     {
         var x1 = (int)x;
         var y1 = (int)y;
@@ -260,18 +260,18 @@ public class GeoTiffReader : IGeoTiffReader
         return _totalRastersSize;
     }
 
-    public Tuple<float, float> GetPixelCoordsByGeoCoords(float lat, float lon)
+    public Tuple<double, double> GetPixelCoordsByGeoCoords(double lat, double lon)
     {
         var latDegrees = lat.ToDegrees();
-        var lonDegrees = -1.0f * lon.ToDegrees(); // GeoTIFF use negative west, we use negative east
+        var lonDegrees = -1.0 * lon.ToDegrees(); // GeoTIFF use negative west, we use negative east
 
         var y = (latDegrees - _geoCoefficients[3] + _geoK3 - _geoK1 * lonDegrees) / _geoK2;
         var x = lonDegrees / _geoCoefficients[1] - _geoK4 - _geoK5 * y;
 
-        return new Tuple<float, float>((float)x, (float)y);
+        return new Tuple<double, double>(x, y);
     }
 
-    public float? GetPixelByGeoCoords(int band, float lat, float lon)
+    public double? GetPixelByGeoCoords(int band, double lat, double lon)
     {
         var planarCoords = GetPixelCoordsByGeoCoords(lat, lon);
         if (planarCoords == null)

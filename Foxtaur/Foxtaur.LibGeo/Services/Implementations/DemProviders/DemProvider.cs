@@ -18,8 +18,6 @@ public class DemProvider : IDemProvider
     private object _regenerationLock = new object();
 
     private object _startDownloadLock = new object();
-    
-    private Logger _logger = LogManager.GetCurrentClassLogger();
 
     /// <summary>
     /// Zoom levels, ordered from higher to lower Fresolution
@@ -36,7 +34,7 @@ public class DemProvider : IDemProvider
         _demResourcesProvider = new DemResourcesProvider();
     }
 
-    public float GetSurfaceAltitude(float lat, float lon, ZoomLevel desiredZoomLevel)
+    public double GetSurfaceAltitude(double lat, double lon, ZoomLevel desiredZoomLevel)
     {
         lock (this)
         {
@@ -83,7 +81,7 @@ public class DemProvider : IDemProvider
         }
     }
 
-    private DemFragment? StartFragmentLoad(float lat, float lon, ZoomLevel zoomLevel)
+    private DemFragment? StartFragmentLoad(double lat, double lon, ZoomLevel zoomLevel)
     {
         // Searching for fragment
         var fragment = _demResourcesProvider.GetResource(lat, lon, zoomLevel) as DemFragment;

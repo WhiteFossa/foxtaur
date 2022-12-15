@@ -8,16 +8,16 @@ public static class DegreesRadiansHelper
     /// <summary>
     /// Radians to degrees
     /// </summary>
-    public static float ToDegrees(this float radians)
+    public static double ToDegrees(this double radians)
     {
-        return radians * 180.0f / (float)Math.PI;
+        return radians * 180.0f / Math.PI;
     }
 
     /// <summary>
     /// Degrees to radians
     /// </summary>
-    public static float ToRadians(this float degrees)
+    public static double ToRadians(this double degrees)
     {
-        return degrees * (float)Math.PI / 180.0f;
+        return degrees * Math.PI / 180.0f;
     }
 }
