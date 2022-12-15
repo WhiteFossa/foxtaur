@@ -45,7 +45,7 @@ public class DesktopRenderer : OpenGlControlBase
     /// <summary>
     /// Screen scaling
     /// </summary>
-    private float _scaling;
+    private double _scaling;
 
     /// <summary>
     /// Viewport width
@@ -96,12 +96,12 @@ public class DesktopRenderer : OpenGlControlBase
     /// <summary>
     /// Mouse X at press moment
     /// </summary>
-    private float _pressX;
+    private double _pressX;
 
     /// <summary>
     /// Mouse Y at press moment
     /// </summary>
-    private float _pressY;
+    private double _pressY;
 
     /// <summary>
     /// Mouse was pressed in this location
@@ -125,22 +125,22 @@ public class DesktopRenderer : OpenGlControlBase
     /// <summary>
     /// Latitudal view angle (head movement)
     /// </summary>
-    private float _surfaceRunLatViewAngle = 0.0f;
+    private double _surfaceRunLatViewAngle = 0.0f;
 
     /// <summary>
     /// Latitudal view angle (head movement started)
     /// </summary>
-    private float _surfaceRunLatViewAnglePress;
+    private double _surfaceRunLatViewAnglePress;
 
     /// <summary>
     /// Longitudal view angle (head movement)
     /// </summary>
-    private float _surfaceRunLonViewAngle = 0.0f;
+    private double _surfaceRunLonViewAngle = 0.0f;
 
     /// <summary>
     /// Laongitudal view angle (head movement started)
     /// </summary>
-    private float _surfaceRunLonViewAnglePress;
+    private double _surfaceRunLonViewAnglePress;
 
     /// <summary>
     /// If true, then we are rotating the head
@@ -192,10 +192,10 @@ public class DesktopRenderer : OpenGlControlBase
     
     #region Debug
 
-    private HighResMapFragment _davydovoFragment = new HighResMapFragment(54.807812457f.ToRadians(),
-        54.757759918f.ToRadians(),
-        -39.823302090f.ToRadians(),
-        -39.879142801f.ToRadians(),
+    private HighResMapFragment _davydovoFragment = new HighResMapFragment(54.807812457.ToRadians(),
+        54.757759918.ToRadians(),
+        -39.823302090.ToRadians(),
+        -39.879142801.ToRadians(),
         ResourcesConstants.MapsRemotePath + @"Davydovo/Davydovo.tif.zst",
         false);
 
@@ -245,12 +245,12 @@ public class DesktopRenderer : OpenGlControlBase
     /// </summary>
     private void OnResize(Rect bounds)
     {
-        _scaling = (float)VisualRoot.RenderScaling; // TODO: In future we may handle scaling change
+        _scaling = VisualRoot.RenderScaling; // TODO: In future we may handle scaling change
 
         _viewportWidth = (int)(bounds.Width * _scaling);
         _viewportHeight = (int)(bounds.Height * _scaling);
 
-        _camera.AspectRatio = _viewportWidth / (float)_viewportHeight;
+        _camera.AspectRatio = _viewportWidth / _viewportHeight;
 
         // Marking GUI as requiring re-initialization
         _ui.IsNeedToReinitialize = true;
@@ -313,7 +313,7 @@ public class DesktopRenderer : OpenGlControlBase
     
     private void OnFpsTimer(object sender, ElapsedEventArgs e)
     {
-        _uiData.Fps = _framesDrawn * (1000 / (float)_fpsTimer.Interval);
+        _uiData.Fps = _framesDrawn * (1000 / _fpsTimer.Interval);
         _framesDrawn = 0;
 
         _uiData.MarkForRegeneration();
@@ -457,12 +457,12 @@ public class DesktopRenderer : OpenGlControlBase
 
         // Target
         var toNorthVector =
-            _sphereCoordinatesProvider.GeoToPlanar3D(new GeoPoint((float)Math.PI / 2.0f, 0, _camera.H)).AsVector3() -
+            _sphereCoordinatesProvider.GeoToPlanar3D(new GeoPoint(Math.PI / 2.0, 0, _camera.H)).AsVector3() -
             _camera.Position3D.AsVector3();
         var nadirNorthPerpVector =
             Vector3.Cross(nadirVector, toNorthVector); // Perpendicular to nadir vector and north vector
 
-        var targetVector = nadirVector.RotateAround(nadirNorthPerpVector, (float)Math.PI / 2.0f);
+        var targetVector = nadirVector.RotateAround(nadirNorthPerpVector, Math.PI / 2.0);
 
         // Latitudal view
         targetVector = targetVector.RotateAround(nadirNorthPerpVector, _surfaceRunLatViewAngle);
@@ -479,7 +479,7 @@ public class DesktopRenderer : OpenGlControlBase
     /// </summary>
     private void OnWheel(object sender, PointerWheelEventArgs e)
     {
-        float steps = (float)Math.Abs(e.Delta.Y);
+        var steps = Math.Abs(e.Delta.Y);
 
         if (e.Delta.Y > 0)
         {
@@ -498,8 +498,8 @@ public class DesktopRenderer : OpenGlControlBase
     /// </summary>
     private void OnMousePressed(object sender, PointerPressedEventArgs e)
     {
-        var x = (float)e.GetCurrentPoint(this).Position.X * _scaling;
-        var y = (float)e.GetCurrentPoint(this).Position.Y * _scaling;
+        var x = e.GetCurrentPoint(this).Position.X * _scaling;
+        var y = e.GetCurrentPoint(this).Position.Y * _scaling;
 
         _pressX = x;
         _pressY = y;
@@ -572,8 +572,8 @@ public class DesktopRenderer : OpenGlControlBase
     /// </summary>
     private void OnMouseMoved(object sender, PointerEventArgs e)
     {
-        var x = (float)e.GetCurrentPoint(this).Position.X * _scaling;
-        var y = (float)e.GetCurrentPoint(this).Position.Y * _scaling;
+        var x = e.GetCurrentPoint(this).Position.X * _scaling;
+        var y = e.GetCurrentPoint(this).Position.Y * _scaling;
 
         var dx = x - _pressX;
         var dy = y - _pressY;
@@ -612,30 +612,30 @@ public class DesktopRenderer : OpenGlControlBase
 
     private void LimitSurfaceRunViewAngles()
     {
-        if (_surfaceRunLatViewAngle > (float)Math.PI / 2.0f)
+        if (_surfaceRunLatViewAngle > Math.PI / 2.0)
         {
-            _surfaceRunLatViewAngle = (float)Math.PI / 2.0f;
+            _surfaceRunLatViewAngle = Math.PI / 2.0;
         }
-        else if (_surfaceRunLatViewAngle < (float)Math.PI / -2.0f)
+        else if (_surfaceRunLatViewAngle < Math.PI / -2.0)
         {
-            _surfaceRunLatViewAngle = (float)Math.PI / -2.0f;
-        }
-
-        while (_surfaceRunLonViewAngle > (float)Math.PI)
-        {
-            _surfaceRunLonViewAngle -= 2.0f * (float)Math.PI;
+            _surfaceRunLatViewAngle = Math.PI / -2.0;
         }
 
-        while (_surfaceRunLonViewAngle < -1.0f * (float)Math.PI)
+        while (_surfaceRunLonViewAngle > Math.PI)
         {
-            _surfaceRunLonViewAngle += 2.0f * (float)Math.PI;
+            _surfaceRunLonViewAngle -= 2.0 * Math.PI;
+        }
+
+        while (_surfaceRunLonViewAngle < -1.0 * Math.PI)
+        {
+            _surfaceRunLonViewAngle += 2.0 * Math.PI;
         }
     }
 
     /// <summary>
     /// Get mouse geographical coordinates (they might be null if mouse outside the Earth)
     /// </summary>
-    private GeoPoint GetMouseGeoCoordinates(float x, float y)
+    private GeoPoint GetMouseGeoCoordinates(double x, double y)
     {
         var cameraRay = Ray.CreateByScreenRaycasting(_camera, x, y, _viewportWidth, _viewportHeight);
 
@@ -679,16 +679,16 @@ public class DesktopRenderer : OpenGlControlBase
     {
         _earthSegments.Clear();
         
-        for (var lat = -0.5f * (float)Math.PI; lat < GeoPoint.SumLatitudesWithWrap(0.5f * (float)Math.PI, -1.0f * _zoomService.ZoomLevelData.SegmentSize); lat += _zoomService.ZoomLevelData.SegmentSize)
+        for (var lat = -0.5 * Math.PI; lat < GeoPoint.SumLatitudesWithWrap(0.5 * Math.PI, -1.0 * _zoomService.ZoomLevelData.SegmentSize); lat += _zoomService.ZoomLevelData.SegmentSize)
         {
-            for (var lon = (float)Math.PI; lon > GeoPoint.SumLongitudesWithWrap(-1.0f * (float)Math.PI, _zoomService.ZoomLevelData.SegmentSize); lon -= _zoomService.ZoomLevelData.SegmentSize)
+            for (var lon = Math.PI; lon > GeoPoint.SumLongitudesWithWrap(-1.0 * Math.PI, _zoomService.ZoomLevelData.SegmentSize); lon -= _zoomService.ZoomLevelData.SegmentSize)
             {
                 _earthSegments.Add(_earthGenerator.GenerateEarthSegment(
                     new GeoSegment(
                         GeoPoint.SumLatitudesWithWrap(lat, _zoomService.ZoomLevelData.SegmentSize),
                         lon,
                         lat,
-                        GeoPoint.SumLongitudesWithWrap(lon, -1.0f * _zoomService.ZoomLevelData.SegmentSize))));
+                        GeoPoint.SumLongitudesWithWrap(lon, -1.0 * _zoomService.ZoomLevelData.SegmentSize))));
             }
         }
     }
