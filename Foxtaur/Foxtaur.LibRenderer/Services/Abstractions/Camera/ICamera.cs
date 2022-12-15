@@ -1,5 +1,6 @@
 using System.Numerics;
 using Foxtaur.LibGeo.Models;
+using MathNet.Numerics.LinearAlgebra;
 
 namespace Foxtaur.LibRenderer.Services.Abstractions.Camera;
 
@@ -56,27 +57,27 @@ public interface ICamera
     /// <summary>
     /// Model matrix
     /// </summary>
-    Matrix4x4 ModelMatrix { get; }
+    Matrix<double> ModelMatrix { get; }
 
     /// <summary>
     /// View matrix
     /// </summary>
-    Matrix4x4 ViewMatrix { get; }
+    Matrix<double> ViewMatrix { get; }
 
     /// <summary>
     /// Projection matrix
     /// </summary>
-    Matrix4x4 ProjectionMatrix { get; }
+    Matrix<double> ProjectionMatrix { get; }
 
     /// <summary>
     /// Forward projection matrix (for projection from 3D space to screen)
     /// </summary>
-    Matrix4x4 ForwardProjectionMatrix { get; }
+    Matrix<double> ForwardProjectionMatrix { get; }
 
     /// <summary>
     /// Matrix for raycasting
     /// </summary>
-    Matrix4x4 BackProjectionMatrix { get; }
+    Matrix<double> BackProjectionMatrix { get; }
 
     /// <summary>
     /// Screen aspect ratio

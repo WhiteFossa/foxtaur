@@ -6,6 +6,7 @@ using Foxtaur.LibGeo.Services.Implementations.CoordinateProviders;
 using Foxtaur.LibRenderer.Constants;
 using Foxtaur.LibRenderer.Helpers;
 using Foxtaur.LibRenderer.Services.Abstractions.Camera;
+using MathNet.Numerics.LinearAlgebra;
 
 namespace Foxtaur.LibRenderer.Services.Implementations.Camera;
 
@@ -149,15 +150,15 @@ public class Camera : ICamera
 
     public bool IsSurfaceRunMode { get; set; }
 
-    public Matrix4x4 ModelMatrix { get; private set; } = new Matrix4x4();
+    public Matrix<double> ModelMatrix { get; private set; } = Matrix<double>.Build.DenseIdentity(4, 4);
 
-    public Matrix4x4 ViewMatrix { get; private set; } = new Matrix4x4();
+    public Matrix<double> ViewMatrix { get; private set; } = Matrix<double>.Build.DenseIdentity(4, 4);
 
-    public Matrix4x4 ProjectionMatrix { get; private set; } = new Matrix4x4();
+    public Matrix<double> ProjectionMatrix { get; private set; } = Matrix<double>.Build.DenseIdentity(4, 4);
 
-    public Matrix4x4 ForwardProjectionMatrix { get; private set; } = new Matrix4x4();
+    public Matrix<double> ForwardProjectionMatrix { get; private set; } = Matrix<double>.Build.DenseIdentity(4, 4);
     
-    public Matrix4x4 BackProjectionMatrix { get; private set; } = new Matrix4x4();
+    public Matrix<double> BackProjectionMatrix { get; private set; } = Matrix<double>.Build.DenseIdentity(4, 4);
 
     public double AspectRatio
     {
@@ -212,8 +213,8 @@ public class Camera : ICamera
     public PlanarPoint2D ProjectPointToViewport(PlanarPoint3D point)
     {
         _ = point ?? throw new ArgumentNullException(nameof(point));
-
-        var projectedPoint = Vector4.Transform(new Vector4((float)point.X, (float)point.Y, (float)point.Z, 1.0f), ForwardProjectionMatrix);
+        
+        var projectedPoint = DoubleHelper.Transform(new Vector4((float)point.X, (float)point.Y, (float)point.Z, 1.0f), ForwardProjectionMatrix);
         
         return new PlanarPoint2D(projectedPoint.X, projectedPoint.Y);
     }
@@ -265,22 +266,17 @@ public class Camera : ICamera
     /// </summary>
     private void CalculateMatrices()
     {
-        ModelMatrix = Matrix4x4.CreateRotationZ(0.0f) * Matrix4x4.CreateRotationY(0.0f) *
-                      Matrix4x4.CreateRotationX(0.0f); // Rotation
-        ViewMatrix = Matrix4x4.CreateLookAt(Position3D.AsVector3(), Target.AsVector3(), Up); // Camera position
-        ProjectionMatrix = Matrix4x4.CreatePerspectiveFieldOfView((float)Zoom, (float)AspectRatio, 0.001f, 100.0f); // Zoom
+        ModelMatrix = DoubleHelper.CreateRotationZMatrix(0) * DoubleHelper.CreateRotationYMatrix(0) * DoubleHelper.CreateRotationXMatrix(0); // Rotation
+        ViewMatrix = DoubleHelper.CreateLookAt(Position3D.AsVector3(), Target.AsVector3(), Up); // Camera position
+        ProjectionMatrix = DoubleHelper.CreatePerspectiveFieldOfView(Zoom, AspectRatio, 0.001, 100.0); // Zoom
         
         ForwardProjectionMatrix = ModelMatrix * ViewMatrix * ProjectionMatrix;
         
         // Back-projection matrix (for raycasting)
         var forwardProjection = ViewMatrix * ProjectionMatrix;
-        
-        Matrix4x4 backProjection;
-        if (!Matrix4x4.Invert(forwardProjection, out backProjection))
-        {
-            throw new InvalidOperationException("Failed to invert forward projection!");
-        }
 
-        BackProjectionMatrix = backProjection;
+        BackProjectionMatrix = forwardProjection.Inverse();
     }
+
+    
 }

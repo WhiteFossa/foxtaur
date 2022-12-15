@@ -121,5 +121,5 @@ public static class RendererConstants
     /// <summary>
     /// Maps are higher than Earth surface by this value
     /// </summary>
-    public const double MapsAltitudeIncrement = 0.000005;
+    public const double MapsAltitudeIncrement = 0.0001;
 }
