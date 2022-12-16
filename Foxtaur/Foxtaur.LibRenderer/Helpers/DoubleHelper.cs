@@ -15,10 +15,10 @@ public static class DoubleHelper
         var num1 = Math.Cos(radians);
         var num2 = Math.Sin(radians);
 
+        result[1, 1] = num1;
+        result[1, 2] = num2;
+        result[2, 1] = -num2;
         result[2, 2] = num1;
-        result[2, 3] = num2;
-        result[3, 2] = -num2;
-        result[3, 3] = num1;
 
         return result;
     }
@@ -30,10 +30,10 @@ public static class DoubleHelper
         var num1 = Math.Cos(radians);
         var num2 = Math.Sin(radians);
 
-        result[1, 1] = num1;
-        result[1, 3] = -num2;
-        result[3, 1] = num2;
-        result[3, 3] = num1;
+        result[0, 0] = num1;
+        result[0, 2] = -num2;
+        result[2, 0] = num2;
+        result[2, 2] = num1;
 
         return result;
     }
@@ -45,10 +45,10 @@ public static class DoubleHelper
         var num1 = Math.Cos(radians);
         var num2 = Math.Sin(radians);
 
+        result[0, 0] = num1;
+        result[0, 1] = num2;
+        result[1, 0] = -num2;
         result[1, 1] = num1;
-        result[1, 2] = num2;
-        result[2, 1] = -num2;
-        result[2, 2] = num1;
 
         return result;
     }   
@@ -61,18 +61,18 @@ public static class DoubleHelper
         
         var result = Matrix<double>.Build.DenseIdentity(4, 4);
 
-        result[1, 1] = vector3_2.X;
-        result[1, 2] = vector1.X;
-        result[1, 3] = vector3_1.X;
-        result[2, 1] = vector3_2.Y;
-        result[2, 2] = vector1.Y;
-        result[2, 3] = vector3_1.Y;
-        result[3, 1] = vector3_2.Z;
-        result[3, 2] = vector1.Z;
-        result[3, 3] = vector3_1.Z;
-        result[4, 1] = -Vector3.Dot(vector3_2, cameraPosition);
-        result[4, 2] = -Vector3.Dot(vector1, cameraPosition);
-        result[4, 3] = -Vector3.Dot(vector3_1, cameraPosition);
+        result[0, 0] = vector3_2.X;
+        result[0, 1] = vector1.X;
+        result[0, 2] = vector3_1.X;
+        result[1, 0] = vector3_2.Y;
+        result[1, 1] = vector1.Y;
+        result[1, 2] = vector3_1.Y;
+        result[2, 0] = vector3_2.Z;
+        result[2, 1] = vector1.Z;
+        result[2, 2] = vector3_1.Z;
+        result[3, 0] = -Vector3.Dot(vector3_2, cameraPosition);
+        result[3, 1] = -Vector3.Dot(vector1, cameraPosition);
+        result[3, 2] = -Vector3.Dot(vector3_1, cameraPosition);
         
         return result;
     }
@@ -104,27 +104,27 @@ public static class DoubleHelper
         
         var result = Matrix<double>.Build.DenseIdentity(4, 4);
 
-        result[1, 1] = num2;
+        result[0, 0] = num2;
+        result[0, 1] = 0;
+        result[0, 2] = 0;
+        result[0, 3] = 0;
+
+        result[1, 1] = num1;
+        result[1, 0] = 0;
         result[1, 2] = 0;
         result[1, 3] = 0;
-        result[1, 4] = 0;
-
-        result[2, 2] = num1;
-        result[2, 1] = 0;
-        result[2, 3] = 0;
-        result[2, 4] = 0;
         
-        result[3, 1] = 0;
-        result[3, 2] = 0;
+        result[2, 0] = 0;
+        result[2, 1] = 0;
         
         var num3 = double.IsPositiveInfinity(farPlaneDistance) ? -1f : farPlaneDistance / (nearPlaneDistance - farPlaneDistance);
-        result[3, 3] = num3;
-        result[3, 4] = -1;
+        result[2, 2] = num3;
+        result[2, 3] = -1;
         
-        result[4, 3] = nearPlaneDistance * num3;
-        result[4, 1] = 0;
-        result[4, 2] = 0;
-        result[4, 4] = 0;
+        result[3, 2] = nearPlaneDistance * num3;
+        result[3, 0] = 0;
+        result[3, 1] = 0;
+        result[3, 3] = 0;
 
         return result;
     }
@@ -133,10 +133,27 @@ public static class DoubleHelper
     {
         return new Vector4
         (
-            (float)(vector.X * matrix[1, 1] + vector.Y * matrix[2, 1] + vector.Z * matrix[3, 1] + vector.W * matrix[4, 1]),
-            (float)(vector.X * matrix[1, 2] + vector.Y * matrix[2, 2] + vector.Z * matrix[3, 2] + vector.W * matrix[4, 2]),
-            (float)(vector.X * matrix[1, 3] + vector.Y * matrix[2, 3] + vector.Z * matrix[3, 3] + vector.W * matrix[4, 3]),
-            (float)(vector.X * matrix[1, 4] + vector.Y * matrix[2, 4] + vector.Z * matrix[3, 4] + vector.W * matrix[4, 4])
+            (float)(vector.X * matrix[0, 0] + vector.Y * matrix[1, 0] + vector.Z * matrix[2, 0] + vector.W * matrix[3, 0]),
+            (float)(vector.X * matrix[0, 1] + vector.Y * matrix[1, 1] + vector.Z * matrix[2, 1] + vector.W * matrix[3, 1]),
+            (float)(vector.X * matrix[0, 2] + vector.Y * matrix[1, 2] + vector.Z * matrix[2, 2] + vector.W * matrix[3, 2]),
+            (float)(vector.X * matrix[0, 3] + vector.Y * matrix[1, 3] + vector.Z * matrix[2, 3] + vector.W * matrix[3, 3])
+        );
+    }
+    
+    public static Vector3 TransformPerspectively(this Matrix<double> matrix, Vector3 vector)
+    {
+        var transformedVector = Transform(new Vector4(vector, 1.0f), matrix);
+        return transformedVector.ToVector3() / transformedVector.W;
+    }
+
+    public static Matrix4x4 ToMatrix4x4(this Matrix<double> matrix)
+    {
+        return new Matrix4x4
+        (
+            (float)matrix[0, 0], (float)matrix[0, 1], (float)matrix[0, 2], (float)matrix[0, 3],
+            (float)matrix[1, 0], (float)matrix[1, 1], (float)matrix[1, 2], (float)matrix[1, 3],
+            (float)matrix[2, 0], (float)matrix[2, 1], (float)matrix[2, 2], (float)matrix[2, 3],
+            (float)matrix[3, 0], (float)matrix[3, 1], (float)matrix[3, 2], (float)matrix[3, 3]
         );
     }
 }

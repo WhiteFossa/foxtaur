@@ -348,9 +348,9 @@ public class DesktopRenderer : OpenGlControlBase
         //_defaultShader.SetUniform2f("resolution", new Vector2(_viewportWidth, _viewportHeight));
 
         // Setting shader parameters (vertices)
-        _defaultShader.SetUniform4f("uModel", _camera.ModelMatrix);
-        _defaultShader.SetUniform4f("uView", _camera.ViewMatrix);
-        _defaultShader.SetUniform4f("uProjection", _camera.ProjectionMatrix);
+        _defaultShader.SetUniform4f("uModel", _camera.ModelMatrix.ToMatrix4x4());
+        _defaultShader.SetUniform4f("uView", _camera.ViewMatrix.ToMatrix4x4());
+        _defaultShader.SetUniform4f("uProjection", _camera.ProjectionMatrix.ToMatrix4x4());
 
         // Setting shader parameters (fragments)
         _defaultShader.SetUniform1i("ourTexture", 0);
