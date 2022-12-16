@@ -44,6 +44,11 @@ public static class RendererHelper
     {
         return new Vector3((float)point.X, (float)point.Y, (float)point.Z);
     }
+    
+    public static MathNet.Numerics.LinearAlgebra.Vector<double> AsMathNetVector3(this PlanarPoint3D point)
+    {
+        return MathNet.Numerics.LinearAlgebra.Vector<double>.Build.DenseOfArray(new double[] { point.X, point.Y, point.Z });
+    }
 
     /// <summary>
     /// Rotate around direction to angle

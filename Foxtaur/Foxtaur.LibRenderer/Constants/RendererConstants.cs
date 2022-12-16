@@ -41,7 +41,7 @@ public static class RendererConstants
     /// <summary>
     /// Camera height for surface walk mode
     /// </summary>
-    public const double SurfaceRunModeCameraOrbitHeight = 0.0002 * GeoConstants.EarthRadius;
+    public const double SurfaceRunModeCameraOrbitHeight = 0.0003 * GeoConstants.EarthRadius;
 
     /// <summary>
     /// Head rotation speed (latitudal) in surface run mode
@@ -121,5 +121,5 @@ public static class RendererConstants
     /// <summary>
     /// Maps are higher than Earth surface by this value
     /// </summary>
-    public const double MapsAltitudeIncrement = 0.0001;
+    public const double MapsAltitudeIncrement = 0.0002;
 }

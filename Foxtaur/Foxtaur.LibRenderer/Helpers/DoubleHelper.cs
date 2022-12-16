@@ -53,26 +53,28 @@ public static class DoubleHelper
         return result;
     }   
     
-    public static Matrix<double> CreateLookAt(Vector3 cameraPosition, Vector3 cameraTarget, Vector3 cameraUpVector)
+    public static Matrix<double> CreateLookAt(MathNet.Numerics.LinearAlgebra.Vector<double> cameraPosition,
+        MathNet.Numerics.LinearAlgebra.Vector<double> cameraTarget,
+        MathNet.Numerics.LinearAlgebra.Vector<double> cameraUpVector)
     {
-        Vector3 vector3_1 = Vector3.Normalize(cameraPosition - cameraTarget);
-        Vector3 vector3_2 = Vector3.Normalize(Vector3.Cross(cameraUpVector, vector3_1));
-        Vector3 vector1 = Vector3.Cross(vector3_1, vector3_2);
+        var vector3_1 = (cameraPosition - cameraTarget).Normalize(1);
+        var vector3_2 = (Cross3(cameraUpVector, vector3_1)).Normalize(1);
+        var vector1 = Cross3(vector3_1, vector3_2);
         
         var result = Matrix<double>.Build.DenseIdentity(4, 4);
 
-        result[0, 0] = vector3_2.X;
-        result[0, 1] = vector1.X;
-        result[0, 2] = vector3_1.X;
-        result[1, 0] = vector3_2.Y;
-        result[1, 1] = vector1.Y;
-        result[1, 2] = vector3_1.Y;
-        result[2, 0] = vector3_2.Z;
-        result[2, 1] = vector1.Z;
-        result[2, 2] = vector3_1.Z;
-        result[3, 0] = -Vector3.Dot(vector3_2, cameraPosition);
-        result[3, 1] = -Vector3.Dot(vector1, cameraPosition);
-        result[3, 2] = -Vector3.Dot(vector3_1, cameraPosition);
+        result[0, 0] = vector3_2[0];
+        result[0, 1] = vector1[0];
+        result[0, 2] = vector3_1[0];
+        result[1, 0] = vector3_2[1];
+        result[1, 1] = vector1[1];
+        result[1, 2] = vector3_1[1];
+        result[2, 0] = vector3_2[2];
+        result[2, 1] = vector1[2];
+        result[2, 2] = vector3_1[2];
+        result[3, 0] = -1 * vector3_2.DotProduct(cameraPosition);
+        result[3, 1] = -1 * vector1.DotProduct(cameraPosition);
+        result[3, 2] = -1 * vector3_1.DotProduct(cameraPosition);
         
         return result;
     }
@@ -154,6 +156,19 @@ public static class DoubleHelper
             (float)matrix[1, 0], (float)matrix[1, 1], (float)matrix[1, 2], (float)matrix[1, 3],
             (float)matrix[2, 0], (float)matrix[2, 1], (float)matrix[2, 2], (float)matrix[2, 3],
             (float)matrix[3, 0], (float)matrix[3, 1], (float)matrix[3, 2], (float)matrix[3, 3]
+        );
+    }
+
+    public static MathNet.Numerics.LinearAlgebra.Vector<double> Cross3(MathNet.Numerics.LinearAlgebra.Vector<double> vector1, MathNet.Numerics.LinearAlgebra.Vector<double> vector2)
+    {
+        return MathNet.Numerics.LinearAlgebra.Vector<double>.Build.DenseOfArray
+        (
+            new double[]
+            {
+                vector1[1] * vector2[2] - vector1[2] * vector2[1],
+                vector1[2] * vector2[0] - vector1[0] * vector2[2],
+                vector1[0] * vector2[1] - vector1[1] * vector2[0]   
+            }
         );
     }
 }

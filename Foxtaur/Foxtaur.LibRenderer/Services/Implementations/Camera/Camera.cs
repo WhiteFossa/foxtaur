@@ -47,7 +47,7 @@ public class Camera : ICamera
     /// <summary>
     /// Camera up vector
     /// </summary>
-    private Vector3 _up;
+    private MathNet.Numerics.LinearAlgebra.Vector<double> _up = MathNet.Numerics.LinearAlgebra.Vector<double>.Build.DenseOfArray(new double[] { 0, 1, 0 });
 
     /// <summary>
     /// Camera aspect ratio
@@ -172,7 +172,7 @@ public class Camera : ICamera
         }
     }
 
-    public Vector3 Up
+    public MathNet.Numerics.LinearAlgebra.Vector<double> Up
     {
         get { return _up; }
 
@@ -191,7 +191,7 @@ public class Camera : ICamera
         _zoom = RendererConstants.CameraMinZoom; // To avoid errors during initialization
 
         AspectRatio = 1.0;
-        Up = new Vector3(0.0f, -1.0f, 0.0f);
+        Up = MathNet.Numerics.LinearAlgebra.Vector<double>.Build.DenseOfArray(new double[] { 0.0, -1.0, 0.0 });
         Zoom = RendererConstants.CameraMinZoom;
 
         CalculateCameraPosition();
@@ -267,7 +267,7 @@ public class Camera : ICamera
     private void CalculateMatrices()
     {
         ModelMatrix = DoubleHelper.CreateRotationZMatrix(0) * DoubleHelper.CreateRotationYMatrix(0) * DoubleHelper.CreateRotationXMatrix(0); // Rotation
-        ViewMatrix = DoubleHelper.CreateLookAt(Position3D.AsVector3(), Target.AsVector3(), Up); // Camera position
+        ViewMatrix = DoubleHelper.CreateLookAt(Position3D.AsMathNetVector3(), Target.AsMathNetVector3(), Up); // Camera position
         ProjectionMatrix = DoubleHelper.CreatePerspectiveFieldOfView(Zoom, AspectRatio, 0.00001, 100.0); // Zoom
         
         ForwardProjectionMatrix = ModelMatrix * ViewMatrix * ProjectionMatrix;

@@ -87,7 +87,7 @@ public interface ICamera
     /// <summary>
     /// Camera up vector
     /// </summary>
-    Vector3 Up { get; set; }
+    MathNet.Numerics.LinearAlgebra.Vector<double> Up { get; set; }
     
     /// <summary>
     /// Called when zoom changed

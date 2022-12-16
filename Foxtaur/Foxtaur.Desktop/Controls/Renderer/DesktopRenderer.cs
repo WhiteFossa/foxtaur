@@ -453,7 +453,7 @@ public class DesktopRenderer : OpenGlControlBase
 
         // Up
         var nadirVector = GeoConstants.EarthCenter - _camera.Position3D.AsVector3();
-        _camera.Up = nadirVector;
+        _camera.Up = MathNet.Numerics.LinearAlgebra.Vector<double>.Build.DenseOfArray(new double[] { nadirVector.X, nadirVector.Y, nadirVector.Z });
 
         // Target
         var toNorthVector =
@@ -529,7 +529,7 @@ public class DesktopRenderer : OpenGlControlBase
             {
                 _camera.H = RendererConstants.CameraOrbitHeight;
                 _camera.Target = GeoConstants.EarthCenter.AsPlanarPoint3D();
-                _camera.Up = new Vector3(0.0f, -1.0f, 0.0f);
+                _camera.Up = MathNet.Numerics.LinearAlgebra.Vector<double>.Build.DenseOfArray(new double[] { 0.0, -1.0, 0.0 });
 
                 _isSurfaceRunMode = false;
             }
