@@ -489,8 +489,6 @@ public class DesktopRenderer : OpenGlControlBase
         {
             _camera.ZoomIn(steps);
         }
-        
-        _logger.Info($"Zoom: { _camera.Zoom }");
     }
 
     /// <summary>
