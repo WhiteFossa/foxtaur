@@ -21,24 +21,7 @@ public static class RendererHelper
     }
 
     /// <summary>
-    /// Throw 4th vector component out
-    /// </summary>
-    public static Vector3 ToVector3(this Vector4 vec)
-    {
-        return new Vector3(vec.X, vec.Y, vec.Z);
-    }
-
-    /// <summary>
-    /// Transform matrix perspectively
-    /// </summary>
-    public static Vector3 TransformPerspectively(this Matrix4x4 matrix, Vector3 vector)
-    {
-        var transformedVector = Vector4.Transform(new Vector4(vector, 1.0f), matrix);
-        return transformedVector.ToVector3() / transformedVector.W;
-    }
-
-    /// <summary>
-    /// PlanarPoint3D to Vector3
+    /// PlanarPoint3D to Vector
     /// </summary>
     public static MathNet.Numerics.LinearAlgebra.Vector<double> AsVector(this PlanarPoint3D point)
     {
@@ -81,27 +64,6 @@ public static class RendererHelper
         return rotation * toRotateMathNet;
     }
 
-    /// <summary>
-    /// Multiply Matrix4x4 by Vector
-    /// </summary>
-    public static Vector4 MultiplyMatrix4x4ByVector4(Matrix4x4 matrix, Vector4 vector)
-    {
-        var mnMatrix = Matrix<double>.Build.DenseOfArray(
-            new double[,]
-            {
-                { matrix.M11, matrix.M12, matrix.M13, matrix.M14 },
-                { matrix.M21, matrix.M22, matrix.M23, matrix.M24 },
-                { matrix.M31, matrix.M32, matrix.M33, matrix.M34 },
-                { matrix.M41, matrix.M42, matrix.M43, matrix.M44 }
-            });
-
-        var mnVector = MathNet.Numerics.LinearAlgebra.Vector<double>.Build.Dense(new double[] { vector.X, vector.Y, vector.Z, vector.W });
-
-        var result = mnMatrix * mnVector;
-
-        return new Vector4((float)result[0], (float)result[1], (float)result[2], (float)result[3]);
-    }
-    
     /// <summary>
     /// Is point in culling viewport?
     /// </summary>
