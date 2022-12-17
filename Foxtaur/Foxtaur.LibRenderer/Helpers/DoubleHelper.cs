@@ -57,8 +57,8 @@ public static class DoubleHelper
         MathNet.Numerics.LinearAlgebra.Vector<double> cameraTarget,
         MathNet.Numerics.LinearAlgebra.Vector<double> cameraUpVector)
     {
-        var vector3_1 = (cameraPosition - cameraTarget).Normalize(1);
-        var vector3_2 = (Cross3(cameraUpVector, vector3_1)).Normalize(1);
+        var vector3_1 = (cameraPosition - cameraTarget).Normalize();
+        var vector3_2 = (Cross3(cameraUpVector, vector3_1)).Normalize();
         var vector1 = Cross3(vector3_1, vector3_2);
         
         var result = Matrix<double>.Build.DenseIdentity(4, 4);
@@ -173,5 +173,12 @@ public static class DoubleHelper
                 vector1[0] * vector2[1] - vector1[1] * vector2[0]   
             }
         );
+    }
+    
+    public static MathNet.Numerics.LinearAlgebra.Vector<double> Normalize(this MathNet.Numerics.LinearAlgebra.Vector<double> vector)
+    {
+        var length = Math.Sqrt(vector.DotProduct(vector));
+        
+        return vector / length;
     }
 }

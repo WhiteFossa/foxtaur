@@ -33,7 +33,7 @@ public static class RendererHelper
     /// </summary>
     public static MathNet.Numerics.LinearAlgebra.Vector<double> RotateAround(this MathNet.Numerics.LinearAlgebra.Vector<double> toRotate, MathNet.Numerics.LinearAlgebra.Vector<double> direction, double a)
     {
-        var nd = direction.Normalize(1);
+        var nd = direction.Normalize();
 
         var cosa = Math.Cos(a);
         var oneMinusCosa = 1 - cosa;

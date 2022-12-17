@@ -242,7 +242,7 @@ public class Camera : ICamera
         _ = point ?? throw new ArgumentNullException(nameof(point));
         _ = undergroundPoint ?? throw new ArgumentNullException(nameof(undergroundPoint));
         
-        var normalizedCameraVector = Position3D.AsVector().Normalize(1);
+        var normalizedCameraVector = Position3D.AsVector().Normalize();
 
         var planeEquationSolution = normalizedCameraVector[0] * (point.X - undergroundPoint.X)
                             + normalizedCameraVector[1] * (point.Y - undergroundPoint.Y)

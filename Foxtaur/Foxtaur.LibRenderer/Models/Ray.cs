@@ -48,7 +48,7 @@ public class Ray
     public List<PlanarPoint3D> Intersect(Sphere sphere)
     {
         var p0 = Begin.AsVector();
-        var rayDirection = (End.AsVector() - p0).Normalize(1);
+        var rayDirection = (End.AsVector() - p0).Normalize();
 
         var k = p0 - sphere.Center.AsVector();
 
@@ -82,7 +82,7 @@ public class Ray
     public bool IsPointOnEndSide(PlanarPoint3D point)
     {
         var p0 = Begin.AsVector();
-        var u = (End.AsVector() - p0).Normalize(1);
+        var u = (End.AsVector() - p0).Normalize();
 
         var t = (point.AsVector() - p0) / u;
 
