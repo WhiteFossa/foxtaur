@@ -41,11 +41,11 @@ public static class GeoConstants
     ///     Maximal possible longitude
     /// </summary>
     public const float MaxLon = (float)Math.PI + GeoCoordinatesCheckDelta;
-    
+
     /// <summary>
     /// Earth center coordinates
     /// </summary>
-    public static readonly Vector3 EarthCenter = new Vector3(0.0f, 0.0f, 0.0f);
+    public static readonly MathNet.Numerics.LinearAlgebra.Vector<double> EarthCenter = MathNet.Numerics.LinearAlgebra.Vector<double>.Build.DenseOfArray(new double[] { 0.0, 0.0, 0.0 });
 
     /// <summary>
     /// Multiply visual DEM altitudes by this value

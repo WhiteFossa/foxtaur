@@ -48,14 +48,6 @@ public static class GeoHelper
     }
 
     /// <summary>
-    /// Vector3 to PlanarPorint3D
-    /// </summary>
-    public static PlanarPoint3D AsPlanarPoint3D(this Vector3 vector)
-    {
-        return new PlanarPoint3D(vector.X, vector.Y, vector.Z);
-    }
-    
-    /// <summary>
     /// Vector of at least 3 components to PlanarPoint3D
     /// </summary>
     public static PlanarPoint3D AsPlanarPoint3D(this MathNet.Numerics.LinearAlgebra.Vector<double> vector)

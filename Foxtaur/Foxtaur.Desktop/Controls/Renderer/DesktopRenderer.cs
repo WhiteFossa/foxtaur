@@ -452,16 +452,13 @@ public class DesktopRenderer : OpenGlControlBase
         _camera.H = cameraH;
 
         // Up
-        var nadirVector = GeoConstants.EarthCenter - _camera.Position3D.AsVector3();
-        _camera.Up = MathNet.Numerics.LinearAlgebra.Vector<double>.Build.DenseOfArray(new double[] { nadirVector.X, nadirVector.Y, nadirVector.Z });
+        var nadirVector = GeoConstants.EarthCenter - _camera.Position3D.AsVector();
+        _camera.Up = nadirVector;
 
         // Target
-        var toNorthVector =
-            _sphereCoordinatesProvider.GeoToPlanar3D(new GeoPoint(Math.PI / 2.0, 0, _camera.H)).AsVector3() -
-            _camera.Position3D.AsVector3();
-        var nadirNorthPerpVector =
-            Vector3.Cross(nadirVector, toNorthVector); // Perpendicular to nadir vector and north vector
-
+        var toNorthVector = _sphereCoordinatesProvider.GeoToPlanar3D(new GeoPoint(Math.PI / 2.0, 0, _camera.H)).AsVector() - _camera.Position3D.AsVector();
+        var nadirNorthPerpVector = DoubleHelper.Cross3(nadirVector, toNorthVector); // Perpendicular to nadir vector and north vector
+        
         var targetVector = nadirVector.RotateAround(nadirNorthPerpVector, Math.PI / 2.0);
 
         // Latitudal view
@@ -470,8 +467,7 @@ public class DesktopRenderer : OpenGlControlBase
         // Longitudal view
         targetVector = targetVector.RotateAround(nadirVector, _surfaceRunLonViewAngle);
 
-        _camera.Target = new PlanarPoint3D(targetVector.X + _camera.Position3D.X, targetVector.Y + _camera.Position3D.Y,
-            targetVector.Z + _camera.Position3D.Z);
+        _camera.Target = new PlanarPoint3D(targetVector[0] + _camera.Position3D.X, targetVector[1] + _camera.Position3D.Y, targetVector[2] + _camera.Position3D.Z);
     }
 
     /// <summary>
@@ -732,8 +728,9 @@ public class DesktopRenderer : OpenGlControlBase
     {
         _visibleEarthSegments.Clear();
         
-        var undergroundPoint = _isSurfaceRunMode ? _sphereCoordinatesProvider.GeoToPlanar3D(new GeoPoint(_camera.Lat, _camera.Lon, RendererConstants.SurfaceRunModeUndergroundPlaneHeight))
-            : new PlanarPoint3D(GeoConstants.EarthCenter.X, GeoConstants.EarthCenter.Y, GeoConstants.EarthCenter.Z);
+        var undergroundPoint = _isSurfaceRunMode
+            ? _sphereCoordinatesProvider.GeoToPlanar3D(new GeoPoint(_camera.Lat, _camera.Lon, RendererConstants.SurfaceRunModeUndergroundPlaneHeight)) 
+            : new PlanarPoint3D(GeoConstants.EarthCenter[0], GeoConstants.EarthCenter[1], GeoConstants.EarthCenter[2]);
         
         foreach (var earthSegment in _earthSegments)
         {
