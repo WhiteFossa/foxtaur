@@ -131,21 +131,24 @@ public static class DoubleHelper
         return result;
     }
 
-    public static Vector4 Transform(Vector4 vector, Matrix<double> matrix)
+    public static MathNet.Numerics.LinearAlgebra.Vector<double> Transform(MathNet.Numerics.LinearAlgebra.Vector<double> vector, Matrix<double> matrix)
     {
-        return new Vector4
+        return MathNet.Numerics.LinearAlgebra.Vector<double>.Build.DenseOfArray
         (
-            (float)(vector.X * matrix[0, 0] + vector.Y * matrix[1, 0] + vector.Z * matrix[2, 0] + vector.W * matrix[3, 0]),
-            (float)(vector.X * matrix[0, 1] + vector.Y * matrix[1, 1] + vector.Z * matrix[2, 1] + vector.W * matrix[3, 1]),
-            (float)(vector.X * matrix[0, 2] + vector.Y * matrix[1, 2] + vector.Z * matrix[2, 2] + vector.W * matrix[3, 2]),
-            (float)(vector.X * matrix[0, 3] + vector.Y * matrix[1, 3] + vector.Z * matrix[2, 3] + vector.W * matrix[3, 3])
+            new double[]
+            {
+                vector[0] * matrix[0, 0] + vector[1] * matrix[1, 0] + vector[2] * matrix[2, 0] + vector[3] * matrix[3, 0],
+                vector[0] * matrix[0, 1] + vector[1] * matrix[1, 1] + vector[2] * matrix[2, 1] + vector[3] * matrix[3, 1],
+                vector[0] * matrix[0, 2] + vector[1] * matrix[1, 2] + vector[2] * matrix[2, 2] + vector[3] * matrix[3, 2],
+                vector[0] * matrix[0, 3] + vector[1] * matrix[1, 3] + vector[2] * matrix[2, 3] + vector[3] * matrix[3, 3]                    
+            }
         );
     }
     
-    public static Vector3 TransformPerspectively(this Matrix<double> matrix, Vector3 vector)
+    public static MathNet.Numerics.LinearAlgebra.Vector<double> TransformPerspectively(this Matrix<double> matrix, MathNet.Numerics.LinearAlgebra.Vector<double> vector)
     {
-        var transformedVector = Transform(new Vector4(vector, 1.0f), matrix);
-        return transformedVector.ToVector3() / transformedVector.W;
+        var transformedVector = Transform(MathNet.Numerics.LinearAlgebra.Vector<double>.Build.DenseOfArray(new double[] { vector[0], vector[1], vector[2], 1.0 }), matrix);
+        return transformedVector / transformedVector[3];
     }
 
     public static Matrix4x4 ToMatrix4x4(this Matrix<double> matrix)

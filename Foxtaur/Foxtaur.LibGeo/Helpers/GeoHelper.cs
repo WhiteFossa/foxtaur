@@ -54,4 +54,12 @@ public static class GeoHelper
     {
         return new PlanarPoint3D(vector.X, vector.Y, vector.Z);
     }
+    
+    /// <summary>
+    /// Vector of at least 3 components to PlanarPoint3D
+    /// </summary>
+    public static PlanarPoint3D AsPlanarPoint3D(this MathNet.Numerics.LinearAlgebra.Vector<double> vector)
+    {
+        return new PlanarPoint3D(vector[0], vector[1], vector[2]);
+    }
 }

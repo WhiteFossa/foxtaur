@@ -214,9 +214,9 @@ public class Camera : ICamera
     {
         _ = point ?? throw new ArgumentNullException(nameof(point));
         
-        var projectedPoint = DoubleHelper.Transform(new Vector4((float)point.X, (float)point.Y, (float)point.Z, 1.0f), ForwardProjectionMatrix);
+        var projectedPoint = DoubleHelper.Transform(MathNet.Numerics.LinearAlgebra.Vector<double>.Build.DenseOfArray(new double[] { point.X, point.Y, point.Z, 1.0}), ForwardProjectionMatrix);
         
-        return new PlanarPoint2D(projectedPoint.X, projectedPoint.Y);
+        return new PlanarPoint2D(projectedPoint[0], projectedPoint[1]);
     }
 
     public PlanarSegment ProjectSegmentToViewport(GeoSegment segment)

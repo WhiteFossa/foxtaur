@@ -37,7 +37,7 @@ public class Ray
         var normalizedDeviceY = screenY / viewportHeight * 2.0 - 1.0;
 
         var nearPoint = camera.Position3D.AsVector3();
-        var farPoint = camera.BackProjectionMatrix.TransformPerspectively(new Vector3((float)normalizedDeviceX, (float)normalizedDeviceY, 1.0f));
+        var farPoint = camera.BackProjectionMatrix.TransformPerspectively(MathNet.Numerics.LinearAlgebra.Vector<double>.Build.DenseOfArray(new double[] { normalizedDeviceX, normalizedDeviceY, 1.0 }));
 
         return new Ray(nearPoint.AsPlanarPoint3D(), farPoint.AsPlanarPoint3D());
     }
