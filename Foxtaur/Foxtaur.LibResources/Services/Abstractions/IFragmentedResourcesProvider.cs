@@ -11,5 +11,5 @@ public interface IFragmentedResourcesProvider
     /// <summary>
     /// Get resource by geocoordinates
     /// </summary>
-    FragmentedResourceBase GetResource(float lat, float lon, ZoomLevel zoomLevel);
+    FragmentedResourceBase GetResource(double lat, double lon, ZoomLevel zoomLevel);
 }

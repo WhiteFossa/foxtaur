@@ -56,22 +56,22 @@ public class Ui : IUi
         _ = data ?? throw new ArgumentNullException(nameof(data));
 
         // Top
-        var topPanelRelativeHeight = RendererConstants.UiTopPanelHeight / (float)uiHeight;
+        var topPanelRelativeHeight = RendererConstants.UiTopPanelHeight / (double)uiHeight;
         _uiMeshTop = _rectangleGenerator.GenerateRectangle(
-            new PlanarPoint3D(0.0f, topPanelRelativeHeight, 0.0f),
-            new PlanarPoint2D(0.0f, 1.0f),
-            new PlanarPoint3D(1.0f, 0.0f, 0.0f),
-            new PlanarPoint2D(1.0f, 0.0f));
+            new PlanarPoint3D(0.0, topPanelRelativeHeight, 0.0),
+            new PlanarPoint2D(0.0, 1.0),
+            new PlanarPoint3D(1.0, 0.0, 0.0),
+            new PlanarPoint2D(1.0, 0.0));
 
         _uiMeshTop.GenerateBuffers(silkGlContext);
 
         // Bottom
-        var bottomPanelRelativeHeight = RendererConstants.UiBottomPanelHeight / (float)uiHeight;
+        var bottomPanelRelativeHeight = RendererConstants.UiBottomPanelHeight / (double)uiHeight;
         _uiMeshBottom = _rectangleGenerator.GenerateRectangle(
-            new PlanarPoint3D(0.0f, 1.0f, 0.0f),
-            new PlanarPoint2D(0.0f, 1.0f),
-            new PlanarPoint3D(1.0f, 1.0f - bottomPanelRelativeHeight, 0.0f),
-            new PlanarPoint2D(1.0f, 0.0f));
+            new PlanarPoint3D(0.0, 1.0, 0.0),
+            new PlanarPoint2D(0.0, 1.0),
+            new PlanarPoint3D(1.0, 1.0 - bottomPanelRelativeHeight, 0.0),
+            new PlanarPoint2D(1.0, 0.0));
 
         _uiMeshBottom.GenerateBuffers(silkGlContext);
 
@@ -104,9 +104,7 @@ public class Ui : IUi
             // FPS
             var fpsText = $"FPS: {data.Fps}";
             var fpsTextSize = _textDrawer.GetTextBounds(uiTopPanelImage, RendererConstants.UiFontSize, fpsText);
-            var fpsTextShiftY = RendererConstants.UiTopPanelHeight -
-                                (RendererConstants.UiTopPanelHeight - (float)fpsTextSize.TextHeight) / 2.0f +
-                                (float)fpsTextSize.Descent;
+            var fpsTextShiftY = RendererConstants.UiTopPanelHeight - (RendererConstants.UiTopPanelHeight - fpsTextSize.TextHeight) / 2.0 + fpsTextSize.Descent;
 
             _textDrawer.DrawText(uiTopPanelImage,
                 RendererConstants.UiFontSize,
@@ -133,10 +131,7 @@ public class Ui : IUi
 
             var mouseCoordsTextSize =
                 _textDrawer.GetTextBounds(uiBottomPanelImage, RendererConstants.UiFontSize, mouseCoordsText);
-            var mouseCoordsTextShiftY = RendererConstants.UiTopPanelHeight -
-                                        (RendererConstants.UiTopPanelHeight - (float)mouseCoordsTextSize.TextHeight) /
-                                        2.0f +
-                                        (float)mouseCoordsTextSize.Descent;
+            var mouseCoordsTextShiftY = RendererConstants.UiTopPanelHeight - (RendererConstants.UiTopPanelHeight - mouseCoordsTextSize.TextHeight) / 2.0 + mouseCoordsTextSize.Descent;
 
             _textDrawer.DrawText(uiBottomPanelImage,
                 RendererConstants.UiFontSize,

@@ -8,24 +8,24 @@ public class GeoSegment
     /// <summary>
     /// North limit
     /// </summary>
-    public float NorthLat { get; private set; }
+    public double NorthLat { get; private set; }
 
     /// <summary>
     /// South limit
     /// </summary>
-    public float SouthLat { get; private set; }
+    public double SouthLat { get; private set; }
 
     /// <summary>
     /// West limit
     /// </summary>
-    public float WestLon { get; private set; }
+    public double WestLon { get; private set; }
 
     /// <summary>
     /// East limit
     /// </summary>
-    public float EastLon { get; private set; }
+    public double EastLon { get; private set; }
 
-    public GeoSegment(float nLat, float wLon, float sLat, float eLon)
+    public GeoSegment(double nLat, double wLon, double sLat, double eLon)
     {
         if (nLat <= sLat)
         {
@@ -46,7 +46,7 @@ public class GeoSegment
     /// <summary>
     /// Is point withing segment (H is ignored). Lat / lon wrap is not supported
     /// </summary>
-    public bool IsInSegment(float lat, float lon)
+    public bool IsInSegment(double lat, double lon)
     {
         if (lat < SouthLat)
         {

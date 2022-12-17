@@ -8,14 +8,14 @@ public class PlanarPoint2D
     /// <summary>
     ///     Planar X
     /// </summary>
-    public float X { get; }
+    public double X { get; }
 
     /// <summary>
     ///     Planar Y
     /// </summary>
-    public float Y { get; }
+    public double Y { get; }
 
-    public PlanarPoint2D(float x, float y)
+    public PlanarPoint2D(double x, double y)
     {
         X = x;
         Y = y;

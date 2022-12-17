@@ -11,17 +11,17 @@ public class Plane
     /// <summary>
     /// Plane equation's A
     /// </summary>
-    public float A { get; private set; }
+    public double A { get; private set; }
 
     /// <summary>
     /// Plane equation's B
     /// </summary>
-    public float B { get; private set; }
+    public double B { get; private set; }
 
     /// <summary>
     /// Plane equation's C
     /// </summary>
-    public float C { get; private set; }
+    public double C { get; private set; }
 
     /// <summary>
     /// Construct plane by 3 points on it
@@ -33,14 +33,14 @@ public class Plane
         _ = p3 ?? throw new ArgumentNullException(nameof(p3));
 
         // Solving plane equations
-        var p = Matrix<float>.Build.DenseOfArray(new float[,]
+        var p = Matrix<double>.Build.DenseOfArray(new double[,]
         {
             { p1.X, p1.Y, p1.Z },
             { p2.X, p2.Y, p2.Z },
             { p3.X, p3.Y, p3.Z }
         });
 
-        var r = Vector<float>.Build.Dense(new float[] { -1.0f, -1.0f, -1.0f });
+        var r = Vector<double>.Build.Dense(new double[] { -1.0, -1.0, -1.0 });
 
         var s = p.Solve(r);
 

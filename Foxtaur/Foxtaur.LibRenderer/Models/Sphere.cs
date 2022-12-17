@@ -15,9 +15,9 @@ public class Sphere
     /// <summary>
     /// Radius
     /// </summary>
-    public float Radius { get; private set; }
+    public double Radius { get; private set; }
 
-    public Sphere(PlanarPoint3D cener, float radius)
+    public Sphere(PlanarPoint3D cener, double radius)
     {
         Center = cener;
         Radius = radius;

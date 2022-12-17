@@ -18,12 +18,12 @@ public interface IGeoTiffReader
     /// <summary>
     /// Get pixel by planar coordinates. Result is normalized to [0; 1]
     /// </summary>
-    float GetPixel(int band, int x, int y);
+    double GetPixel(int band, int x, int y);
 
     /// <summary>
     /// Get pixel by planar coordinates (with bilinear interpolation). Result is normalized to [0; 1]
     /// </summary>
-    float GetPixelWithInterpolation(int band, float x, float y); 
+    double GetPixelWithInterpolation(int band, double x, double y); 
 
     /// <summary>
     /// Get image width
@@ -44,11 +44,11 @@ public interface IGeoTiffReader
     /// <summary>
     /// Get pixel coordinates by geo coordnates. Pixel coordinates may be wrong is geo coordinates points outside image
     /// </summary>
-    Tuple<float, float> GetPixelCoordsByGeoCoords(float lat, float lon);
+    Tuple<double, double> GetPixelCoordsByGeoCoords(double lat, double lon);
     
     /// <summary>
     /// Get pixel by geocoordinates
     /// If geocoordinates are outside image will return null
     /// </summary>
-    float? GetPixelByGeoCoords(int band, float lat, float lon);
+    double? GetPixelByGeoCoords(int band, double lat, double lon);
 }

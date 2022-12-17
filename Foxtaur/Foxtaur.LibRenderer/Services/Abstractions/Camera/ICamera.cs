@@ -1,13 +1,14 @@
 using System.Numerics;
 using Foxtaur.LibGeo.Models;
+using MathNet.Numerics.LinearAlgebra;
 
 namespace Foxtaur.LibRenderer.Services.Abstractions.Camera;
 
 public class OnZoomChangedArgs
 {
-    public float Zoom { get; private set; }
+    public double Zoom { get; private set; }
 
-    public OnZoomChangedArgs(float zoom)
+    public OnZoomChangedArgs(double zoom)
     {
         Zoom = zoom;
     }
@@ -21,17 +22,17 @@ public interface ICamera
     /// <summary>
     /// Camera latitude
     /// </summary>
-    float Lat { get; set; }
+    double Lat { get; set; }
 
     /// <summary>
     /// Camera longitude
     /// </summary>
-    float Lon { get; set; }
+    double Lon { get; set; }
 
     /// <summary>
     /// Camera height (over the center of Earth)
     /// </summary>
-    float H { get; set; }
+    double H { get; set; }
 
     /// <summary>
     /// Camera position for given geo coordinates
@@ -46,7 +47,7 @@ public interface ICamera
     /// <summary>
     /// Camera zoom (in radians)
     /// </summary>
-    float Zoom { get; set; }
+    double Zoom { get; set; }
 
     /// <summary>
     /// If true, then we are in surface run mode, so special limits for zoom are applied
@@ -56,37 +57,37 @@ public interface ICamera
     /// <summary>
     /// Model matrix
     /// </summary>
-    Matrix4x4 ModelMatrix { get; }
+    Matrix<double> ModelMatrix { get; }
 
     /// <summary>
     /// View matrix
     /// </summary>
-    Matrix4x4 ViewMatrix { get; }
+    Matrix<double> ViewMatrix { get; }
 
     /// <summary>
     /// Projection matrix
     /// </summary>
-    Matrix4x4 ProjectionMatrix { get; }
+    Matrix<double> ProjectionMatrix { get; }
 
     /// <summary>
     /// Forward projection matrix (for projection from 3D space to screen)
     /// </summary>
-    Matrix4x4 ForwardProjectionMatrix { get; }
+    Matrix<double> ForwardProjectionMatrix { get; }
 
     /// <summary>
     /// Matrix for raycasting
     /// </summary>
-    Matrix4x4 BackProjectionMatrix { get; }
+    Matrix<double> BackProjectionMatrix { get; }
 
     /// <summary>
     /// Screen aspect ratio
     /// </summary>
-    float AspectRatio { get; set; }
+    double AspectRatio { get; set; }
 
     /// <summary>
     /// Camera up vector
     /// </summary>
-    Vector3 Up { get; set; }
+    MathNet.Numerics.LinearAlgebra.Vector<double> Up { get; set; }
     
     /// <summary>
     /// Called when zoom changed
@@ -101,12 +102,12 @@ public interface ICamera
     /// <summary>
     /// Zoom in
     /// </summary>
-    void ZoomIn(float steps);
+    void ZoomIn(double steps);
 
     /// <summary>
     /// Zoom out
     /// </summary>
-    void ZoomOut(float steps);
+    void ZoomOut(double steps);
 
     /// <summary>
     /// Project point from 3D space to viewport coordinates [-1; 1]

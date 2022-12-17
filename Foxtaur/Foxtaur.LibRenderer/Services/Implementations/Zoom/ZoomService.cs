@@ -15,7 +15,7 @@ public class ZoomService : IZoomService
     /// <summary>
     /// Current zoom
     /// </summary>
-    public float Zoom
+    public double Zoom
     {
         get
         {
@@ -65,29 +65,29 @@ public class ZoomService : IZoomService
         }
     }
 
-    private float _zoom = RendererConstants.CameraMinZoom;
+    private double _zoom = RendererConstants.CameraMinZoom;
     private ZoomLevel _zoomLevel;
     private Models.Zoom.ZoomLevel _zoomLevelData;
 
     private List<Models.Zoom.ZoomLevel> _zoomLevels = new()
     {
         new(ZoomLevel.ZoomLevel0,
-            (float)Math.PI / 2.0f,
-            0.1f,
-            10.0f.ToRadians(),
-            0.5f.ToRadians()),
+            Math.PI / 2.0f,
+            0.1,
+            10.0.ToRadians(),
+            0.5.ToRadians()),
         
         new(ZoomLevel.ZoomLevel1,
-            0.1f,
-            0.01f,
-            2.0f.ToRadians(),
-            0.1f.ToRadians()),
+            0.1,
+            0.01,
+            2.0.ToRadians(),
+            0.1.ToRadians()),
         
         new(ZoomLevel.ZoomLevel2,
-            0.01f,
-            0.0f,
-            1.0f.ToRadians(),
-            0.05f.ToRadians())
+            0.01,
+            0.0,
+            1.0.ToRadians(),
+            0.05.ToRadians())
     };
 
     public ZoomService()
@@ -96,7 +96,7 @@ public class ZoomService : IZoomService
         ZoomLevelData = GetZoomLevel(ZoomLevel);
     }
     
-    private ZoomLevel GetZoomLevelByCameraZoom(float cameraZoom)
+    private ZoomLevel GetZoomLevelByCameraZoom(double cameraZoom)
     {
         return _zoomLevels
             .First(zl => zl.MinZoom >= cameraZoom && zl.MaxZoom < cameraZoom)
@@ -105,7 +105,6 @@ public class ZoomService : IZoomService
 
     private Models.Zoom.ZoomLevel GetZoomLevel(ZoomLevel zoomLevel)
     {
-        return _zoomLevels
-            .First(zl => zl.Level == zoomLevel);
+        return _zoomLevels.First(zl => zl.Level == zoomLevel);
     }
 }

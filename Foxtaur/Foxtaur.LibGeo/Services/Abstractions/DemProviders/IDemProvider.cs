@@ -10,7 +10,7 @@ public class OnRegenerateDemFragmentArgs
     /// </summary>
     public GeoSegment Segment { get; private set; }
 
-    public OnRegenerateDemFragmentArgs(float nLat, float wLon, float sLat, float eLon)
+    public OnRegenerateDemFragmentArgs(double nLat, double wLon, double sLat, double eLon)
     {
         Segment = new GeoSegment(nLat, wLon, sLat, eLon);
     }
@@ -24,7 +24,7 @@ public interface IDemProvider
     /// <summary>
     /// Get surface altitude (in ideal Earth radiuses)
     /// </summary>
-    float GetSurfaceAltitude(float lat, float lon, ZoomLevel desiredZoomLevel);
+    double GetSurfaceAltitude(double lat, double lon, ZoomLevel desiredZoomLevel);
     
     /// <summary>
     /// Event for DEM fragment regeneration

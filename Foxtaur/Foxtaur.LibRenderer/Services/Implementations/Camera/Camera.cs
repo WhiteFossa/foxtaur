@@ -6,6 +6,7 @@ using Foxtaur.LibGeo.Services.Implementations.CoordinateProviders;
 using Foxtaur.LibRenderer.Constants;
 using Foxtaur.LibRenderer.Helpers;
 using Foxtaur.LibRenderer.Services.Abstractions.Camera;
+using MathNet.Numerics.LinearAlgebra;
 
 namespace Foxtaur.LibRenderer.Services.Implementations.Camera;
 
@@ -16,17 +17,17 @@ public class Camera : ICamera
     /// <summary>
     /// Camera latitude
     /// </summary>
-    private float _lat;
+    private double _lat;
 
     /// <summary>
     /// Camera longitude
     /// </summary>
-    private float _lon;
+    private double _lon;
 
     /// <summary>
     /// Camera height
     /// </summary>
-    private float _h;
+    private double _h;
 
     /// <summary>
     /// Camera position in 3D space
@@ -41,19 +42,19 @@ public class Camera : ICamera
     /// <summary>
     /// Camera zoom
     /// </summary>
-    private float _zoom;
+    private double _zoom;
 
     /// <summary>
     /// Camera up vector
     /// </summary>
-    private Vector3 _up;
+    private MathNet.Numerics.LinearAlgebra.Vector<double> _up = MathNet.Numerics.LinearAlgebra.Vector<double>.Build.DenseOfArray(new double[] { 0, 1, 0 });
 
     /// <summary>
     /// Camera aspect ratio
     /// </summary>
-    private float _aspectRatio;
+    private double _aspectRatio;
 
-    public float Lat
+    public double Lat
     {
         get { return _lat; }
 
@@ -65,7 +66,7 @@ public class Camera : ICamera
         }
     }
 
-    public float Lon
+    public double Lon
     {
         get { return _lon; }
 
@@ -77,7 +78,7 @@ public class Camera : ICamera
         }
     }
 
-    public float H
+    public double H
     {
         get { return _h; }
 
@@ -118,7 +119,7 @@ public class Camera : ICamera
         }
     }
 
-    public float Zoom
+    public double Zoom
     {
         get { return _zoom; }
 
@@ -149,17 +150,17 @@ public class Camera : ICamera
 
     public bool IsSurfaceRunMode { get; set; }
 
-    public Matrix4x4 ModelMatrix { get; private set; } = new Matrix4x4();
+    public Matrix<double> ModelMatrix { get; private set; } = Matrix<double>.Build.DenseIdentity(4, 4);
 
-    public Matrix4x4 ViewMatrix { get; private set; } = new Matrix4x4();
+    public Matrix<double> ViewMatrix { get; private set; } = Matrix<double>.Build.DenseIdentity(4, 4);
 
-    public Matrix4x4 ProjectionMatrix { get; private set; } = new Matrix4x4();
+    public Matrix<double> ProjectionMatrix { get; private set; } = Matrix<double>.Build.DenseIdentity(4, 4);
 
-    public Matrix4x4 ForwardProjectionMatrix { get; private set; } = new Matrix4x4();
+    public Matrix<double> ForwardProjectionMatrix { get; private set; } = Matrix<double>.Build.DenseIdentity(4, 4);
     
-    public Matrix4x4 BackProjectionMatrix { get; private set; } = new Matrix4x4();
+    public Matrix<double> BackProjectionMatrix { get; private set; } = Matrix<double>.Build.DenseIdentity(4, 4);
 
-    public float AspectRatio
+    public double AspectRatio
     {
         get { return _aspectRatio; }
 
@@ -171,7 +172,7 @@ public class Camera : ICamera
         }
     }
 
-    public Vector3 Up
+    public MathNet.Numerics.LinearAlgebra.Vector<double> Up
     {
         get { return _up; }
 
@@ -189,8 +190,8 @@ public class Camera : ICamera
 
         _zoom = RendererConstants.CameraMinZoom; // To avoid errors during initialization
 
-        AspectRatio = 1.0f;
-        Up = new Vector3(0.0f, -1.0f, 0.0f);
+        AspectRatio = 1.0;
+        Up = MathNet.Numerics.LinearAlgebra.Vector<double>.Build.DenseOfArray(new double[] { 0.0, -1.0, 0.0 });
         Zoom = RendererConstants.CameraMinZoom;
 
         CalculateCameraPosition();
@@ -199,23 +200,23 @@ public class Camera : ICamera
 
     public event ICamera.OnZoomChangedHandler OnZoomChanged;
 
-    public void ZoomIn(float steps)
+    public void ZoomIn(double steps)
     {
-        Zoom = Zoom * (float)Math.Pow(RendererConstants.CameraZoomInMultiplier, steps);
+        Zoom = Zoom * Math.Pow(RendererConstants.CameraZoomInMultiplier, steps);
     }
 
-    public void ZoomOut(float steps)
+    public void ZoomOut(double steps)
     {
-        Zoom = Zoom * (float)Math.Pow(RendererConstants.CameraZoomOutMultiplier, steps);
+        Zoom = Zoom * Math.Pow(RendererConstants.CameraZoomOutMultiplier, steps);
     }
 
     public PlanarPoint2D ProjectPointToViewport(PlanarPoint3D point)
     {
         _ = point ?? throw new ArgumentNullException(nameof(point));
-
-        var projectedPoint = Vector4.Transform(new Vector4(point.X, point.Y, point.Z, 1.0f), ForwardProjectionMatrix);
         
-        return new PlanarPoint2D(projectedPoint.X, projectedPoint.Y);
+        var projectedPoint = DoubleHelper.Transform(MathNet.Numerics.LinearAlgebra.Vector<double>.Build.DenseOfArray(new double[] { point.X, point.Y, point.Z, 1.0}), ForwardProjectionMatrix);
+        
+        return new PlanarPoint2D(projectedPoint[0], projectedPoint[1]);
     }
 
     public PlanarSegment ProjectSegmentToViewport(GeoSegment segment)
@@ -240,12 +241,12 @@ public class Camera : ICamera
     {
         _ = point ?? throw new ArgumentNullException(nameof(point));
         _ = undergroundPoint ?? throw new ArgumentNullException(nameof(undergroundPoint));
+        
+        var normalizedCameraVector = Position3D.AsVector().Normalize();
 
-        var normalizedCameraVector = Vector3.Normalize(new Vector3(Position3D.X, Position3D.Y, Position3D.Z));
-
-        var planeEquationSolution = normalizedCameraVector.X * (point.X - undergroundPoint.X)
-                            + normalizedCameraVector.Y * (point.Y - undergroundPoint.Y)
-                            + normalizedCameraVector.Z * (point.Z - undergroundPoint.Z);
+        var planeEquationSolution = normalizedCameraVector[0] * (point.X - undergroundPoint.X)
+                            + normalizedCameraVector[1] * (point.Y - undergroundPoint.Y)
+                            + normalizedCameraVector[2] * (point.Z - undergroundPoint.Z);
 
         return planeEquationSolution > 0;
     }
@@ -265,22 +266,17 @@ public class Camera : ICamera
     /// </summary>
     private void CalculateMatrices()
     {
-        ModelMatrix = Matrix4x4.CreateRotationZ(0.0f) * Matrix4x4.CreateRotationY(0.0f) *
-                      Matrix4x4.CreateRotationX(0.0f); // Rotation
-        ViewMatrix = Matrix4x4.CreateLookAt(Position3D.AsVector3(), Target.AsVector3(), Up); // Camera position
-        ProjectionMatrix = Matrix4x4.CreatePerspectiveFieldOfView(Zoom, AspectRatio, 0.01f, 100.0f); // Zoom
+        ModelMatrix = DoubleHelper.CreateRotationZMatrix(0) * DoubleHelper.CreateRotationYMatrix(0) * DoubleHelper.CreateRotationXMatrix(0); // Rotation
+        ViewMatrix = DoubleHelper.CreateLookAt(Position3D.AsVector(), Target.AsVector(), Up); // Camera position
+        ProjectionMatrix = DoubleHelper.CreatePerspectiveFieldOfView(Zoom, AspectRatio, 0.00001, 100.0); // Zoom
         
         ForwardProjectionMatrix = ModelMatrix * ViewMatrix * ProjectionMatrix;
         
         // Back-projection matrix (for raycasting)
         var forwardProjection = ViewMatrix * ProjectionMatrix;
-        
-        Matrix4x4 backProjection;
-        if (!Matrix4x4.Invert(forwardProjection, out backProjection))
-        {
-            throw new InvalidOperationException("Failed to invert forward projection!");
-        }
 
-        BackProjectionMatrix = backProjection;
+        BackProjectionMatrix = forwardProjection.Inverse();
     }
+
+    
 }

@@ -18,22 +18,22 @@ public abstract class FragmentedResourceBase
     /// <summary>
     /// North border of a fragment
     /// </summary>
-    public float NorthLat { get; private set; }
+    public double NorthLat { get; private set; }
 
     /// <summary>
     /// South border of fragment
     /// </summary>
-    public float SouthLat { get; private set; }
+    public double SouthLat { get; private set; }
 
     /// <summary>
     /// Western border (fragment can't stretch over 180 / -180 line)
     /// </summary>
-    public float WestLon { get; private set; }
+    public double WestLon { get; private set; }
 
     /// <summary>
     /// Eastern border
     /// </summary>
-    public float EastLon { get; private set; }
+    public double EastLon { get; private set; }
 
     /// <summary>
     /// Unique resource name
@@ -58,10 +58,10 @@ public abstract class FragmentedResourceBase
     private readonly HttpClient _httpClient = new HttpClient();
     private Logger _logger = LogManager.GetCurrentClassLogger();
 
-    public FragmentedResourceBase(float northLat,
-        float southLat,
-        float westLon,
-        float eastLon,
+    public FragmentedResourceBase(double northLat,
+        double southLat,
+        double westLon,
+        double eastLon,
         string resourceName,
         bool isLocal)
     {
@@ -105,7 +105,7 @@ public abstract class FragmentedResourceBase
     /// <summary>
     /// Is given coordinates hit the resource
     /// </summary>
-    public bool IsHit(float lat, float lon)
+    public bool IsHit(double lat, double lon)
     {
         return lat >= SouthLat && lat <= NorthLat && lon >= EastLon && lon <= WestLon;
     }

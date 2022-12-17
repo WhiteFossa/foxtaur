@@ -12,7 +12,7 @@ public static class GeoHelper
     /// <summary>
     /// Radians to degrees string (sign is discarded)
     /// </summary>
-    public static string ToDegreesStringSignless(this float radians, bool isLat)
+    public static string ToDegreesStringSignless(this double radians, bool isLat)
     {
         var degreesRaw = Math.Abs(radians.ToDegrees());
 
@@ -30,7 +30,7 @@ public static class GeoHelper
     /// <summary>
     /// Radians to latitude string
     /// </summary>
-    public static string ToLatString(this float lat)
+    public static string ToLatString(this double lat)
     {
         var postfix = lat >= 0 ? "N" : "S";
 
@@ -40,7 +40,7 @@ public static class GeoHelper
     /// <summary>
     /// Radians to longitude string
     /// </summary>
-    public static string ToLonString(this float lon)
+    public static string ToLonString(this double lon)
     {
         var postfix = lon >= 0 ? "W" : "E";
 
@@ -48,10 +48,10 @@ public static class GeoHelper
     }
 
     /// <summary>
-    /// Vector3 to PlanarPorint3D
+    /// Vector of at least 3 components to PlanarPoint3D
     /// </summary>
-    public static PlanarPoint3D AsPlanarPoint3D(this Vector3 vector)
+    public static PlanarPoint3D AsPlanarPoint3D(this MathNet.Numerics.LinearAlgebra.Vector<double> vector)
     {
-        return new PlanarPoint3D(vector.X, vector.Y, vector.Z);
+        return new PlanarPoint3D(vector[0], vector[1], vector[2]);
     }
 }
