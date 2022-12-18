@@ -17,7 +17,7 @@ public class DemFragment : ZoomedFragmentedResourceBase
 
     private bool _isLoading;
 
-    private object _processingLock = new object();
+    private Mutex _downloadLock = new Mutex();
 
     /// <summary>
     /// Is fragment data loaded?
@@ -48,21 +48,33 @@ public class DemFragment : ZoomedFragmentedResourceBase
 
     public override void Download(OnFragmentedResourceLoaded onLoad)
     {
-        OnLoad = onLoad ?? throw new ArgumentNullException(nameof(onLoad));
+        _downloadLock.WaitOne();
 
-        if (IsLoaded)
+        try
         {
-            // Fragment already downloaded
-            return;
+            OnLoad = onLoad ?? throw new ArgumentNullException(nameof(onLoad));
+
+            if (IsLoaded)
+            {
+                // Fragment already downloaded
+                return;
+            }
+        
+            if (_isLoading)
+            {
+                // Loading in progress
+                return;
+            }
+
+            _isLoading = true;
+        }
+        finally
+        {
+            _downloadLock.ReleaseMutex();
         }
         
-        if (_isLoading)
-        {
-            // Loading in progress
-            return;
-        }
-
-        _isLoading = true;
+        
+        //_downloadLock.ReleaseMutex();
 
         _logger.Info($"Loading { ResourceName }...");
     
@@ -99,21 +111,18 @@ public class DemFragment : ZoomedFragmentedResourceBase
     /// </summary>
     public void Unload()
     {
-        lock (_processingLock)
+        if (!IsLoaded)
         {
-            if (!IsLoaded)
-            {
-                _logger.Info($"Attempt to unload not loaded fragment: { ResourceName }!");   
-                throw new InvalidOperationException($"Attempt to unload not loaded fragment: { ResourceName }!");
-            }
-            
-            _logger.Info($"Unloading { ResourceName }...");
-
-            IsLoaded = false;
-            _reader = null;
-            
-            _logger.Info($"Unloaded { ResourceName }...");
+            _logger.Info($"Attempt to unload not loaded fragment: { ResourceName }!");   
+            throw new InvalidOperationException($"Attempt to unload not loaded fragment: { ResourceName }!");
         }
+        
+        _logger.Info($"Unloading { ResourceName }...");
+
+        IsLoaded = false;
+        _reader = null;
+        
+        _logger.Info($"Unloaded { ResourceName }...");
     }
     
     /// <summary>

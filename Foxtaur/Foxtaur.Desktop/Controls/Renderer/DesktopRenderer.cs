@@ -230,8 +230,7 @@ public class DesktopRenderer : OpenGlControlBase
         // Debug
         _davydovoHighResMap = new HighResMap(Guid.NewGuid(), "Davydovo", _davydovoFragment);
 
-        //Task.Run(() => _davydovoFragment.DownloadAsync(OnDavydovoLoad));
-        //_davydovoFragment.DownloadAsync(OnDavydovoLoad); // TODO: Uncomment me!
+        Task.Run(() => _davydovoFragment.Download(OnDavydovoLoad));
     }
 
     private void OnDavydovoLoad(FragmentedResourceBase davydovo)

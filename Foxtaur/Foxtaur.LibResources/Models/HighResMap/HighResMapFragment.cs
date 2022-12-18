@@ -18,6 +18,8 @@ public class HighResMapFragment : FragmentedResourceBase
 
     private MagickImage _image;
 
+    private Mutex _downloadLock = new Mutex();
+
     /// <summary>
     /// Is fragment data loaded?
     /// </summary>
@@ -30,21 +32,30 @@ public class HighResMapFragment : FragmentedResourceBase
 
     public override void Download(OnFragmentedResourceLoaded onLoad)
     {
-        OnLoad = onLoad ?? throw new ArgumentNullException(nameof(onLoad));
+        _downloadLock.WaitOne();
 
-        if (IsLoaded)
+        try
         {
-            // Fragment already downloaded
-            return;
-        }
+            OnLoad = onLoad ?? throw new ArgumentNullException(nameof(onLoad));
+
+            if (IsLoaded)
+            {
+                // Fragment already downloaded
+                return;
+            }
         
-        if (_isLoading)
-        {
-            // Loading in progress
-            return;
-        }
+            if (_isLoading)
+            {
+                // Loading in progress
+                return;
+            }
 
-        _isLoading = true;
+            _isLoading = true;
+        }
+        finally
+        {
+            _downloadLock.ReleaseMutex();            
+        }
 
         _logger.Info($"Loading map { ResourceName }...");
 
