@@ -113,12 +113,12 @@ public abstract class FragmentedResourceBase
     /// <summary>
     /// Download resource
     /// </summary>
-    public abstract Task DownloadAsync(OnFragmentedResourceLoaded onLoad);
+    public abstract void Download(OnFragmentedResourceLoaded onLoad);
 
     /// <summary>
     /// Load resource as a stream from a relative URL
     /// </summary>
-    protected async Task<MemoryStream> LoadFromUrlAsync(string relativeUrl)
+    protected MemoryStream LoadFromUrl(string relativeUrl)
     {
         if (string.IsNullOrWhiteSpace(relativeUrl))
         {
@@ -140,7 +140,7 @@ public abstract class FragmentedResourceBase
 
             _logger.Info($"Downloading from {uriResult}");
 
-            using (var downloadStream = await _httpClient.GetStreamAsync(uriResult))
+            using (var downloadStream = _httpClient.GetStreamAsync(uriResult).Result)
             {
                 var resultStream = new MemoryStream();
                 downloadStream.CopyTo(resultStream);
@@ -159,14 +159,14 @@ public abstract class FragmentedResourceBase
         }
     }
 
-    protected async Task LoadFromUrlToFileAsync(string relativeUrl)
+    protected void LoadFromUrlToFile(string relativeUrl)
     {
         if (string.IsNullOrWhiteSpace(relativeUrl))
         {
             throw new ArgumentException(nameof(relativeUrl));
         }
 
-        using (var downloadStream = await LoadFromUrlAsync(relativeUrl))
+        using (var downloadStream = LoadFromUrl(relativeUrl))
         {
             var localPath = GetResourceLocalPath(relativeUrl);
             

@@ -28,27 +28,24 @@ public class HighResMapFragment : FragmentedResourceBase
     {
     }
 
-    public override async Task DownloadAsync(OnFragmentedResourceLoaded onLoad)
+    public override void Download(OnFragmentedResourceLoaded onLoad)
     {
         OnLoad = onLoad ?? throw new ArgumentNullException(nameof(onLoad));
-        
-        lock (this)
-        {
-            if (IsLoaded)
-            {
-                // Fragment already downloaded
-                return;
-            }
-            
-            if (_isLoading)
-            {
-                // Loading in progress
-                return;
-            }
 
-            _isLoading = true;
+        if (IsLoaded)
+        {
+            // Fragment already downloaded
+            return;
         }
         
+        if (_isLoading)
+        {
+            // Loading in progress
+            return;
+        }
+
+        _isLoading = true;
+
         _logger.Info($"Loading map { ResourceName }...");
 
         try
@@ -59,7 +56,7 @@ public class HighResMapFragment : FragmentedResourceBase
                 var localPath = GetResourceLocalPath(ResourceName);
                 if (!File.Exists(localPath))
                 {
-                    await LoadFromUrlToFileAsync(ResourceName);    
+                    LoadFromUrlToFile(ResourceName);    
                 }
             }
 

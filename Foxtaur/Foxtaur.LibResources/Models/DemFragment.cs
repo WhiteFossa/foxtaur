@@ -46,55 +46,52 @@ public class DemFragment : ZoomedFragmentedResourceBase
         LastAccessTime = DateTime.UtcNow;
     }
 
-    public override async Task DownloadAsync(OnFragmentedResourceLoaded onLoad)
+    public override void Download(OnFragmentedResourceLoaded onLoad)
     {
         OnLoad = onLoad ?? throw new ArgumentNullException(nameof(onLoad));
-        
-        lock (_processingLock)
+
+        if (IsLoaded)
         {
-            if (IsLoaded)
-            {
-                // Fragment already downloaded
-                return;
-            }
-            
-            if (_isLoading)
-            {
-                // Loading in progress
-                return;
-            }
-
-            _isLoading = true;
-
-            _logger.Info($"Loading { ResourceName }...");
-        
-            if (!IsLocal)
-            {
-                // Do we have already downloaded file?
-                var localPath = GetResourceLocalPath(ResourceName);
-                if (!File.Exists(localPath))
-                {
-                    Task.WaitAll(LoadFromUrlToFileAsync(ResourceName));    
-                }
-            }
-
-            // Decompressing
-            _logger.Info($"Decompressing { ResourceName }...");
-            using (var decompressedStream = LoadZstdFile(GetLocalPath()))
-            {
-                // Processing
-                _logger.Info($"Processing { ResourceName }...");
-            
-                _reader = new GeoTiffReader();
-                _reader.Open(decompressedStream);
-            }
-
-            _isLoading = false;
-            IsLoaded = true;
-            
-            _logger.Info($"{ ResourceName } is ready.");
-            OnLoad(this);    
+            // Fragment already downloaded
+            return;
         }
+        
+        if (_isLoading)
+        {
+            // Loading in progress
+            return;
+        }
+
+        _isLoading = true;
+
+        _logger.Info($"Loading { ResourceName }...");
+    
+        if (!IsLocal)
+        {
+            // Do we have already downloaded file?
+            var localPath = GetResourceLocalPath(ResourceName);
+            if (!File.Exists(localPath))
+            {
+                LoadFromUrlToFile(ResourceName);    
+            }
+        }
+
+        // Decompressing
+        _logger.Info($"Decompressing { ResourceName }...");
+        using (var decompressedStream = LoadZstdFile(GetLocalPath()))
+        {
+            // Processing
+            _logger.Info($"Processing { ResourceName }...");
+        
+            _reader = new GeoTiffReader();
+            _reader.Open(decompressedStream);
+        }
+
+        _isLoading = false;
+        IsLoaded = true;
+        
+        _logger.Info($"{ ResourceName } is ready.");
+        OnLoad(this);
     }
 
     /// <summary>
