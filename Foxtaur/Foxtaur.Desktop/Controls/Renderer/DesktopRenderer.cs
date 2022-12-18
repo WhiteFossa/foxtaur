@@ -231,7 +231,7 @@ public class DesktopRenderer : OpenGlControlBase
         _davydovoHighResMap = new HighResMap(Guid.NewGuid(), "Davydovo", _davydovoFragment);
 
         //Task.Run(() => _davydovoFragment.DownloadAsync(OnDavydovoLoad));
-        _davydovoFragment.DownloadAsync(OnDavydovoLoad);
+        //_davydovoFragment.DownloadAsync(OnDavydovoLoad); // TODO: Uncomment me!
     }
 
     private void OnDavydovoLoad(FragmentedResourceBase davydovo)
