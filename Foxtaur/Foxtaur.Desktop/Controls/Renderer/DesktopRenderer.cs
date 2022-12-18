@@ -148,6 +148,15 @@ public class DesktopRenderer : OpenGlControlBase
     private bool _rotateHeadMode = false;
 
     #endregion
+    
+    #region Maps
+
+    /// <summary>
+    /// Add this altitude to all map mesh nodes (to lift map over the surface)
+    /// </summary>
+    private double _currentMapsSurfaceAltitudeIncrement = RendererConstants.MapsAltitudeIncrementSatelliteMode;
+    
+    #endregion
 
     #region UI
 
@@ -382,7 +391,7 @@ public class DesktopRenderer : OpenGlControlBase
         {
             if (_davydovoMapSegment == null)
             {
-                _davydovoMapSegment = _mapSegmentGenerator.Generate(_davydovoHighResMap);
+                _davydovoMapSegment = _mapSegmentGenerator.Generate(_davydovoHighResMap, _currentMapsSurfaceAltitudeIncrement);
             }
             
             // Do we have texture?
@@ -519,13 +528,20 @@ public class DesktopRenderer : OpenGlControlBase
             if (!_isSurfaceRunMode)
             {
                 _isSurfaceRunMode = true;
+                
                 _camera.Zoom = RendererConstants.SurfaceRunMinZoom;
+                
+                _currentMapsSurfaceAltitudeIncrement = RendererConstants.MapsAltitudeIncrementSurfaceRunMode;
+                _davydovoMapSegment = null;
             }
             else
             {
                 _camera.H = RendererConstants.CameraOrbitHeight;
                 _camera.Target = GeoConstants.EarthCenter.AsPlanarPoint3D();
                 _camera.Up = MathNet.Numerics.LinearAlgebra.Vector<double>.Build.DenseOfArray(new double[] { 0.0, -1.0, 0.0 });
+                
+                _currentMapsSurfaceAltitudeIncrement = RendererConstants.MapsAltitudeIncrementSatelliteMode;
+                _davydovoMapSegment = null;
 
                 _isSurfaceRunMode = false;
             }

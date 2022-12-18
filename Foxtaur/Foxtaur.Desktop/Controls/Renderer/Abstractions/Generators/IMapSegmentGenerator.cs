@@ -11,5 +11,5 @@ public interface IMapSegmentGenerator
     /// <summary>
     /// Generate map segment by map
     /// </summary>
-    MapSegment Generate(HighResMap map);
+    MapSegment Generate(HighResMap map, double mapsAltitudeIncrement);
 }

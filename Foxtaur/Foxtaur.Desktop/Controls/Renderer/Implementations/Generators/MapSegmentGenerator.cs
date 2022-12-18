@@ -29,7 +29,7 @@ public class MapSegmentGenerator : IMapSegmentGenerator
         _zoomService = zoomService;
     }
     
-    public MapSegment Generate(HighResMap map)
+    public MapSegment Generate(HighResMap map, double mapsAltitudeIncrement)
     {
         _ = map ?? throw new ArgumentNullException(nameof(map));
         
@@ -44,7 +44,7 @@ public class MapSegmentGenerator : IMapSegmentGenerator
             var granulatedWestLon = geoSegment.WestLon.GetClosestLonNodeWest(_zoomService.ZoomLevelData.MeshesStep);
 
             // First two points of a stripe
-            var firstPair = GenerateAndAddPointsPair(segmentMesh, lat, granulatedWestLon, latNorther, granulatedWestLon, _zoomService.ZoomLevelData.Level, map.Fragment);
+            var firstPair = GenerateAndAddPointsPair(segmentMesh, lat, granulatedWestLon, latNorther, granulatedWestLon, _zoomService.ZoomLevelData.Level, map.Fragment, mapsAltitudeIncrement);
             var i3D0 = firstPair.Item1;
             var i3D1 = firstPair.Item2;
 
@@ -53,7 +53,7 @@ public class MapSegmentGenerator : IMapSegmentGenerator
             
             for (var lon = granulatedWestLon - _zoomService.ZoomLevelData.MeshesStep; lon > granulatedEastLon; lon -= _zoomService.ZoomLevelData.MeshesStep)
             {
-                var intermediatePair = GenerateAndAddPointsPair(segmentMesh, lat, lon, latNorther, lon, _zoomService.ZoomLevelData.Level, map.Fragment);
+                var intermediatePair = GenerateAndAddPointsPair(segmentMesh, lat, lon, latNorther, lon, _zoomService.ZoomLevelData.Level, map.Fragment, mapsAltitudeIncrement);
                 var i3D2 = intermediatePair.Item1;
                 var i3D3 = intermediatePair.Item2;
 
@@ -70,7 +70,7 @@ public class MapSegmentGenerator : IMapSegmentGenerator
             }
             
             // Two last triangles of a stripe
-            var lastPair = GenerateAndAddPointsPair(segmentMesh, lat, granulatedEastLon, latNorther, granulatedEastLon, _zoomService.ZoomLevelData.Level, map.Fragment);
+            var lastPair = GenerateAndAddPointsPair(segmentMesh, lat, granulatedEastLon, latNorther, granulatedEastLon, _zoomService.ZoomLevelData.Level, map.Fragment, mapsAltitudeIncrement);
             var i3last0 = lastPair.Item1;
             var i3last1 = lastPair.Item2;
 
@@ -96,15 +96,16 @@ public class MapSegmentGenerator : IMapSegmentGenerator
         double p1Lat,
         double p1Lon,
         ZoomLevel desiredZoomLevel,
-        HighResMapFragment fragment)
+        HighResMapFragment fragment,
+        double mapsAltitudeIncrement)
     {
         _ = mesh ?? throw new ArgumentNullException(nameof(mesh));
 
         // Geopoints
-        var altitude0 = _demProvider.GetSurfaceAltitude(p0Lat, p0Lon, desiredZoomLevel) + RendererConstants.MapsAltitudeIncrement;
+        var altitude0 = _demProvider.GetSurfaceAltitude(p0Lat, p0Lon, desiredZoomLevel) + mapsAltitudeIncrement;
         var geoPoint0 = new GeoPoint(p0Lat, p0Lon, altitude0);
 
-        var altitude1 = _demProvider.GetSurfaceAltitude(p1Lat, p1Lon, desiredZoomLevel) + RendererConstants.MapsAltitudeIncrement;
+        var altitude1 = _demProvider.GetSurfaceAltitude(p1Lat, p1Lon, desiredZoomLevel) + mapsAltitudeIncrement;
         var geoPoint1 = new GeoPoint(p1Lat, p1Lon, altitude1);
 
         // Planar coordinates (3D + Texture)
