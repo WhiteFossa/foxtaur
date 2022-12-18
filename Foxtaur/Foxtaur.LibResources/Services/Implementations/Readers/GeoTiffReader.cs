@@ -63,7 +63,7 @@ public class GeoTiffReader : IGeoTiffReader
     /// <summary>
     /// It seems that GDAL is not thread safe
     /// </summary>
-    private static object _gdalLock = new object();
+    private static Mutex _gdalLock = new Mutex();
 
     static GeoTiffReader()
     {
@@ -72,8 +72,10 @@ public class GeoTiffReader : IGeoTiffReader
 
     public void Open(string path)
     {
-        lock (_gdalLock)
+        try
         {
+            _gdalLock.WaitOne();
+            
             if (string.IsNullOrEmpty(path))
             {
                 throw new ArgumentException(nameof(path));
@@ -135,7 +137,11 @@ public class GeoTiffReader : IGeoTiffReader
             _geoK2 = _geoCoefficients[5] - _geoK1 * _geoCoefficients[2];
             _geoK3 = _geoK1 * _geoCoefficients[0];
             _geoK4 = _geoCoefficients[0] / _geoCoefficients[1];
-            _geoK5 = _geoCoefficients[2] / _geoCoefficients[1];    
+            _geoK5 = _geoCoefficients[2] / _geoCoefficients[1];
+        }
+        finally
+        {
+            _gdalLock.ReleaseMutex();
         }
     }
 
@@ -191,24 +197,33 @@ public class GeoTiffReader : IGeoTiffReader
 
     public double GetPixel(int band, int x, int y)
     {
-        // No params checks for speedup
-        var bandIndex = band - 1;
-        if (_bytesPerPixel == 1)
+        try
         {
-            return _rasters[bandIndex][y * _width + x] / (double)byte.MaxValue;
-        }
-        else if (_bytesPerPixel == 2)
-        {
-            var baseIndex = 2 * (y * _width + x);
+            _gdalLock.WaitOne();
+            
+            // No params checks for speedup
+            var bandIndex = band - 1;
+            if (_bytesPerPixel == 1)
+            {
+                return _rasters[bandIndex][y * _width + x] / (double)byte.MaxValue;
+            }
+            else if (_bytesPerPixel == 2)
+            {
+                var baseIndex = 2 * (y * _width + x);
 
-            var lowerByte = _rasters[bandIndex][baseIndex];
-            var higherByte = _rasters[bandIndex][baseIndex + 1];
+                var lowerByte = _rasters[bandIndex][baseIndex];
+                var higherByte = _rasters[bandIndex][baseIndex + 1];
 
-            return BitConverter.ToInt16(new byte[] { lowerByte, higherByte }, 0) / (double)UInt16.MaxValue + 0.5;
+                return BitConverter.ToInt16(new byte[] { lowerByte, higherByte }, 0) / (double)UInt16.MaxValue + 0.5;
+            }
+            else
+            {
+                throw new NotSupportedException("Get pixel: Only byte and int16 datatypes are supported");
+            }
         }
-        else
+        finally
         {
-            throw new NotSupportedException("Get pixel: Only byte and int16 datatypes are supported");
+            _gdalLock.ReleaseMutex();
         }
     }
 
