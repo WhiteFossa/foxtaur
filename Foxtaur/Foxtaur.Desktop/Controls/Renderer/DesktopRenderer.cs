@@ -691,7 +691,7 @@ public class DesktopRenderer : OpenGlControlBase
     {
         _earthSegments.Clear();
         
-        for (var lat = -0.5 * Math.PI; lat < GeoPoint.SumLatitudesWithWrap(0.5 * Math.PI, -1.0 * _zoomService.ZoomLevelData.SegmentSize); lat += _zoomService.ZoomLevelData.SegmentSize)
+        for (var lat = -0.5 * Math.PI; lat < 0.5 * Math.PI; lat += _zoomService.ZoomLevelData.SegmentSize)
         {
             for (var lon = Math.PI; lon > GeoPoint.SumLongitudesWithWrap(-1.0 * Math.PI, _zoomService.ZoomLevelData.SegmentSize); lon -= _zoomService.ZoomLevelData.SegmentSize)
             {
@@ -745,7 +745,7 @@ public class DesktopRenderer : OpenGlControlBase
     private void FindVisibleEarthSegments()
     {
         _visibleEarthSegments.Clear();
-        
+
         var undergroundPoint = _isSurfaceRunMode
             ? _sphereCoordinatesProvider.GeoToPlanar3D(new GeoPoint(_camera.Lat, _camera.Lon, RendererConstants.SurfaceRunModeUndergroundPlaneHeight)) 
             : new PlanarPoint3D(GeoConstants.EarthCenter[0], GeoConstants.EarthCenter[1], GeoConstants.EarthCenter[2]);
