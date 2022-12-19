@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Numerics;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Timers;
 using Avalonia;
@@ -32,6 +33,7 @@ using Foxtaur.LibResources.Models.HighResMap;
 using Microsoft.Extensions.DependencyInjection;
 using NLog;
 using Silk.NET.OpenGL;
+using Timer = System.Timers.Timer;
 
 namespace Foxtaur.Desktop.Controls.Renderer;
 
@@ -229,8 +231,9 @@ public class DesktopRenderer : OpenGlControlBase
         
         // Debug
         _davydovoHighResMap = new HighResMap(Guid.NewGuid(), "Davydovo", _davydovoFragment);
-
-        Task.Run(() => _davydovoFragment.Download(OnDavydovoLoad));
+        
+        var davydovoThread = new Thread(() => _davydovoFragment.Download(OnDavydovoLoad));
+        davydovoThread.Start();
     }
 
     private void OnDavydovoLoad(FragmentedResourceBase davydovo)

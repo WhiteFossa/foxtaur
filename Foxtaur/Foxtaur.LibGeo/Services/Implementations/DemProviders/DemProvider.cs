@@ -81,8 +81,14 @@ public class DemProvider : IDemProvider
         {
             return null;
         }
+
+        if (fragment.IsLoaded || fragment.IsLoading)
+        {
+            return fragment;
+        }
         
-        Task.Run(() => fragment.Download(OnFragmentLoaded)); // Running in separate thread
+        var downloadThread = new Thread(() => fragment.Download(OnFragmentLoaded));
+        downloadThread.Start();
 
         return fragment;
     }

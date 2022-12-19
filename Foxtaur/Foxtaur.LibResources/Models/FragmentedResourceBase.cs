@@ -54,9 +54,10 @@ public abstract class FragmentedResourceBase
     /// Semaphore for limit the number of active downloading threads
     /// </summary>
     protected static Semaphore DownloadThreadsLimiter = new Semaphore(ResourcesConstants.MaxActiveDownloadingThreads, ResourcesConstants.MaxActiveDownloadingThreads); 
-
-    private readonly HttpClient _httpClient = new HttpClient();
+    
     private Logger _logger = LogManager.GetCurrentClassLogger();
+
+    private static Mutex _downloadMutex = new Mutex();
 
     public FragmentedResourceBase(double northLat,
         double southLat,
@@ -140,12 +141,23 @@ public abstract class FragmentedResourceBase
 
             _logger.Info($"Downloading from {uriResult}");
 
-            using (var downloadStream = _httpClient.GetStreamAsync(uriResult).Result)
+            _downloadMutex.WaitOne();
+
+            try
             {
+                var httpClient = new HttpClient();
+                var webRequest = new HttpRequestMessage(HttpMethod.Get, uriResult);
+                var downloadStream = httpClient.Send(webRequest).Content.ReadAsStream();
+
                 var resultStream = new MemoryStream();
                 downloadStream.CopyTo(resultStream);
-
+                downloadStream.Dispose();
+                
                 return resultStream;
+            }
+            finally
+            {
+                _downloadMutex.ReleaseMutex();
             }
         }
         catch (Exception ex)

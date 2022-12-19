@@ -50,5 +50,5 @@ public static class GeoConstants
     /// <summary>
     /// Multiply visual DEM altitudes by this value
     /// </summary>
-    public const float DemAltitudeMultiplicator = 10.0f;
+    public const float DemAltitudeMultiplicator = 1.0f;
 }

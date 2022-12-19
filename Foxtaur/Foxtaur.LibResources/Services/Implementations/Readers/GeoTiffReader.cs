@@ -197,33 +197,24 @@ public class GeoTiffReader : IGeoTiffReader
 
     public double GetPixel(int band, int x, int y)
     {
-        try
+        // No params checks for speedup
+        var bandIndex = band - 1;
+        if (_bytesPerPixel == 1)
         {
-            _gdalLock.WaitOne();
-            
-            // No params checks for speedup
-            var bandIndex = band - 1;
-            if (_bytesPerPixel == 1)
-            {
-                return _rasters[bandIndex][y * _width + x] / (double)byte.MaxValue;
-            }
-            else if (_bytesPerPixel == 2)
-            {
-                var baseIndex = 2 * (y * _width + x);
-
-                var lowerByte = _rasters[bandIndex][baseIndex];
-                var higherByte = _rasters[bandIndex][baseIndex + 1];
-
-                return BitConverter.ToInt16(new byte[] { lowerByte, higherByte }, 0) / (double)UInt16.MaxValue + 0.5;
-            }
-            else
-            {
-                throw new NotSupportedException("Get pixel: Only byte and int16 datatypes are supported");
-            }
+            return _rasters[bandIndex][y * _width + x] / (double)byte.MaxValue;
         }
-        finally
+        else if (_bytesPerPixel == 2)
         {
-            _gdalLock.ReleaseMutex();
+            var baseIndex = 2 * (y * _width + x);
+
+            var lowerByte = _rasters[bandIndex][baseIndex];
+            var higherByte = _rasters[bandIndex][baseIndex + 1];
+
+            return BitConverter.ToInt16(new byte[] { lowerByte, higherByte }, 0) / (double)UInt16.MaxValue + 0.5;
+        }
+        else
+        {
+            throw new NotSupportedException("Get pixel: Only byte and int16 datatypes are supported");
         }
     }
 

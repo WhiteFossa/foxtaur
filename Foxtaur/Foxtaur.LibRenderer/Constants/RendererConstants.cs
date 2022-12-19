@@ -41,7 +41,7 @@ public static class RendererConstants
     /// <summary>
     /// Camera height for surface walk mode
     /// </summary>
-    public const double SurfaceRunModeCameraOrbitHeight = 0.00001 * GeoConstants.EarthRadius;
+    public const double SurfaceRunModeCameraOrbitHeight = 0.0001 * GeoConstants.EarthRadius;
 
     /// <summary>
     /// Head rotation speed (latitudal) in surface run mode
