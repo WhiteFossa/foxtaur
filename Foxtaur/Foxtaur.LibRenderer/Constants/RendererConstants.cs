@@ -41,7 +41,7 @@ public static class RendererConstants
     /// <summary>
     /// Camera height for surface walk mode
     /// </summary>
-    public const double SurfaceRunModeCameraOrbitHeight = 0.0001 * GeoConstants.EarthRadius;
+    public const double SurfaceRunModeCameraOrbitHeight = 0.00001 * GeoConstants.EarthRadius;
 
     /// <summary>
     /// Head rotation speed (latitudal) in surface run mode
@@ -110,7 +110,7 @@ public static class RendererConstants
     /// <summary>
     /// Virtual viewport size for the purporse of culling
     /// </summary>
-    public const double CullingViewportSize = 1.5;
+    public const double CullingViewportSize = 1.0;
     
     /// <summary>
     /// Underground plane height for surface walk mode segments culling
@@ -125,5 +125,5 @@ public static class RendererConstants
     /// <summary>
     /// Maps are higher than Earth surface by this value (surface run mode)
     /// </summary>
-    public const double MapsAltitudeIncrementSurfaceRunMode = 0.00001;
+    public const double MapsAltitudeIncrementSurfaceRunMode = 0.0000001;
 }
