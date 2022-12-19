@@ -16,7 +16,7 @@ public static class RendererConstants
     /// <summary>
     /// Camera zoom must be lesser than this
     /// </summary>
-    public const double CameraMinZoom = Math.PI / 2.0;
+    public const double CameraMinZoom = Math.PI / 2.0 - 0.001;
 
     /// <summary>
     /// Min zoom for surcace run mode

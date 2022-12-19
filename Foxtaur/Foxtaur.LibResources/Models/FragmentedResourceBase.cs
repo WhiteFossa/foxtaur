@@ -146,14 +146,16 @@ public abstract class FragmentedResourceBase
             try
             {
                 var httpClient = new HttpClient();
-                var webRequest = new HttpRequestMessage(HttpMethod.Get, uriResult);
-                var downloadStream = httpClient.Send(webRequest).Content.ReadAsStream();
+                using (var webRequest = new HttpRequestMessage(HttpMethod.Get, uriResult))
+                {
+                    using (var downloadStream = httpClient.Send(webRequest).Content.ReadAsStream())
+                    {
+                        var resultStream = new MemoryStream();
+                        downloadStream.CopyTo(resultStream);
 
-                var resultStream = new MemoryStream();
-                downloadStream.CopyTo(resultStream);
-                downloadStream.Dispose();
-                
-                return resultStream;
+                        return resultStream;                        
+                    }
+                }
             }
             finally
             {
