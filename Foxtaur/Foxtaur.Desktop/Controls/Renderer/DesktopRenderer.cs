@@ -2,9 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
-using System.Numerics;
 using System.Threading;
-using System.Threading.Tasks;
 using System.Timers;
 using Avalonia;
 using Avalonia.Input;
@@ -20,7 +18,6 @@ using Foxtaur.LibGeo.Helpers;
 using Foxtaur.LibGeo.Models;
 using Foxtaur.LibGeo.Services.Abstractions.CoordinateProviders;
 using Foxtaur.LibGeo.Services.Abstractions.DemProviders;
-using Foxtaur.LibGeo.Services.Implementations.DemProviders;
 using Foxtaur.LibRenderer.Constants;
 using Foxtaur.LibRenderer.Helpers;
 using Foxtaur.LibRenderer.Models;
@@ -30,6 +27,7 @@ using Foxtaur.LibRenderer.Services.Abstractions.Zoom;
 using Foxtaur.LibResources.Constants;
 using Foxtaur.LibResources.Models;
 using Foxtaur.LibResources.Models.HighResMap;
+using MathNet.Numerics.LinearAlgebra;
 using Microsoft.Extensions.DependencyInjection;
 using NLog;
 using Silk.NET.OpenGL;
@@ -540,7 +538,7 @@ public class DesktopRenderer : OpenGlControlBase
             {
                 _camera.H = RendererConstants.CameraOrbitHeight;
                 _camera.Target = GeoConstants.EarthCenter.AsPlanarPoint3D();
-                _camera.Up = MathNet.Numerics.LinearAlgebra.Vector<double>.Build.DenseOfArray(new double[] { 0.0, -1.0, 0.0 });
+                _camera.Up = Vector<double>.Build.DenseOfArray(new double[] { 0.0, -1.0, 0.0 });
                 
                 _currentMapsSurfaceAltitudeIncrement = RendererConstants.MapsAltitudeIncrementSatelliteMode;
                 _davydovoMapSegment = null;

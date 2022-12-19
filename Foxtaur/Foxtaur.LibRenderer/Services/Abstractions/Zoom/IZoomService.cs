@@ -1,12 +1,12 @@
-using Foxtaur.LibRenderer.Models.Zoom;
+using Foxtaur.LibResources.Enums;
 
 namespace Foxtaur.LibRenderer.Services.Abstractions.Zoom;
 
 public class OnZoomLevelChangedArgs
 {
-    public LibResources.Enums.ZoomLevel ZoomLevel { get; private set; }
+    public ZoomLevel ZoomLevel { get; private set; }
 
-    public OnZoomLevelChangedArgs(LibResources.Enums.ZoomLevel zoomLevel)
+    public OnZoomLevelChangedArgs(ZoomLevel zoomLevel)
     {
         ZoomLevel = zoomLevel;
     }
@@ -35,10 +35,10 @@ public interface IZoomService
     /// <summary>
     /// Current zoom level
     /// </summary>
-    LibResources.Enums.ZoomLevel ZoomLevel { get; }
+    ZoomLevel ZoomLevel { get; }
     
     /// <summary>
     /// Current zoom level data
     /// </summary>
-    ZoomLevel ZoomLevelData { get; }
+    Models.Zoom.ZoomLevel ZoomLevelData { get; }
 }

@@ -1,4 +1,3 @@
-using System.Numerics;
 using Foxtaur.LibGeo.Models;
 using MathNet.Numerics.LinearAlgebra;
 
@@ -87,7 +86,7 @@ public interface ICamera
     /// <summary>
     /// Camera up vector
     /// </summary>
-    MathNet.Numerics.LinearAlgebra.Vector<double> Up { get; set; }
+    Vector<double> Up { get; set; }
     
     /// <summary>
     /// Called when zoom changed

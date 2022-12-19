@@ -1,4 +1,3 @@
-using System.Numerics;
 using Foxtaur.LibGeo.Models;
 using Foxtaur.LibRenderer.Constants;
 using MathNet.Numerics.LinearAlgebra;
@@ -23,15 +22,15 @@ public static class RendererHelper
     /// <summary>
     /// PlanarPoint3D to Vector
     /// </summary>
-    public static MathNet.Numerics.LinearAlgebra.Vector<double> AsVector(this PlanarPoint3D point)
+    public static Vector<double> AsVector(this PlanarPoint3D point)
     {
-        return MathNet.Numerics.LinearAlgebra.Vector<double>.Build.DenseOfArray(new double[] { point.X, point.Y, point.Z });
+        return Vector<double>.Build.DenseOfArray(new double[] { point.X, point.Y, point.Z });
     }
 
     /// <summary>
     /// Rotate around direction to angle
     /// </summary>
-    public static MathNet.Numerics.LinearAlgebra.Vector<double> RotateAround(this MathNet.Numerics.LinearAlgebra.Vector<double> toRotate, MathNet.Numerics.LinearAlgebra.Vector<double> direction, double a)
+    public static Vector<double> RotateAround(this Vector<double> toRotate, Vector<double> direction, double a)
     {
         var nd = direction.Normalize();
 
@@ -59,7 +58,7 @@ public static class RendererHelper
                 { m31, m32, m33 }
             });
 
-        var toRotateMathNet = MathNet.Numerics.LinearAlgebra.Vector<double>.Build.Dense(new double[] { toRotate[0], toRotate[1], toRotate[2] });
+        var toRotateMathNet = Vector<double>.Build.Dense(new double[] { toRotate[0], toRotate[1], toRotate[2] });
 
         return rotation * toRotateMathNet;
     }

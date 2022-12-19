@@ -1,4 +1,4 @@
-using System.Numerics;
+using MathNet.Numerics.LinearAlgebra;
 
 namespace Foxtaur.LibGeo.Constants;
 
@@ -45,7 +45,7 @@ public static class GeoConstants
     /// <summary>
     /// Earth center coordinates
     /// </summary>
-    public static readonly MathNet.Numerics.LinearAlgebra.Vector<double> EarthCenter = MathNet.Numerics.LinearAlgebra.Vector<double>.Build.DenseOfArray(new double[] { 0.0, 0.0, 0.0 });
+    public static readonly Vector<double> EarthCenter = Vector<double>.Build.DenseOfArray(new double[] { 0.0, 0.0, 0.0 });
 
     /// <summary>
     /// Multiply visual DEM altitudes by this value

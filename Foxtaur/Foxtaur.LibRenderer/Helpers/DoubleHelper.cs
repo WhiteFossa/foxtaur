@@ -53,9 +53,7 @@ public static class DoubleHelper
         return result;
     }   
     
-    public static Matrix<double> CreateLookAt(MathNet.Numerics.LinearAlgebra.Vector<double> cameraPosition,
-        MathNet.Numerics.LinearAlgebra.Vector<double> cameraTarget,
-        MathNet.Numerics.LinearAlgebra.Vector<double> cameraUpVector)
+    public static Matrix<double> CreateLookAt(MathNet.Numerics.LinearAlgebra.Vector<double> cameraPosition, MathNet.Numerics.LinearAlgebra.Vector<double> cameraTarget, MathNet.Numerics.LinearAlgebra.Vector<double> cameraUpVector)
     {
         var vector3_1 = (cameraPosition - cameraTarget).Normalize();
         var vector3_2 = (Cross3(cameraUpVector, vector3_1)).Normalize();

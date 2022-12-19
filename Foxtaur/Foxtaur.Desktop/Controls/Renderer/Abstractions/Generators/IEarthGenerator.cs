@@ -1,8 +1,6 @@
 using Foxtaur.Desktop.Controls.Renderer.Models;
 using Foxtaur.LibGeo.Models;
 using Foxtaur.LibRenderer.Models;
-using Foxtaur.LibResources.Enums;
-using Silk.NET.OpenGL;
 
 namespace Foxtaur.Desktop.Controls.Renderer.Abstractions.Generators;
 

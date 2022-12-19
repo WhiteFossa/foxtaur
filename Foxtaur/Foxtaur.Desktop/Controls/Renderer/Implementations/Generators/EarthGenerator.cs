@@ -2,7 +2,6 @@ using System;
 using Foxtaur.Desktop.Controls.Renderer.Abstractions.Generators;
 using Foxtaur.Desktop.Controls.Renderer.Helpers;
 using Foxtaur.Desktop.Controls.Renderer.Models;
-using Foxtaur.Helpers;
 using Foxtaur.LibGeo.Constants;
 using Foxtaur.LibGeo.Models;
 using Foxtaur.LibGeo.Services.Abstractions.CoordinateProviders;
@@ -10,7 +9,6 @@ using Foxtaur.LibGeo.Services.Abstractions.DemProviders;
 using Foxtaur.LibRenderer.Models;
 using Foxtaur.LibRenderer.Services.Abstractions.Zoom;
 using Foxtaur.LibResources.Enums;
-using Silk.NET.OpenGL;
 
 namespace Foxtaur.Desktop.Controls.Renderer.Implementations.Generators;
 

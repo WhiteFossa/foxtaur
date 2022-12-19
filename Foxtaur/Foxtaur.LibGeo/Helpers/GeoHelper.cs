@@ -1,6 +1,6 @@
-using System.Numerics;
 using Foxtaur.Helpers;
 using Foxtaur.LibGeo.Models;
+using MathNet.Numerics.LinearAlgebra;
 
 namespace Foxtaur.LibGeo.Helpers;
 
@@ -50,7 +50,7 @@ public static class GeoHelper
     /// <summary>
     /// Vector of at least 3 components to PlanarPoint3D
     /// </summary>
-    public static PlanarPoint3D AsPlanarPoint3D(this MathNet.Numerics.LinearAlgebra.Vector<double> vector)
+    public static PlanarPoint3D AsPlanarPoint3D(this Vector<double> vector)
     {
         return new PlanarPoint3D(vector[0], vector[1], vector[2]);
     }

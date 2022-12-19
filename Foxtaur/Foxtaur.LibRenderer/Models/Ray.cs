@@ -1,9 +1,9 @@
-using System.Numerics;
 using Foxtaur.LibGeo.Helpers;
 using Foxtaur.LibGeo.Models;
 using Foxtaur.LibRenderer.Constants;
 using Foxtaur.LibRenderer.Helpers;
 using Foxtaur.LibRenderer.Services.Abstractions.Camera;
+using MathNet.Numerics.LinearAlgebra;
 
 namespace Foxtaur.LibRenderer.Models;
 
@@ -37,7 +37,7 @@ public class Ray
         var normalizedDeviceY = screenY / viewportHeight * 2.0 - 1.0;
 
         var nearPoint = camera.Position3D.AsVector();
-        var farPoint = camera.BackProjectionMatrix.TransformPerspectively(MathNet.Numerics.LinearAlgebra.Vector<double>.Build.DenseOfArray(new double[] { normalizedDeviceX, normalizedDeviceY, 1.0 }));
+        var farPoint = camera.BackProjectionMatrix.TransformPerspectively(Vector<double>.Build.DenseOfArray(new double[] { normalizedDeviceX, normalizedDeviceY, 1.0 }));
 
         return new Ray(nearPoint.AsPlanarPoint3D(), farPoint.AsPlanarPoint3D());
     }

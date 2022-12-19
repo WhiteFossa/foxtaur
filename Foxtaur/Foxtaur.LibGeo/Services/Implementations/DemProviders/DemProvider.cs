@@ -5,7 +5,6 @@ using Foxtaur.LibResources.Enums;
 using Foxtaur.LibResources.Models;
 using Foxtaur.LibResources.Services.Abstractions;
 using Foxtaur.LibResources.Services.Implementations;
-using NLog;
 
 namespace Foxtaur.LibGeo.Services.Implementations.DemProviders;
 

@@ -5,7 +5,7 @@ using Foxtaur.LibResources.Enums;
 using Foxtaur.LibResources.Models;
 using Foxtaur.LibResources.Services.Abstractions;
 using NLog;
-using Timer = System.Threading.Timer;
+using Timer = System.Timers.Timer;
 
 namespace Foxtaur.LibResources.Services.Implementations;
 
@@ -19,7 +19,7 @@ public class DemResourcesProvider : IFragmentedResourcesProvider
     /// <summary>
     /// Cache clear timer
     /// </summary>
-    private System.Timers.Timer _cacheClearTimer;
+    private Timer _cacheClearTimer;
     
     private Logger _logger = LogManager.GetCurrentClassLogger();
 
@@ -1590,7 +1590,7 @@ public class DemResourcesProvider : IFragmentedResourcesProvider
         #endregion
         
         // Starting cache clear timer
-        _cacheClearTimer = new System.Timers.Timer(1000);
+        _cacheClearTimer = new Timer(1000);
         _cacheClearTimer.Elapsed += OnCacheClearTimer;
         _cacheClearTimer.AutoReset = true;
         _cacheClearTimer.Enabled = true;

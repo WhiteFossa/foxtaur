@@ -1,4 +1,3 @@
-using System.Numerics;
 using Foxtaur.LibGeo.Constants;
 using Foxtaur.LibGeo.Models;
 using Foxtaur.LibGeo.Services.Abstractions.CoordinateProviders;
@@ -47,7 +46,7 @@ public class Camera : ICamera
     /// <summary>
     /// Camera up vector
     /// </summary>
-    private MathNet.Numerics.LinearAlgebra.Vector<double> _up = MathNet.Numerics.LinearAlgebra.Vector<double>.Build.DenseOfArray(new double[] { 0, 1, 0 });
+    private Vector<double> _up = Vector<double>.Build.DenseOfArray(new double[] { 0, 1, 0 });
 
     /// <summary>
     /// Camera aspect ratio
@@ -172,7 +171,7 @@ public class Camera : ICamera
         }
     }
 
-    public MathNet.Numerics.LinearAlgebra.Vector<double> Up
+    public Vector<double> Up
     {
         get { return _up; }
 
@@ -191,7 +190,7 @@ public class Camera : ICamera
         _zoom = RendererConstants.CameraMinZoom; // To avoid errors during initialization
 
         AspectRatio = 1.0;
-        Up = MathNet.Numerics.LinearAlgebra.Vector<double>.Build.DenseOfArray(new double[] { 0.0, -1.0, 0.0 });
+        Up = Vector<double>.Build.DenseOfArray(new double[] { 0.0, -1.0, 0.0 });
         Zoom = RendererConstants.CameraMinZoom;
 
         CalculateCameraPosition();
@@ -214,7 +213,7 @@ public class Camera : ICamera
     {
         _ = point ?? throw new ArgumentNullException(nameof(point));
         
-        var projectedPoint = DoubleHelper.Transform(MathNet.Numerics.LinearAlgebra.Vector<double>.Build.DenseOfArray(new double[] { point.X, point.Y, point.Z, 1.0}), ForwardProjectionMatrix);
+        var projectedPoint = DoubleHelper.Transform(Vector<double>.Build.DenseOfArray(new double[] { point.X, point.Y, point.Z, 1.0}), ForwardProjectionMatrix);
         
         return new PlanarPoint2D(projectedPoint[0], projectedPoint[1]);
     }
