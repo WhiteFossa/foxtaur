@@ -54,9 +54,10 @@ public abstract class FragmentedResourceBase
     /// Semaphore for limit the number of active downloading threads
     /// </summary>
     protected static Semaphore DownloadThreadsLimiter = new Semaphore(ResourcesConstants.MaxActiveDownloadingThreads, ResourcesConstants.MaxActiveDownloadingThreads); 
-
-    private readonly HttpClient _httpClient = new HttpClient();
+    
     private Logger _logger = LogManager.GetCurrentClassLogger();
+
+    private static Mutex _downloadMutex = new Mutex();
 
     public FragmentedResourceBase(double northLat,
         double southLat,
@@ -113,12 +114,12 @@ public abstract class FragmentedResourceBase
     /// <summary>
     /// Download resource
     /// </summary>
-    public abstract Task DownloadAsync(OnFragmentedResourceLoaded onLoad);
+    public abstract void Download(OnFragmentedResourceLoaded onLoad);
 
     /// <summary>
     /// Load resource as a stream from a relative URL
     /// </summary>
-    protected async Task<MemoryStream> LoadFromUrlAsync(string relativeUrl)
+    protected MemoryStream LoadFromUrl(string relativeUrl)
     {
         if (string.IsNullOrWhiteSpace(relativeUrl))
         {
@@ -140,12 +141,25 @@ public abstract class FragmentedResourceBase
 
             _logger.Info($"Downloading from {uriResult}");
 
-            using (var downloadStream = await _httpClient.GetStreamAsync(uriResult))
-            {
-                var resultStream = new MemoryStream();
-                downloadStream.CopyTo(resultStream);
+            _downloadMutex.WaitOne();
 
-                return resultStream;
+            try
+            {
+                var httpClient = new HttpClient();
+                using (var webRequest = new HttpRequestMessage(HttpMethod.Get, uriResult))
+                {
+                    using (var downloadStream = httpClient.Send(webRequest).Content.ReadAsStream())
+                    {
+                        var resultStream = new MemoryStream();
+                        downloadStream.CopyTo(resultStream);
+
+                        return resultStream;                        
+                    }
+                }
+            }
+            finally
+            {
+                _downloadMutex.ReleaseMutex();
             }
         }
         catch (Exception ex)
@@ -159,14 +173,14 @@ public abstract class FragmentedResourceBase
         }
     }
 
-    protected async Task LoadFromUrlToFileAsync(string relativeUrl)
+    protected void LoadFromUrlToFile(string relativeUrl)
     {
         if (string.IsNullOrWhiteSpace(relativeUrl))
         {
             throw new ArgumentException(nameof(relativeUrl));
         }
 
-        using (var downloadStream = await LoadFromUrlAsync(relativeUrl))
+        using (var downloadStream = LoadFromUrl(relativeUrl))
         {
             var localPath = GetResourceLocalPath(relativeUrl);
             

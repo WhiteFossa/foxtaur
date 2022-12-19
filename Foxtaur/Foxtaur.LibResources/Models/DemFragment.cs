@@ -15,10 +15,13 @@ public class DemFragment : ZoomedFragmentedResourceBase
     
     private IGeoTiffReader _reader;
 
-    private bool _isLoading;
+    private Mutex _downloadLock = new Mutex();
 
-    private object _processingLock = new object();
-
+    /// <summary>
+    /// Is fragment data loading in progress?
+    /// </summary>
+    public bool IsLoading { get; private set; }
+    
     /// <summary>
     /// Is fragment data loaded?
     /// </summary>
@@ -46,25 +49,27 @@ public class DemFragment : ZoomedFragmentedResourceBase
         LastAccessTime = DateTime.UtcNow;
     }
 
-    public override async Task DownloadAsync(OnFragmentedResourceLoaded onLoad)
+    public override void Download(OnFragmentedResourceLoaded onLoad)
     {
-        OnLoad = onLoad ?? throw new ArgumentNullException(nameof(onLoad));
-        
-        lock (_processingLock)
+        _downloadLock.WaitOne();
+
+        try
         {
+            OnLoad = onLoad ?? throw new ArgumentNullException(nameof(onLoad));
+
             if (IsLoaded)
             {
                 // Fragment already downloaded
                 return;
             }
-            
-            if (_isLoading)
+        
+            if (IsLoading)
             {
                 // Loading in progress
                 return;
             }
 
-            _isLoading = true;
+            IsLoading = true;
 
             _logger.Info($"Loading { ResourceName }...");
         
@@ -74,7 +79,7 @@ public class DemFragment : ZoomedFragmentedResourceBase
                 var localPath = GetResourceLocalPath(ResourceName);
                 if (!File.Exists(localPath))
                 {
-                    Task.WaitAll(LoadFromUrlToFileAsync(ResourceName));    
+                    LoadFromUrlToFile(ResourceName);    
                 }
             }
 
@@ -89,11 +94,16 @@ public class DemFragment : ZoomedFragmentedResourceBase
                 _reader.Open(decompressedStream);
             }
 
-            _isLoading = false;
+            IsLoading = false;
             IsLoaded = true;
             
             _logger.Info($"{ ResourceName } is ready.");
-            OnLoad(this);    
+            OnLoad(this);
+            
+        }
+        finally
+        {
+            _downloadLock.ReleaseMutex();
         }
     }
 
@@ -102,21 +112,18 @@ public class DemFragment : ZoomedFragmentedResourceBase
     /// </summary>
     public void Unload()
     {
-        lock (_processingLock)
+        if (!IsLoaded)
         {
-            if (!IsLoaded)
-            {
-                _logger.Info($"Attempt to unload not loaded fragment: { ResourceName }!");   
-                throw new InvalidOperationException($"Attempt to unload not loaded fragment: { ResourceName }!");
-            }
-            
-            _logger.Info($"Unloading { ResourceName }...");
-
-            IsLoaded = false;
-            _reader = null;
-            
-            _logger.Info($"Unloaded { ResourceName }...");
+            _logger.Info($"Attempt to unload not loaded fragment: { ResourceName }!");   
+            throw new InvalidOperationException($"Attempt to unload not loaded fragment: { ResourceName }!");
         }
+        
+        _logger.Info($"Unloading { ResourceName }...");
+
+        IsLoaded = false;
+        _reader = null;
+        
+        _logger.Info($"Unloaded { ResourceName }...");
     }
     
     /// <summary>

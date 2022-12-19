@@ -23,7 +23,7 @@ public class ZoomedFragmentedResourceBase : FragmentedResourceBase
         ZoomLevels = zoomLevels;
     }
 
-    public override Task DownloadAsync(OnFragmentedResourceLoaded onLoad)
+    public override void Download(OnFragmentedResourceLoaded onLoad)
     {
         throw new NotImplementedException("Implement me in children!");
     }

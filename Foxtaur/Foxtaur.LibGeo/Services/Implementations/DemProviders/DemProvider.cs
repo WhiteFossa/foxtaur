@@ -14,10 +14,8 @@ public class DemProvider : IDemProvider
     private readonly IFragmentedResourcesProvider _demResourcesProvider;
 
     public event IDemProvider.OnRegenerateDemFragmentHandler? OnRegenerateDemFragment;
-    
-    private object _regenerationLock = new object();
 
-    private object _startDownloadLock = new object();
+    private Mutex _demRegenerationLock = new Mutex();
 
     /// <summary>
     /// Zoom levels, ordered from higher to lower Fresolution
@@ -36,49 +34,43 @@ public class DemProvider : IDemProvider
 
     public double GetSurfaceAltitude(double lat, double lon, ZoomLevel desiredZoomLevel)
     {
-        lock (this)
+        // Returning the best available zoom level
+        int desiredZoomLevelIndex = -1;
+        for (var zoomLevelIndex = 0; zoomLevelIndex < _orderedZoomLevels.Count; zoomLevelIndex++)
         {
-            // Returning the best available zoom level
-            int desiredZoomLevelIndex = -1;
-            for (var zoomLevelIndex = 0; zoomLevelIndex < _orderedZoomLevels.Count; zoomLevelIndex++)
+            if (_orderedZoomLevels[zoomLevelIndex] == desiredZoomLevel)
             {
-                if (_orderedZoomLevels[zoomLevelIndex] == desiredZoomLevel)
-                {
-                    desiredZoomLevelIndex = zoomLevelIndex;
-                    break;
-                }
+                desiredZoomLevelIndex = zoomLevelIndex;
+                break;
             }
+        }
 
-            DemFragment fragment = null;
-            for (var zoomLevelIndex = desiredZoomLevelIndex;
-                 zoomLevelIndex < _orderedZoomLevels.Count;
-                 zoomLevelIndex++)
+        DemFragment fragment = null;
+        for (var zoomLevelIndex = desiredZoomLevelIndex; zoomLevelIndex < _orderedZoomLevels.Count; zoomLevelIndex++)
+        {
+            fragment = StartFragmentLoad(lat, lon, _orderedZoomLevels[zoomLevelIndex]);
+            if (fragment == null)
             {
-                fragment = StartFragmentLoad(lat, lon, _orderedZoomLevels[zoomLevelIndex]);
-                if (fragment == null)
-                {
-                    // We don't have DEM for this coordinates at all
-                    return GeoConstants.EarthRadius;
-                }
-
-                if (fragment.IsLoaded)
-                {
-                    // Fragment is ready, go to get coordinates
-                    break;
-                }
-
-                // Fragment is not ready, maybe lower resolution fragment is ready? We will know it on next iteration
-            }
-
-            var h = fragment.GetHeight(lat, lon);
-            if (h == null)
-            {
+                // We don't have DEM for this coordinates at all
                 return GeoConstants.EarthRadius;
             }
 
-            return GeoConstants.EarthRadius + GeoConstants.DemAltitudeMultiplicator *
-                ResourcesConstants.DemScalingFactor * (h.Value - ResourcesConstants.DemSeaLevel);
+            if (fragment.IsLoaded)
+            {
+                // Fragment is ready, go to get coordinates
+                break;
+            }
+
+            // Fragment is not ready, maybe lower resolution fragment is ready? We will know it on next iteration
         }
+
+        var h = fragment.GetHeight(lat, lon);
+        if (h == null)
+        {
+            return GeoConstants.EarthRadius;
+        }
+
+        return GeoConstants.EarthRadius + GeoConstants.DemAltitudeMultiplicator * ResourcesConstants.DemScalingFactor * (h.Value - ResourcesConstants.DemSeaLevel);
     }
 
     private DemFragment? StartFragmentLoad(double lat, double lon, ZoomLevel zoomLevel)
@@ -90,11 +82,13 @@ public class DemProvider : IDemProvider
             return null;
         }
 
-        lock (_startDownloadLock)
+        if (fragment.IsLoaded || fragment.IsLoading)
         {
-            //fragment.DownloadAsync(OnFragmentLoaded);
-            Task.Run(() => fragment.DownloadAsync(OnFragmentLoaded)); // Running in separate thread
+            return fragment;
         }
+        
+        var downloadThread = new Thread(() => fragment.Download(OnFragmentLoaded));
+        downloadThread.Start();
 
         return fragment;
     }
@@ -105,9 +99,15 @@ public class DemProvider : IDemProvider
         _ = demFragment ?? throw new InvalidOperationException();
 
         // Requesting DEM regeneration
-        lock (_regenerationLock)
+        try
         {
-            OnRegenerateDemFragment?.Invoke(this, new OnRegenerateDemFragmentArgs(demFragment.NorthLat, demFragment.WestLon, demFragment.SouthLat, demFragment.EastLon));    
+            _demRegenerationLock.WaitOne();
+            
+            OnRegenerateDemFragment?.Invoke(this, new OnRegenerateDemFragmentArgs(demFragment.NorthLat, demFragment.WestLon, demFragment.SouthLat, demFragment.EastLon));
+        }
+        finally
+        {
+            _demRegenerationLock.ReleaseMutex();
         }
     }
 }

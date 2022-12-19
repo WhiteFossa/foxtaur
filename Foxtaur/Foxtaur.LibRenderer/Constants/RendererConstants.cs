@@ -16,7 +16,7 @@ public static class RendererConstants
     /// <summary>
     /// Camera zoom must be lesser than this
     /// </summary>
-    public const double CameraMinZoom = Math.PI / 2.0;
+    public const double CameraMinZoom = Math.PI / 2.0 - 0.001;
 
     /// <summary>
     /// Min zoom for surcace run mode
@@ -41,7 +41,7 @@ public static class RendererConstants
     /// <summary>
     /// Camera height for surface walk mode
     /// </summary>
-    public const double SurfaceRunModeCameraOrbitHeight = 0.00001 * GeoConstants.EarthRadius;
+    public const double SurfaceRunModeCameraOrbitHeight = 0.0001 * GeoConstants.EarthRadius;
 
     /// <summary>
     /// Head rotation speed (latitudal) in surface run mode
@@ -120,7 +120,7 @@ public static class RendererConstants
     /// <summary>
     /// Maps are higher than Earth surface by this value (satellite mode)
     /// </summary>
-    public const double MapsAltitudeIncrementSatelliteMode = 0.002;
+    public const double MapsAltitudeIncrementSatelliteMode = 0.005;
     
     /// <summary>
     /// Maps are higher than Earth surface by this value (surface run mode)
