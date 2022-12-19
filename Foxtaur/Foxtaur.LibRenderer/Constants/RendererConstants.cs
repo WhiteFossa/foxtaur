@@ -120,7 +120,7 @@ public static class RendererConstants
     /// <summary>
     /// Maps are higher than Earth surface by this value (satellite mode)
     /// </summary>
-    public const double MapsAltitudeIncrementSatelliteMode = 0.002;
+    public const double MapsAltitudeIncrementSatelliteMode = 0.005;
     
     /// <summary>
     /// Maps are higher than Earth surface by this value (surface run mode)
