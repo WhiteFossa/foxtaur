@@ -95,7 +95,7 @@ public class HighResMapFragment : FragmentedResourceBase
                         raster[pixelBaseIndex + 0] = (byte)(_reader.GetPixel(1, x, y) * 255);
                         raster[pixelBaseIndex + 1] = (byte)(_reader.GetPixel(2, x, y) * 255);
                         raster[pixelBaseIndex + 2] = (byte)(_reader.GetPixel(3, x, y) * 255);
-                        raster[pixelBaseIndex + 3] = 255; // No transparency
+                        raster[pixelBaseIndex + 3] = (byte)(_reader.GetPixel(4, x, y) * 255);
 
                         pixelBaseIndex += 4;
                     }
