@@ -9,33 +9,54 @@
         Icon="/Assets/avalonia-logo.ico"
         Title="Foxtaur.Desktop">
 
+    <Window.Styles>
+        <StyleInclude Source="/Styles/Common.axaml" />
+    </Window.Styles>
+    
     <Design.DataContext>
         <vm:MainWindowViewModel/>
     </Design.DataContext>
     
-    <Grid ColumnDefinitions="*, Auto" RowDefinitions="*, Auto, Auto">
+    <Grid ColumnDefinitions="*, Auto, Auto" RowDefinitions="*, Auto, Auto">
         
         <!-- Renderer -->
-        <renderer:DesktopRenderer Grid.Column="0" Grid.Row="0" />
+        <renderer:DesktopRenderer Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="2" />
         
         <!-- Splitter between renderer and console -->
-        <GridSplitter Grid.Column="0" Grid.Row="1" ResizeDirection="Rows" MaxHeight="300"/>
+        <GridSplitter Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="2" ResizeDirection="Rows" MaxHeight="300"/>
         
         <!-- Console -->
         <TextBox
             Grid.Column="0"
             Grid.Row="2"
+            Grid.ColumnSpan="2"
             AcceptsReturn="True"
             IsReadOnly="True"
             MaxHeight="300"
             Text="{Binding ConsoleText}"
             CaretIndex="{Binding ConsoleCaretIndex}" />
         
-        <!-- Side controls -->
-        <TextBlock Grid.Column="1" Grid.Row="0" Grid.RowSpan="3">
-            Yiffy text
-        </TextBlock>
+        <!-- Splitter between left and right parts of window -->
+        <GridSplitter Grid.Column="1" Grid.Row="0" Grid.RowSpan="3" ResizeDirection="Columns" MaxWidth="500"/>
         
+        <!-- Side controls -->
+        <Border
+            Classes="VisibleBorders"
+            Grid.Column="2"
+            Grid.Row="0"
+            Grid.RowSpan="3">
+            
+            <Grid ColumnDefinitions="*" RowDefinitions="Auto, *, Auto">
+                
+                <StackPanel Grid.Column="0" Grid.Row="0">
+                    <TextBlock>Distances will be here</TextBlock>
+                </StackPanel>
+                
+                <StackPanel Grid.Column="0" Grid.Row="2">
+                    <TextBlock>Settings will be here</TextBlock>
+                </StackPanel>
+            </Grid>
+        </Border>
     </Grid>
     
 </Window>
