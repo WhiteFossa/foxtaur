@@ -67,34 +67,43 @@
                 </StackPanel>
                 
                 <!-- Renderer settings -->
-                <ScrollViewer Grid.Column="0" Grid.Row="2">
-                    <StackPanel>
-                        
-                        <!-- DEM scale -->
-                        <StackPanel
-                            Orientation="Horizontal">
+                <StackPanel Grid.Column="0"
+                            Grid.Row="2">
+                    
+                    <Label>Renderer settings:</Label>
+                    
+                    <Border
+                        Classes="VisibleBorders">
+                    
+                        <ScrollViewer>
+                            <StackPanel>
+                                <!-- DEM scale -->
+                                <StackPanel
+                                    Orientation="Horizontal">
                             
-                            <Label>DEM scale:</Label>
+                                    <Label>DEM scale:</Label>
                         
-                            <Label
-                                VerticalAlignment="Center"
-                                Content="{ Binding DemScaleText }">
-                            </Label>    
-                        </StackPanel>
+                                    <Label
+                                        VerticalAlignment="Center"
+                                        Content="{ Binding DemScaleText }">
+                                    </Label>    
+                                </StackPanel>
                         
-                        <Slider
-                            Name="DemScaleSlider"
-                            Grid.Column="0"
-                            Grid.Row="0"
-                            Minimum="1"
-                            Maximum="10"
-                            Value="{ Binding DemScale }"
-                            VerticalAlignment="Center">
-                        </Slider>
-                        <!-- End of DEM scale -->
+                                <Slider
+                                    Name="DemScaleSlider"
+                                    Grid.Column="0"
+                                    Grid.Row="0"
+                                    Minimum="1"
+                                    Maximum="10"
+                                    Value="{ Binding DemScale }"
+                                    VerticalAlignment="Center">
+                                </Slider>
+                                <!-- End of DEM scale -->
                         
-                    </StackPanel>        
-                </ScrollViewer>
+                            </StackPanel>        
+                        </ScrollViewer>                    
+                    </Border>
+                </StackPanel>
             </Grid>
         </Border>
     </Grid>
