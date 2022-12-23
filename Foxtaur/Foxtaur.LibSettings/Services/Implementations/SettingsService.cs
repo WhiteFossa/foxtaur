@@ -12,7 +12,7 @@ public class SettingsService : ISettingsService
     {
         // TODO: Load from DB instead
         _demScale = 1.0;
-        //InvokeOnDemScaleChanged();
+        InvokeOnDemScaleChanged();
     }
     
     public double GetDemScale()
