@@ -1,4 +1,6 @@
 ﻿using System;
+using Foxtaur.LibSettings.Services.Abstractions;
+using Microsoft.Extensions.DependencyInjection;
 using ReactiveUI;
 
 namespace Foxtaur.Desktop.ViewModels
@@ -42,7 +44,10 @@ namespace Foxtaur.Desktop.ViewModels
             set
             {
                 this.RaiseAndSetIfChanged(ref _demScale, value);
-                DemScaleText = $"{value:0.#}";
+                DemScaleText = $"{_demScale:0.#}";
+                
+                // Notifying
+                _settingsService.SetDemScale(_demScale);
             }
         }
 
@@ -57,10 +62,16 @@ namespace Foxtaur.Desktop.ViewModels
         
         #endregion
 
+        #region DI
+
+        private readonly ISettingsService _settingsService = Program.Di.GetService<ISettingsService>();
+
+        #endregion
+        
         public MainWindowViewModel()
         {
-            // Loading settings (TODO: Load from DB)
-            DemScale = 1.0;
+            // Loading settings
+            DemScale = _settingsService.GetDemScale();
         }
 
         #region Logging

@@ -19,6 +19,8 @@ using Foxtaur.LibRenderer.Services.Abstractions.Zoom;
 using Foxtaur.LibRenderer.Services.Implementations.Camera;
 using Foxtaur.LibRenderer.Services.Implementations.Drawers;
 using Foxtaur.LibRenderer.Services.Implementations.Zoom;
+using Foxtaur.LibSettings.Services.Abstractions;
+using Foxtaur.LibSettings.Services.Implementations;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using NLog;
@@ -86,6 +88,7 @@ namespace Foxtaur.Desktop
             services.AddSingleton<IDemProvider, DemProvider>();
             services.AddSingleton<IZoomService, ZoomService>();
             services.AddSingleton<IMapSegmentGenerator, MapSegmentGenerator>();
+            services.AddSingleton<ISettingsService, SettingsService>();
 
             return services;
         }

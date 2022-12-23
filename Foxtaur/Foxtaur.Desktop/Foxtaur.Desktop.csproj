@@ -74,5 +74,6 @@
     </ItemGroup>
     <ItemGroup>
       <ProjectReference Include="..\Foxtaur.LibRenderer\Foxtaur.LibRenderer.csproj" />
+      <ProjectReference Include="..\Foxtaur.LibSettings\Foxtaur.LibSettings.csproj" />
     </ItemGroup>
 </Project>

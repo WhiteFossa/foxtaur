@@ -10,6 +10,7 @@
     <ItemGroup>
       <ProjectReference Include="..\Foxtaur.Helpers\Foxtaur.Helpers.csproj" />
       <ProjectReference Include="..\Foxtaur.LibResources\Foxtaur.LibResources.csproj" />
+      <ProjectReference Include="..\Foxtaur.LibSettings\Foxtaur.LibSettings.csproj" />
     </ItemGroup>
 
     <ItemGroup>

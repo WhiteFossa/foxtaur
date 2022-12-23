@@ -91,10 +91,8 @@
                         
                                 <Slider
                                     Name="DemScaleSlider"
-                                    Grid.Column="0"
-                                    Grid.Row="0"
                                     Minimum="1"
-                                    Maximum="10"
+                                    Maximum="20"
                                     Value="{ Binding DemScale }"
                                     VerticalAlignment="Center">
                                 </Slider>
