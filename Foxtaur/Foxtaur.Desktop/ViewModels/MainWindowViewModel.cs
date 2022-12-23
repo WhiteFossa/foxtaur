@@ -12,6 +12,8 @@ namespace Foxtaur.Desktop.ViewModels
 
         private string _consoleText;
         private int _consoleCaretIndex;
+        private double _demScale;
+        private string _demScaleText;
 
         /// <summary>
         /// Text in console
@@ -31,7 +33,35 @@ namespace Foxtaur.Desktop.ViewModels
             set => this.RaiseAndSetIfChanged(ref _consoleCaretIndex, value);
         }
 
+        /// <summary>
+        /// DEM scaling factor
+        /// </summary>
+        public double DemScale
+        {
+            get => _demScale;
+            set
+            {
+                this.RaiseAndSetIfChanged(ref _demScale, value);
+                DemScaleText = $"{value:0.#}";
+            }
+        }
+
+        /// <summary>
+        /// DEM scale as text
+        /// </summary>
+        public string DemScaleText
+        {
+            get => _demScaleText;
+            set => this.RaiseAndSetIfChanged(ref _demScaleText, value);
+        }
+        
         #endregion
+
+        public MainWindowViewModel()
+        {
+            // Loading settings (TODO: Load from DB)
+            DemScale = 1.0;
+        }
 
         #region Logging
 

@@ -71,25 +71,26 @@
                     <StackPanel>
                         
                         <!-- DEM scale -->
-                        <Label>DEM scale:</Label>
-                        
-                        <Grid ColumnDefinitions="*, Auto" RowDefinitions="Auto">
-                            <Slider
-                                Grid.Column="0"
-                                Grid.Row="0"
-                                Minimum="1"
-                                Maximum="20"
-                                Value="1"
-                                VerticalAlignment="Center">
-                            </Slider>
+                        <StackPanel
+                            Orientation="Horizontal">
                             
+                            <Label>DEM scale:</Label>
+                        
                             <Label
-                                Grid.Column="1"
-                                Grid.Row="0"
-                                VerticalAlignment="Center">
-                                1.0
-                            </Label>
-                        </Grid>
+                                VerticalAlignment="Center"
+                                Content="{ Binding DemScaleText }">
+                            </Label>    
+                        </StackPanel>
+                        
+                        <Slider
+                            Name="DemScaleSlider"
+                            Grid.Column="0"
+                            Grid.Row="0"
+                            Minimum="1"
+                            Maximum="10"
+                            Value="{ Binding DemScale }"
+                            VerticalAlignment="Center">
+                        </Slider>
                         <!-- End of DEM scale -->
                         
                     </StackPanel>        
