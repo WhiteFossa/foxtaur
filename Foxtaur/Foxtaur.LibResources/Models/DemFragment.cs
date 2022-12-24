@@ -62,7 +62,7 @@ public class DemFragment : ZoomedFragmentedResourceBase
                 // Fragment already downloaded
                 return;
             }
-        
+
             if (IsLoading)
             {
                 // Loading in progress
@@ -71,35 +71,43 @@ public class DemFragment : ZoomedFragmentedResourceBase
 
             IsLoading = true;
 
-            _logger.Info($"Loading { ResourceName }...");
-        
+            _logger.Info($"Loading {ResourceName}...");
+
             if (!IsLocal)
             {
                 // Do we have already downloaded file?
                 var localPath = GetResourceLocalPath(ResourceName);
                 if (!File.Exists(localPath))
                 {
-                    LoadFromUrlToFile(ResourceName);    
+                    LoadFromUrlToFile(ResourceName);
                 }
             }
 
             // Decompressing
-            _logger.Info($"Decompressing { ResourceName }...");
+            _logger.Info($"Decompressing {ResourceName}...");
             using (var decompressedStream = LoadZstdFile(GetLocalPath()))
             {
                 // Processing
-                _logger.Info($"Processing { ResourceName }...");
-            
+                _logger.Info($"Processing {ResourceName}...");
+
                 _reader = new GeoTiffReader();
                 _reader.Open(decompressedStream);
             }
 
             IsLoading = false;
             IsLoaded = true;
-            
-            _logger.Info($"{ ResourceName } is ready.");
+
+            _logger.Info($"{ResourceName} is ready.");
             OnLoad(this);
+
+        }
+        catch (Exception ex)
+        {
+            // Something went wrong, most probably network error during download
+            _logger.Error($"Error during {ResourceName} download. Exception: { ex.Message }");
             
+            IsLoading = false;
+            IsLoaded = false;
         }
         finally
         {
