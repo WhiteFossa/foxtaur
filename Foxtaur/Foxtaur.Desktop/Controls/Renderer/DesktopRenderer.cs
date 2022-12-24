@@ -200,9 +200,7 @@ public class DesktopRenderer : OpenGlControlBase
     private object _demRegenerationLock = new object();
 
     #endregion
-    
-    private bool _isNeedToRegenerateEarthMeshes = false;
-    
+
     #region Debug
 
     private HighResMapFragment _davydovoFragment = new HighResMapFragment(54.807812457.ToRadians(),
@@ -376,19 +374,9 @@ public class DesktopRenderer : OpenGlControlBase
         // If zoom level changed, we have to regenerate everything Earth-related
         if (_isZoomLevelChanged)
         {
-            _isNeedToRegenerateEarthMeshes = true;
+            _earthSegments.ForEach(es => es.MarkToRegeneration());
             
             _isZoomLevelChanged = false;
-        }
-
-        if (_isNeedToRegenerateEarthMeshes)
-        {
-            DisposeEarthSegments();
-            GenerateEarthSegments();
-
-            _davydovoMapSegment = null;
-
-            _isNeedToRegenerateEarthMeshes = false;
         }
         
         // Work only with those segments
@@ -809,6 +797,9 @@ public class DesktopRenderer : OpenGlControlBase
 
     private void OnDemScaleChanged(object sender, ISettingsService.OnDemScaleChangedArgs args)
     {
-        _isNeedToRegenerateEarthMeshes = true;
+        _earthSegments
+            .ForEach(es => es.MarkToRegeneration());
+
+        _davydovoMapSegment = null; // TODO: Remove me when map manager is ready
     }
 }

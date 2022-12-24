@@ -93,6 +93,7 @@
                                     Name="DemScaleSlider"
                                     Minimum="1"
                                     Maximum="20"
+                                    Ticks="10"
                                     Value="{ Binding DemScale }"
                                     VerticalAlignment="Center">
                                 </Slider>
