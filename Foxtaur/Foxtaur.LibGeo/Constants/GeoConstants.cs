@@ -46,9 +46,4 @@ public static class GeoConstants
     /// Earth center coordinates
     /// </summary>
     public static readonly Vector<double> EarthCenter = Vector<double>.Build.DenseOfArray(new double[] { 0.0, 0.0, 0.0 });
-
-    /// <summary>
-    /// Multiply visual DEM altitudes by this value
-    /// </summary>
-    public const float DemAltitudeMultiplicator = 5.0f;
 }

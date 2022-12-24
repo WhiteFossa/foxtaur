@@ -5,12 +5,14 @@ using Foxtaur.LibResources.Enums;
 using Foxtaur.LibResources.Models;
 using Foxtaur.LibResources.Services.Abstractions;
 using Foxtaur.LibResources.Services.Implementations;
+using Foxtaur.LibSettings.Services.Abstractions;
 
 namespace Foxtaur.LibGeo.Services.Implementations.DemProviders;
 
 public class DemProvider : IDemProvider
 {
     private readonly IFragmentedResourcesProvider _demResourcesProvider;
+    private readonly ISettingsService _settingsService;
 
     public event IDemProvider.OnRegenerateDemFragmentHandler? OnRegenerateDemFragment;
 
@@ -26,8 +28,10 @@ public class DemProvider : IDemProvider
         ZoomLevel.ZoomLevel0
     };
 
-    public DemProvider()
+    public DemProvider(ISettingsService settingsService)
     {
+        _settingsService = settingsService;
+        
         _demResourcesProvider = new DemResourcesProvider();
     }
 
@@ -69,7 +73,7 @@ public class DemProvider : IDemProvider
             return GeoConstants.EarthRadius;
         }
 
-        return GeoConstants.EarthRadius + GeoConstants.DemAltitudeMultiplicator * ResourcesConstants.DemScalingFactor * (h.Value - ResourcesConstants.DemSeaLevel);
+        return GeoConstants.EarthRadius + _settingsService.GetDemScale() * ResourcesConstants.DemScalingFactor * (h.Value - ResourcesConstants.DemSeaLevel);
     }
 
     private DemFragment? StartFragmentLoad(double lat, double lon, ZoomLevel zoomLevel)

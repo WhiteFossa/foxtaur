@@ -9,33 +9,102 @@
         Icon="/Assets/avalonia-logo.ico"
         Title="Foxtaur.Desktop">
 
+    <Window.Styles>
+        <StyleInclude Source="/Styles/Common.axaml" />
+    </Window.Styles>
+    
     <Design.DataContext>
         <vm:MainWindowViewModel/>
     </Design.DataContext>
     
-    <Grid ColumnDefinitions="*, Auto" RowDefinitions="*, Auto, Auto">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="Auto" MinWidth="300" />
+        </Grid.ColumnDefinitions>
+        
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
         
         <!-- Renderer -->
-        <renderer:DesktopRenderer Grid.Column="0" Grid.Row="0" />
+        <renderer:DesktopRenderer Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="2" />
         
         <!-- Splitter between renderer and console -->
-        <GridSplitter Grid.Column="0" Grid.Row="1" ResizeDirection="Rows" MaxHeight="300"/>
+        <GridSplitter Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="2" ResizeDirection="Rows" />
         
         <!-- Console -->
         <TextBox
             Grid.Column="0"
             Grid.Row="2"
+            Grid.ColumnSpan="2"
             AcceptsReturn="True"
             IsReadOnly="True"
+            Height="300"
             MaxHeight="300"
             Text="{Binding ConsoleText}"
             CaretIndex="{Binding ConsoleCaretIndex}" />
         
-        <!-- Side controls -->
-        <TextBlock Grid.Column="1" Grid.Row="0" Grid.RowSpan="3">
-            Yiffy text
-        </TextBlock>
+        <!-- Splitter between left and right parts of window -->
+        <GridSplitter Grid.Column="1" Grid.Row="0" Grid.RowSpan="3" ResizeDirection="Columns" />
         
+        <!-- Side controls -->
+        <Border
+            Classes="VisibleBorders"
+            Grid.Column="2"
+            Grid.Row="0"
+            Grid.RowSpan="3"
+            Width="300">
+            
+            <Grid ColumnDefinitions="*" RowDefinitions="Auto, *, Auto">
+                
+                <!-- Distances -->
+                <StackPanel Grid.Column="0" Grid.Row="0">
+                    <Label>Distances will be here</Label>
+                </StackPanel>
+                
+                <!-- Renderer settings -->
+                <StackPanel Grid.Column="0"
+                            Grid.Row="2">
+                    
+                    <Label>Renderer settings:</Label>
+                    
+                    <Border
+                        Classes="VisibleBorders">
+                    
+                        <ScrollViewer>
+                            <StackPanel>
+                                <!-- DEM scale -->
+                                <StackPanel
+                                    Orientation="Horizontal">
+                            
+                                    <Label>DEM scale:</Label>
+                        
+                                    <Label
+                                        VerticalAlignment="Center"
+                                        Content="{ Binding DemScaleText }">
+                                    </Label>    
+                                </StackPanel>
+                        
+                                <Slider
+                                    Name="DemScaleSlider"
+                                    Minimum="1"
+                                    Maximum="20"
+                                    Ticks="10"
+                                    Value="{ Binding DemScale }"
+                                    VerticalAlignment="Center">
+                                </Slider>
+                                <!-- End of DEM scale -->
+                        
+                            </StackPanel>        
+                        </ScrollViewer>                    
+                    </Border>
+                </StackPanel>
+            </Grid>
+        </Border>
     </Grid>
     
 </Window>

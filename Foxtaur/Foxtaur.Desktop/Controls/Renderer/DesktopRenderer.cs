@@ -27,6 +27,7 @@ using Foxtaur.LibRenderer.Services.Abstractions.Zoom;
 using Foxtaur.LibResources.Constants;
 using Foxtaur.LibResources.Models;
 using Foxtaur.LibResources.Models.HighResMap;
+using Foxtaur.LibSettings.Services.Abstractions;
 using MathNet.Numerics.LinearAlgebra;
 using Microsoft.Extensions.DependencyInjection;
 using NLog;
@@ -190,6 +191,7 @@ public class DesktopRenderer : OpenGlControlBase
     private IDemProvider _demProvider = Program.Di.GetService<IDemProvider>();
     private IZoomService _zoomService = Program.Di.GetService<IZoomService>();
     private IMapSegmentGenerator _mapSegmentGenerator = Program.Di.GetService<IMapSegmentGenerator>();
+    private ISettingsService _settingsService = Program.Di.GetService<ISettingsService>();
 
     #endregion
     
@@ -198,7 +200,7 @@ public class DesktopRenderer : OpenGlControlBase
     private object _demRegenerationLock = new object();
 
     #endregion
-    
+
     #region Debug
 
     private HighResMapFragment _davydovoFragment = new HighResMapFragment(54.807812457.ToRadians(),
@@ -226,6 +228,9 @@ public class DesktopRenderer : OpenGlControlBase
         
         // We need to regenerate meshes on DEM updates
         _demProvider.OnRegenerateDemFragment += OnDemChanged;
+        
+        // DEM scale change
+        _settingsService.OnDemScaleChanged += OnDemScaleChanged;
         
         // Debug
         _davydovoHighResMap = new HighResMap(Guid.NewGuid(), "Davydovo", _davydovoFragment);
@@ -369,10 +374,7 @@ public class DesktopRenderer : OpenGlControlBase
         // If zoom level changed, we have to regenerate everything Earth-related
         if (_isZoomLevelChanged)
         {
-            DisposeEarthSegments();
-            GenerateEarthSegments();
-
-            _davydovoMapSegment = null;
+            _earthSegments.ForEach(es => es.MarkToRegeneration());
             
             _isZoomLevelChanged = false;
         }
@@ -793,32 +795,11 @@ public class DesktopRenderer : OpenGlControlBase
         _isZoomLevelChanged = true;
     }
 
-    /*/// <summary>
-    /// Draw debug vector
-    /// </summary>
-    private unsafe void DrawDebugVector(GL silkGlContext, PlanarPoint3D startPoint, PlanarPoint3D endPoint)
+    private void OnDemScaleChanged(object sender, ISettingsService.OnDemScaleChangedArgs args)
     {
-        var mesh = new Mesh();
-        mesh.AddVertex(new PlanarPoint3D(startPoint.X - 0.01f, startPoint.Y, startPoint.Z), new PlanarPoint2D(0, 0));
-        mesh.AddVertex(new PlanarPoint3D(startPoint.X + 0.01f, startPoint.Y, startPoint.Z), new PlanarPoint2D(0, 1));
-        
-        mesh.AddVertex(new PlanarPoint3D(endPoint.X - 0.01f, endPoint.Y, endPoint.Z), new PlanarPoint2D(1, 0));
-        mesh.AddVertex(new PlanarPoint3D(endPoint.X + 0.01f, endPoint.Y, endPoint.Z), new PlanarPoint2D(1, 1));
-        
-        mesh.AddIndex(0);
-        mesh.AddIndex(1);
-        mesh.AddIndex(2);
-        
-        mesh.AddIndex(2);
-        mesh.AddIndex(3);
-        mesh.AddIndex(1);
-        
-        mesh.GenerateBuffers(silkGlContext);
-        
-        mesh.BindBuffers(silkGlContext);
-        
-        silkGlContext.DrawElements(PrimitiveType.Triangles, (uint)mesh.Indices.Count, DrawElementsType.UnsignedInt, null);
-        
-        mesh.Dispose();
-    }*/
+        _earthSegments
+            .ForEach(es => es.MarkToRegeneration());
+
+        _davydovoMapSegment = null; // TODO: Remove me when map manager is ready
+    }
 }
