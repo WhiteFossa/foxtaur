@@ -1606,7 +1606,7 @@ public class DemResourcesProvider : IFragmentedResourcesProvider
 
             var size = loadedFragments
                 .Sum(lf => lf.CacheSize);
-            
+
             // Cleaning one fragment per timer call
             if (size > ResourcesConstants.MaxDemCacheSize)
             {

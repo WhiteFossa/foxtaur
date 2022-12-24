@@ -709,20 +709,25 @@ public class DesktopRenderer : OpenGlControlBase
     {
         var toRegenerateInThisFrame = _visibleEarthSegments
             .Where(es => es.IsRegenerationNeeded)
-            .TakeLast(RendererConstants.MaxSegmentsPerFrameRegeneration)
-            .ToList();
+            .TakeLast(RendererConstants.MaxSegmentsPerFrameRegeneration);
 
         // Regenerating meshes
-        toRegenerateInThisFrame
-            .ForEach(es => _earthGenerator.GenerateMeshForSegment(es));
-        
+        foreach (var segment in toRegenerateInThisFrame)
+        {
+            _earthGenerator.GenerateMeshForSegment(segment);
+        }
+
         // Regenerating buffers
-        toRegenerateInThisFrame
-            .ForEach(es => es.Mesh.GenerateBuffers(silkGl));
-        
+        foreach (var segment in toRegenerateInThisFrame)
+        {
+            segment.Mesh.GenerateBuffers(silkGl);
+        }
+
         // Done
-        toRegenerateInThisFrame
-            .ForEach(es => es.MarkAsRegenerated());
+        foreach (var segment in toRegenerateInThisFrame)
+        {
+            segment.MarkAsRegenerated();
+        }
     }
 
     private unsafe void DrawEarth(GL silkGl)
