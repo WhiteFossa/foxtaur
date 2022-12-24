@@ -458,7 +458,7 @@ public class DesktopRenderer : OpenGlControlBase
         LimitSurfaceRunViewAngles();
         
         // Camera height
-        var cameraH = RendererConstants.SurfaceRunModeCameraOrbitHeight + _demProvider.GetSurfaceAltitude(_camera.Lat, _camera.Lon, _zoomService.ZoomLevel);
+        var cameraH = RendererConstants.SurfaceRunModeCameraOrbitHeight * _settingsService.GetDemScale() + _demProvider.GetSurfaceAltitude(_camera.Lat, _camera.Lon, _zoomService.ZoomLevel);
         //var cameraH = GeoConstants.EarthRadius + RendererConstants.SurfaceRunModeCameraOrbitHeight;
         _camera.H = cameraH;
 
@@ -679,10 +679,13 @@ public class DesktopRenderer : OpenGlControlBase
         {
             lock (_demRegenerationLock)
             {
-                _earthSegments
-                    .Where(es => es.GeoSegment.IsCoveredBy(args.Segment))
-                    .ToList()
-                    .ForEach(s => s.MarkToRegeneration());    
+                var segmentsToRegenerate = _earthSegments
+                    .Where(es => es.GeoSegment.IsCoveredBy(args.Segment));
+
+                foreach (var segment in segmentsToRegenerate)
+                {
+                    segment.MarkToRegeneration();
+                }
             }
         });
     }
