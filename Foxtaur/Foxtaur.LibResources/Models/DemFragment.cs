@@ -43,7 +43,7 @@ public class DemFragment : ZoomedFragmentedResourceBase
         }
     }
     
-    public DemFragment(double northLat, double southLat, double westLon, double eastLon, List<ZoomLevel> zoomLevels, string resourceName, bool isLocal)
+    public DemFragment(double northLat, double southLat, double westLon, double eastLon, ZoomLevel[] zoomLevels, string resourceName, bool isLocal)
         : base(northLat, southLat, westLon, eastLon, zoomLevels, resourceName, isLocal)
     {
         LastAccessTime = DateTime.UtcNow;

@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using Foxtaur.LibGeo.Constants;
 using Foxtaur.LibGeo.Services.Abstractions.DemProviders;
 using Foxtaur.LibResources.Constants;
@@ -6,6 +7,7 @@ using Foxtaur.LibResources.Models;
 using Foxtaur.LibResources.Services.Abstractions;
 using Foxtaur.LibResources.Services.Implementations;
 using Foxtaur.LibSettings.Services.Abstractions;
+using NLog;
 
 namespace Foxtaur.LibGeo.Services.Implementations.DemProviders;
 
@@ -13,6 +15,8 @@ public class DemProvider : IDemProvider
 {
     private readonly IFragmentedResourcesProvider _demResourcesProvider;
     private readonly ISettingsService _settingsService;
+    
+    private Logger _logger = LogManager.GetCurrentClassLogger();
 
     public event IDemProvider.OnRegenerateDemFragmentHandler? OnRegenerateDemFragment;
 
