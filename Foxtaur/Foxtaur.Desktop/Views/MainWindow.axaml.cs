@@ -16,7 +16,14 @@ namespace Foxtaur.Desktop.Views
         {
             base.OnKeyDown(e);
             
-            this.EarthRenderer.OnKeyPressed(e);
+            EarthRenderer.OnKeyPressed(e);
+        }
+
+        protected override void OnKeyUp(KeyEventArgs e)
+        {
+            base.OnKeyUp(e);
+            
+            EarthRenderer.OnKeyReleased(e);
         }
     }
 }

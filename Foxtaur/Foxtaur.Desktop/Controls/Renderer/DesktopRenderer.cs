@@ -11,6 +11,7 @@ using Avalonia.OpenGL.Controls;
 using Avalonia.Threading;
 using Foxtaur.Desktop.Controls.Renderer.Abstractions.Generators;
 using Foxtaur.Desktop.Controls.Renderer.Abstractions.UI;
+using Foxtaur.Desktop.Controls.Renderer.Enums;
 using Foxtaur.Desktop.Controls.Renderer.Models;
 using Foxtaur.Helpers;
 using Foxtaur.LibGeo.Constants;
@@ -147,6 +148,11 @@ public class DesktopRenderer : OpenGlControlBase
     /// If true, then we are rotating the head
     /// </summary>
     private bool _rotateHeadMode = false;
+
+    /// <summary>
+    /// Surface run state (i.e. is user moving?)
+    /// </summary>
+    private SurfaceRunState _surfaceRunState = SurfaceRunState.Stop;
 
     #endregion
     
@@ -353,6 +359,8 @@ public class DesktopRenderer : OpenGlControlBase
         // Surface mode camera positioning
         if (_isSurfaceRunMode)
         {
+            ProcessSurfaceRunMovement();
+            
             SurfaceRunPositionCamera();
         }
 
@@ -820,6 +828,80 @@ public class DesktopRenderer : OpenGlControlBase
 
     public void OnKeyPressed(KeyEventArgs e)
     {
-        _logger.Warn($"Pressed: { e.Key }");
+        if (e.Key == Key.W)
+        {
+            // Forward
+            _surfaceRunState = SurfaceRunState.Forward;
+        }
+        else if (e.Key == Key.S)
+        {
+            // Backward
+            _surfaceRunState = SurfaceRunState.Backward;
+        }
+    }
+
+    public void OnKeyReleased(KeyEventArgs e)
+    {
+        _surfaceRunState = SurfaceRunState.Stop;
+    }
+    
+    private void ProcessSurfaceRunMovement()
+    {
+        if (_surfaceRunState == SurfaceRunState.Stop)
+        {
+            return;
+        }
+        
+        // Under camera point
+        var cameraPoint = _camera.Position3D.AsVector();
+        
+        // North vector (normalized by speed)
+        var toNorthVector = (_sphereCoordinatesProvider.GeoToPlanar3D(new GeoPoint(Math.PI / 2.0, 0, _camera.H)).AsVector() - _camera.Position3D.AsVector())
+            .Normalize()
+            * 0.000001;
+
+        // Moving camera
+        Vector<double> newCameraPosition3D;
+
+        if (_surfaceRunState == SurfaceRunState.Forward)
+        {
+            newCameraPosition3D = cameraPoint + toNorthVector;
+        }
+        else if (_surfaceRunState == SurfaceRunState.Backward)
+        {
+            newCameraPosition3D = cameraPoint - toNorthVector;
+        }
+        else
+        {
+            throw new ArgumentException("Incorrect surface run state.");
+        }
+        
+        var newCameraPositionGeo = _sphereCoordinatesProvider.Planar3DToGeo(newCameraPosition3D.AsPlanarPoint3D());
+
+        _camera.Lat = newCameraPositionGeo.Lat;
+        _camera.Lon = newCameraPositionGeo.Lon;
+
+        /*// Camera height
+        var cameraH = RendererConstants.SurfaceRunModeCameraOrbitHeight * _settingsService.GetDemScale() + _demProvider.GetSurfaceAltitude(_camera.Lat, _camera.Lon, _zoomService.ZoomLevel);
+        //var cameraH = GeoConstants.EarthRadius + RendererConstants.SurfaceRunModeCameraOrbitHeight;
+        _camera.H = cameraH;
+
+        // Up
+        var nadirVector = GeoConstants.EarthCenter - _camera.Position3D.AsVector();
+        _camera.Up = nadirVector;
+
+        // Target
+        var toNorthVector = _sphereCoordinatesProvider.GeoToPlanar3D(new GeoPoint(Math.PI / 2.0, 0, _camera.H)).AsVector() - _camera.Position3D.AsVector();
+        var nadirNorthPerpVector = DoubleHelper.Cross3(nadirVector, toNorthVector); // Perpendicular to nadir vector and north vector
+        
+        var targetVector = nadirVector.RotateAround(nadirNorthPerpVector, Math.PI / 2.0);
+
+        // Latitudal view
+        targetVector = targetVector.RotateAround(nadirNorthPerpVector, _surfaceRunLatViewAngle);
+
+        // Longitudal view
+        targetVector = targetVector.RotateAround(nadirVector, _surfaceRunLonViewAngle);
+
+        _camera.Target = new PlanarPoint3D(targetVector[0] + _camera.Position3D.X, targetVector[1] + _camera.Position3D.Y, targetVector[2] + _camera.Position3D.Z);*/
     }
 }
