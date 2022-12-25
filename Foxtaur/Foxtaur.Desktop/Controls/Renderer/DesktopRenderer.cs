@@ -231,7 +231,7 @@ public class DesktopRenderer : OpenGlControlBase
         
         // DEM scale change
         _settingsService.OnDemScaleChanged += OnDemScaleChanged;
-        
+
         // Debug
         _davydovoHighResMap = new HighResMap(Guid.NewGuid(), "Davydovo", _davydovoFragment);
         
@@ -816,5 +816,10 @@ public class DesktopRenderer : OpenGlControlBase
             .ForEach(es => es.MarkToRegeneration());
 
         _davydovoMapSegment = null; // TODO: Remove me when map manager is ready
+    }
+
+    public void OnKeyPressed(KeyEventArgs e)
+    {
+        _logger.Warn($"Pressed: { e.Key }");
     }
 }

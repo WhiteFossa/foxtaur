@@ -31,7 +31,11 @@
         </Grid.RowDefinitions>
         
         <!-- Renderer -->
-        <renderer:DesktopRenderer Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="2" />
+        <renderer:DesktopRenderer
+            Name="EarthRenderer"
+            Grid.Column="0"
+            Grid.Row="0"
+            Grid.ColumnSpan="2" />
         
         <!-- Splitter between renderer and console -->
         <GridSplitter Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="2" ResizeDirection="Rows" />
