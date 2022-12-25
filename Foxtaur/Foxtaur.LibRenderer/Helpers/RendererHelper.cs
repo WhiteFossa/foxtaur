@@ -83,9 +83,9 @@ public static class RendererHelper
     public static bool IsCullingViewpointCoveredBySegment(this PlanarSegment segment)
     {
         // X-cross, Y-cover
-        if ((segment.Left >= -1.0 && segment.Left <= 1.0)
+        if (((segment.Left >= -1.0 && segment.Left <= 1.0)
             ||
-            (segment.Right >= -1.0 && segment.Right <= 1.0)
+            (segment.Right >= -1.0 && segment.Right <= 1.0))
             &&
             (segment.Top >= 1.0 && segment.Bottom <= -1.0))
         {
@@ -93,9 +93,9 @@ public static class RendererHelper
         }
         
         // Y-cross, X-cover
-        if ((segment.Bottom >= -1.0 && segment.Bottom <= 1.0)
+        if (((segment.Bottom >= -1.0 && segment.Bottom <= 1.0)
             ||
-            (segment.Top >= -1.0 && segment.Top <= 1.0)
+            (segment.Top >= -1.0 && segment.Top <= 1.0))
             &&
             (segment.Right >= 1.0 && segment.Left <= -1.0))
         {
@@ -103,9 +103,7 @@ public static class RendererHelper
         }
 
         // Full cover
-        if ((segment.Left <= -1.0 && segment.Right >= 1.0)
-            &&
-            (segment.Top >= 1.0 && segment.Bottom <= -1.0))
+        if (segment.Left <= -1.0 && segment.Right >= 1.0 && segment.Top >= 1.0 && segment.Bottom <= -1.0)
         {
             return true;
         }

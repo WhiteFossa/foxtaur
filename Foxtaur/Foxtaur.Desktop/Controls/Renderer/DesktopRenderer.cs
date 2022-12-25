@@ -773,21 +773,8 @@ public class DesktopRenderer : OpenGlControlBase
             var isC3InViewport = c3.IsPointInCullingViewport();
             var isC4InViewport = c4.IsPointInCullingViewport();
 
-            /*if (earthSegment.GeoSegment.SouthLat > 45.0.ToRadians() && earthSegment.GeoSegment.NorthLat < 65.0.ToRadians())
-            {
-                if (earthSegment.GeoSegment.EastLon < -25.0.ToRadians() && earthSegment.GeoSegment.WestLon > -55.0.ToRadians())
-                {
-                    int b = 10;
-                }
-            }*/
-            
             var isViewportCoveredBySegment = viewportSegment.IsCullingViewpointCoveredBySegment();
 
-            /*if (isViewportCoveredBySegment)
-            {
-                int a = 10;
-            }*/
-            
             if (isC1InViewport || isC2InViewport || isC3InViewport || isC4InViewport || isViewportCoveredBySegment)
             {
                 // Removing far-side segments
