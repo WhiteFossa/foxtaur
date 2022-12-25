@@ -11,6 +11,7 @@ using Avalonia.OpenGL.Controls;
 using Avalonia.Threading;
 using Foxtaur.Desktop.Controls.Renderer.Abstractions.Generators;
 using Foxtaur.Desktop.Controls.Renderer.Abstractions.UI;
+using Foxtaur.Desktop.Controls.Renderer.Enums;
 using Foxtaur.Desktop.Controls.Renderer.Models;
 using Foxtaur.Helpers;
 using Foxtaur.LibGeo.Constants;
@@ -148,6 +149,21 @@ public class DesktopRenderer : OpenGlControlBase
     /// </summary>
     private bool _rotateHeadMode = false;
 
+    /// <summary>
+    /// Surface run mode (i.e. is user moving?)
+    /// </summary>
+    private SurfaceRunMode _surfaceRunMode = SurfaceRunMode.Stop;
+
+    /// <summary>
+    /// Surface run direction (radians, relative to north)
+    /// </summary>
+    private double _surfaceRunDirection = 0.0;
+
+    /// <summary>
+    /// Surface run rotation mode
+    /// </summary>
+    private SurfaceRunRotationMode _surfaceRunRotationMode = SurfaceRunRotationMode.None;
+ 
     #endregion
     
     #region Maps
@@ -231,7 +247,7 @@ public class DesktopRenderer : OpenGlControlBase
         
         // DEM scale change
         _settingsService.OnDemScaleChanged += OnDemScaleChanged;
-        
+
         // Debug
         _davydovoHighResMap = new HighResMap(Guid.NewGuid(), "Davydovo", _davydovoFragment);
         
@@ -314,7 +330,7 @@ public class DesktopRenderer : OpenGlControlBase
         _defaultShader = new Shader(silkGlContext, @"Resources/Shaders/shader.vert", @"Resources/Shaders/shader.frag");
 
         // Loading textures
-        _earthTexture = new Texture(silkGlContext, @"Resources/Textures/Basemaps/NE2_50M_SR_W.jpeg");
+        _earthTexture = new Texture(silkGlContext, @"Resources/Textures/Basemaps/HYP_HR_SR_OB_DR_resized.jpeg");
 
         // UI
         _ui.Initialize(silkGlContext, _viewportWidth, _viewportHeight, _uiData); // We also need to re-initialize on viewport size change
@@ -353,6 +369,8 @@ public class DesktopRenderer : OpenGlControlBase
         // Surface mode camera positioning
         if (_isSurfaceRunMode)
         {
+            ProcessSurfaceRunMovement();
+            
             SurfaceRunPositionCamera();
         }
 
@@ -476,6 +494,7 @@ public class DesktopRenderer : OpenGlControlBase
         targetVector = targetVector.RotateAround(nadirNorthPerpVector, _surfaceRunLatViewAngle);
 
         // Longitudal view
+        targetVector = targetVector.RotateAround(nadirVector, _surfaceRunDirection);
         targetVector = targetVector.RotateAround(nadirVector, _surfaceRunLonViewAngle);
 
         _camera.Target = new PlanarPoint3D(targetVector[0] + _camera.Position3D.X, targetVector[1] + _camera.Position3D.Y, targetVector[2] + _camera.Position3D.Z);
@@ -816,5 +835,119 @@ public class DesktopRenderer : OpenGlControlBase
             .ForEach(es => es.MarkToRegeneration());
 
         _davydovoMapSegment = null; // TODO: Remove me when map manager is ready
+    }
+
+    public void OnKeyPressed(KeyEventArgs e)
+    {
+        // Surface run direction
+        if (e.Key == Key.D)
+        {
+            _surfaceRunRotationMode = SurfaceRunRotationMode.Right;
+        }
+        
+        if (e.Key == Key.A)
+        {
+            _surfaceRunRotationMode = SurfaceRunRotationMode.Left;
+        }
+        
+        if (e.Key == Key.W)
+        {
+            // Forward
+            _surfaceRunMode = SurfaceRunMode.Forward;
+        }
+        else if (e.Key == Key.S)
+        {
+            // Backward
+            _surfaceRunMode = SurfaceRunMode.Backward;
+        }
+    }
+
+    public void OnKeyReleased(KeyEventArgs e)
+    {
+        if (e.Key == Key.D || e.Key == Key.A)
+        {
+            _surfaceRunRotationMode = SurfaceRunRotationMode.None;
+        }
+
+        if (e.Key == Key.W || e.Key == Key.S)
+        {
+            _surfaceRunMode = SurfaceRunMode.Stop;            
+        }
+    }
+    
+    private void ProcessSurfaceRunMovement()
+    {
+        if (_surfaceRunMode == SurfaceRunMode.Stop)
+        {
+            return;
+        }
+
+        switch (_surfaceRunRotationMode)
+        {
+            case SurfaceRunRotationMode.Left:
+                _surfaceRunDirection = _surfaceRunDirection.AddAngleWithWrap(1.0.ToRadians());
+                break;
+            
+            case SurfaceRunRotationMode.Right:
+                _surfaceRunDirection = _surfaceRunDirection.AddAngleWithWrap(-1.0.ToRadians());
+                break;
+            
+            case SurfaceRunRotationMode.None:
+                break;
+            
+            default:
+                throw new ArgumentException(nameof(_surfaceRunRotationMode));
+        }
+        
+        // Under camera point
+        var cameraPoint = _camera.Position3D.AsVector();
+        
+        // North vector (normalized by speed)
+        var toNorthVector = (_sphereCoordinatesProvider.GeoToPlanar3D(new GeoPoint(Math.PI / 2.0, 0, _camera.H)).AsVector() - _camera.Position3D.AsVector())
+            .Normalize()
+            * 0.000001;
+        
+        // Rotating (to be able to move not only to the North)
+        var targetVector = toNorthVector;
+        var nadirVector = GeoConstants.EarthCenter - cameraPoint;
+        
+        targetVector = targetVector.RotateAround(nadirVector, _surfaceRunDirection);
+        
+        // Moving camera
+        Vector<double> newCameraPosition3D;
+
+        if (_surfaceRunMode == SurfaceRunMode.Forward)
+        {
+            newCameraPosition3D = cameraPoint + targetVector;
+        }
+        else if (_surfaceRunMode == SurfaceRunMode.Backward)
+        {
+            newCameraPosition3D = cameraPoint - targetVector;
+        }
+        else
+        {
+            throw new ArgumentException("Incorrect surface run state.");
+        }
+        
+        var newCameraPositionGeo = _sphereCoordinatesProvider.Planar3DToGeo(newCameraPosition3D.AsPlanarPoint3D());
+
+        _camera.Lat = newCameraPositionGeo.Lat;
+        _camera.Lon = newCameraPositionGeo.Lon;
+    }
+
+    private double AddAnglesWithLimit(double a1, double a2)
+    {
+        var result = a1 + a2;
+
+        if (result < -Math.PI / 2.0)
+        {
+            result = -Math.PI / 2.0;
+        }
+        else if (result > Math.PI / 2.0)
+        {
+            result = Math.PI / 2.0;
+        }
+
+        return result;
     }
 }

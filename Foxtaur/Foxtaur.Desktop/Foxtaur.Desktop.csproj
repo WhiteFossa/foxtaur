@@ -39,6 +39,9 @@
         <None Update="Resources\Shaders\shader_fxaa.frag">
           <CopyToOutputDirectory>Always</CopyToOutputDirectory>
         </None>
+        <None Update="Resources\Textures\Basemaps\HYP_HR_SR_OB_DR_resized.jpeg">
+          <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
     </ItemGroup>
     <ItemGroup>
         <!--This helps with theme dll-s trimming.
