@@ -53,7 +53,7 @@ public class ResourcesConstants
     /// <summary>
     /// Start to clear DEM cache is it's size greater than this value
     /// </summary>
-    public const long MaxDemCacheSize = 8 * BytesInGiB;
+    public const long MaxDemCacheSize = 2 * BytesInGiB;
     
     /// <summary>
     /// Maps is here on server
