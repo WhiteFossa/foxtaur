@@ -108,11 +108,6 @@ public static class RendererConstants
     public const int MaxSegmentsPerFrameRegeneration = 2;
 
     /// <summary>
-    /// Virtual viewport size for the purporse of culling
-    /// </summary>
-    public const double CullingViewportSize = 1.0;
-    
-    /// <summary>
     /// Underground plane height for surface walk mode segments culling
     /// </summary>
     public const double SurfaceRunModeUndergroundPlaneHeight = GeoConstants.EarthRadius - 0.005 * GeoConstants.EarthRadius;

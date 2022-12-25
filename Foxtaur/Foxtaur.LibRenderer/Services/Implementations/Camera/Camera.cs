@@ -276,6 +276,4 @@ public class Camera : ICamera
 
         BackProjectionMatrix = forwardProjection.Inverse();
     }
-
-    
 }

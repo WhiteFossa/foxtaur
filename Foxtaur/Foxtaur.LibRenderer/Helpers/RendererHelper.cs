@@ -68,13 +68,13 @@ public static class RendererHelper
     /// </summary>
     public static bool IsPointInCullingViewport(this PlanarPoint2D point)
     {
-        return point.X >= -1.0 * RendererConstants.CullingViewportSize
+        return point.X >= -1.0
                &&
-               point.X <= RendererConstants.CullingViewportSize
+               point.X <= 1.0
                &&
-               point.Y >= -1.0 * RendererConstants.CullingViewportSize
+               point.Y >= -1.0
                &&
-               point.Y <= RendererConstants.CullingViewportSize;
+               point.Y <= 1.0;
     }
 
     /// <summary>
@@ -82,8 +82,34 @@ public static class RendererHelper
     /// </summary>
     public static bool IsCullingViewpointCoveredBySegment(this PlanarSegment segment)
     {
-        return (segment.Left <= -1.0 * RendererConstants.CullingViewportSize && segment.Right >= RendererConstants.CullingViewportSize)
-               ||
-               (segment.Top >= RendererConstants.CullingViewportSize && segment.Bottom <= -1.0 * RendererConstants.CullingViewportSize);
+        // X-cross, Y-cover
+        if ((segment.Left >= -1.0 && segment.Left <= 1.0)
+            ||
+            (segment.Right >= -1.0 && segment.Right <= 1.0)
+            &&
+            (segment.Top >= 1.0 && segment.Bottom <= -1.0))
+        {
+            return true;
+        }
+        
+        // Y-cross, X-cover
+        if ((segment.Bottom >= -1.0 && segment.Bottom <= 1.0)
+            ||
+            (segment.Top >= -1.0 && segment.Top <= 1.0)
+            &&
+            (segment.Right >= 1.0 && segment.Left <= -1.0))
+        {
+            return true;
+        }
+
+        // Full cover
+        if ((segment.Left <= -1.0 && segment.Right >= 1.0)
+            &&
+            (segment.Top >= 1.0 && segment.Bottom <= -1.0))
+        {
+            return true;
+        }
+
+        return false;
     }
 }
