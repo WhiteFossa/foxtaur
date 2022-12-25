@@ -73,18 +73,18 @@ public class ZoomService : IZoomService
     {
         new(ZoomLevel.ZoomLevel0,
             Math.PI / 2.0f,
-            0.1,
+            0.5,
             10.0.ToRadians(),
             0.5.ToRadians()),
         
         new(ZoomLevel.ZoomLevel1,
+            0.5,
             0.1,
-            0.001,
             2.0.ToRadians(),
             0.1.ToRadians()),
         
         new(ZoomLevel.ZoomLevel2,
-            0.001,
+            0.1,
             0.0,
             1.0.ToRadians(),
             0.05.ToRadians())
