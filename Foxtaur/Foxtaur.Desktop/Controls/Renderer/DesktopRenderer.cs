@@ -154,6 +154,11 @@ public class DesktopRenderer : OpenGlControlBase
     /// </summary>
     private SurfaceRunState _surfaceRunState = SurfaceRunState.Stop;
 
+    /// <summary>
+    /// Surface run direction (radians, relative to north)
+    /// </summary>
+    private double _surfaceRunDirection = 0.0;
+
     #endregion
     
     #region Maps
@@ -320,7 +325,7 @@ public class DesktopRenderer : OpenGlControlBase
         _defaultShader = new Shader(silkGlContext, @"Resources/Shaders/shader.vert", @"Resources/Shaders/shader.frag");
 
         // Loading textures
-        _earthTexture = new Texture(silkGlContext, @"Resources/Textures/Basemaps/NE2_50M_SR_W.jpeg");
+        _earthTexture = new Texture(silkGlContext, @"Resources/Textures/Basemaps/HYP_HR_SR_OB_DR_resized.jpeg");
 
         // UI
         _ui.Initialize(silkGlContext, _viewportWidth, _viewportHeight, _uiData); // We also need to re-initialize on viewport size change
@@ -828,6 +833,17 @@ public class DesktopRenderer : OpenGlControlBase
 
     public void OnKeyPressed(KeyEventArgs e)
     {
+        // Surface run direction
+        if (e.Key == Key.D)
+        {
+            _surfaceRunDirection = _surfaceRunDirection.AddAngleWithWrap(-1.0.ToRadians());
+        }
+        
+        if (e.Key == Key.A)
+        {
+            _surfaceRunDirection = _surfaceRunDirection.AddAngleWithWrap(1.0.ToRadians());
+        }
+        
         if (e.Key == Key.W)
         {
             // Forward
@@ -859,17 +875,23 @@ public class DesktopRenderer : OpenGlControlBase
         var toNorthVector = (_sphereCoordinatesProvider.GeoToPlanar3D(new GeoPoint(Math.PI / 2.0, 0, _camera.H)).AsVector() - _camera.Position3D.AsVector())
             .Normalize()
             * 0.000001;
-
+        
+        // Rotating (to be able to move not only to the North)
+        var targetVector = toNorthVector;
+        var nadirVector = GeoConstants.EarthCenter - cameraPoint;
+        
+        targetVector = targetVector.RotateAround(nadirVector, _surfaceRunDirection);
+        
         // Moving camera
         Vector<double> newCameraPosition3D;
 
         if (_surfaceRunState == SurfaceRunState.Forward)
         {
-            newCameraPosition3D = cameraPoint + toNorthVector;
+            newCameraPosition3D = cameraPoint + targetVector;
         }
         else if (_surfaceRunState == SurfaceRunState.Backward)
         {
-            newCameraPosition3D = cameraPoint - toNorthVector;
+            newCameraPosition3D = cameraPoint - targetVector;
         }
         else
         {
