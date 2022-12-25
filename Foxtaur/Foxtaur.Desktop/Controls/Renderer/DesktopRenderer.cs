@@ -494,6 +494,7 @@ public class DesktopRenderer : OpenGlControlBase
         targetVector = targetVector.RotateAround(nadirNorthPerpVector, _surfaceRunLatViewAngle);
 
         // Longitudal view
+        targetVector = targetVector.RotateAround(nadirVector, _surfaceRunDirection);
         targetVector = targetVector.RotateAround(nadirVector, _surfaceRunLonViewAngle);
 
         _camera.Target = new PlanarPoint3D(targetVector[0] + _camera.Position3D.X, targetVector[1] + _camera.Position3D.Y, targetVector[2] + _camera.Position3D.Z);
