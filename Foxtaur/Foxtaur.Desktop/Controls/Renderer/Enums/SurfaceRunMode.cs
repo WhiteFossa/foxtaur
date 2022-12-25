@@ -3,7 +3,7 @@ namespace Foxtaur.Desktop.Controls.Renderer.Enums;
 /// <summary>
 /// Surface run state
 /// </summary>
-public enum SurfaceRunState
+public enum SurfaceRunMode
 {
     /// <summary>
     /// No movement

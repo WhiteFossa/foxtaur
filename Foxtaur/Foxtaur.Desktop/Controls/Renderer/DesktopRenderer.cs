@@ -150,15 +150,20 @@ public class DesktopRenderer : OpenGlControlBase
     private bool _rotateHeadMode = false;
 
     /// <summary>
-    /// Surface run state (i.e. is user moving?)
+    /// Surface run mode (i.e. is user moving?)
     /// </summary>
-    private SurfaceRunState _surfaceRunState = SurfaceRunState.Stop;
+    private SurfaceRunMode _surfaceRunMode = SurfaceRunMode.Stop;
 
     /// <summary>
     /// Surface run direction (radians, relative to north)
     /// </summary>
     private double _surfaceRunDirection = 0.0;
 
+    /// <summary>
+    /// Surface run rotation mode
+    /// </summary>
+    private SurfaceRunRotationMode _surfaceRunRotationMode = SurfaceRunRotationMode.None;
+ 
     #endregion
     
     #region Maps
@@ -836,36 +841,61 @@ public class DesktopRenderer : OpenGlControlBase
         // Surface run direction
         if (e.Key == Key.D)
         {
-            _surfaceRunDirection = _surfaceRunDirection.AddAngleWithWrap(-1.0.ToRadians());
+            _surfaceRunRotationMode = SurfaceRunRotationMode.Right;
         }
         
         if (e.Key == Key.A)
         {
-            _surfaceRunDirection = _surfaceRunDirection.AddAngleWithWrap(1.0.ToRadians());
+            _surfaceRunRotationMode = SurfaceRunRotationMode.Left;
         }
         
         if (e.Key == Key.W)
         {
             // Forward
-            _surfaceRunState = SurfaceRunState.Forward;
+            _surfaceRunMode = SurfaceRunMode.Forward;
         }
         else if (e.Key == Key.S)
         {
             // Backward
-            _surfaceRunState = SurfaceRunState.Backward;
+            _surfaceRunMode = SurfaceRunMode.Backward;
         }
     }
 
     public void OnKeyReleased(KeyEventArgs e)
     {
-        _surfaceRunState = SurfaceRunState.Stop;
+        if (e.Key == Key.D || e.Key == Key.A)
+        {
+            _surfaceRunRotationMode = SurfaceRunRotationMode.None;
+        }
+
+        if (e.Key == Key.W || e.Key == Key.S)
+        {
+            _surfaceRunMode = SurfaceRunMode.Stop;            
+        }
     }
     
     private void ProcessSurfaceRunMovement()
     {
-        if (_surfaceRunState == SurfaceRunState.Stop)
+        if (_surfaceRunMode == SurfaceRunMode.Stop)
         {
             return;
+        }
+
+        switch (_surfaceRunRotationMode)
+        {
+            case SurfaceRunRotationMode.Left:
+                _surfaceRunDirection = _surfaceRunDirection.AddAngleWithWrap(1.0.ToRadians());
+                break;
+            
+            case SurfaceRunRotationMode.Right:
+                _surfaceRunDirection = _surfaceRunDirection.AddAngleWithWrap(-1.0.ToRadians());
+                break;
+            
+            case SurfaceRunRotationMode.None:
+                break;
+            
+            default:
+                throw new ArgumentException(nameof(_surfaceRunRotationMode));
         }
         
         // Under camera point
@@ -885,11 +915,11 @@ public class DesktopRenderer : OpenGlControlBase
         // Moving camera
         Vector<double> newCameraPosition3D;
 
-        if (_surfaceRunState == SurfaceRunState.Forward)
+        if (_surfaceRunMode == SurfaceRunMode.Forward)
         {
             newCameraPosition3D = cameraPoint + targetVector;
         }
-        else if (_surfaceRunState == SurfaceRunState.Backward)
+        else if (_surfaceRunMode == SurfaceRunMode.Backward)
         {
             newCameraPosition3D = cameraPoint - targetVector;
         }
@@ -902,28 +932,21 @@ public class DesktopRenderer : OpenGlControlBase
 
         _camera.Lat = newCameraPositionGeo.Lat;
         _camera.Lon = newCameraPositionGeo.Lon;
+    }
 
-        /*// Camera height
-        var cameraH = RendererConstants.SurfaceRunModeCameraOrbitHeight * _settingsService.GetDemScale() + _demProvider.GetSurfaceAltitude(_camera.Lat, _camera.Lon, _zoomService.ZoomLevel);
-        //var cameraH = GeoConstants.EarthRadius + RendererConstants.SurfaceRunModeCameraOrbitHeight;
-        _camera.H = cameraH;
+    private double AddAnglesWithLimit(double a1, double a2)
+    {
+        var result = a1 + a2;
 
-        // Up
-        var nadirVector = GeoConstants.EarthCenter - _camera.Position3D.AsVector();
-        _camera.Up = nadirVector;
+        if (result < -Math.PI / 2.0)
+        {
+            result = -Math.PI / 2.0;
+        }
+        else if (result > Math.PI / 2.0)
+        {
+            result = Math.PI / 2.0;
+        }
 
-        // Target
-        var toNorthVector = _sphereCoordinatesProvider.GeoToPlanar3D(new GeoPoint(Math.PI / 2.0, 0, _camera.H)).AsVector() - _camera.Position3D.AsVector();
-        var nadirNorthPerpVector = DoubleHelper.Cross3(nadirVector, toNorthVector); // Perpendicular to nadir vector and north vector
-        
-        var targetVector = nadirVector.RotateAround(nadirNorthPerpVector, Math.PI / 2.0);
-
-        // Latitudal view
-        targetVector = targetVector.RotateAround(nadirNorthPerpVector, _surfaceRunLatViewAngle);
-
-        // Longitudal view
-        targetVector = targetVector.RotateAround(nadirVector, _surfaceRunLonViewAngle);
-
-        _camera.Target = new PlanarPoint3D(targetVector[0] + _camera.Position3D.X, targetVector[1] + _camera.Position3D.Y, targetVector[2] + _camera.Position3D.Z);*/
+        return result;
     }
 }
