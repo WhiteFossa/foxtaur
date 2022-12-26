@@ -494,8 +494,8 @@ public class DesktopRenderer : OpenGlControlBase
         targetVector = targetVector.RotateAround(nadirNorthPerpVector, _surfaceRunLatViewAngle);
 
         // Longitudal view
-        targetVector = targetVector.RotateAround(nadirVector, _surfaceRunDirection);
-        targetVector = targetVector.RotateAround(nadirVector, _surfaceRunLonViewAngle);
+        targetVector = targetVector.RotateAround(nadirVector, _surfaceRunDirection); // Run direction
+        targetVector = targetVector.RotateAround(nadirVector, _surfaceRunLonViewAngle); // Head direction
 
         _camera.Target = new PlanarPoint3D(targetVector[0] + _camera.Position3D.X, targetVector[1] + _camera.Position3D.Y, targetVector[2] + _camera.Position3D.Z);
     }
@@ -877,11 +877,7 @@ public class DesktopRenderer : OpenGlControlBase
     
     private void ProcessSurfaceRunMovement()
     {
-        if (_surfaceRunMode == SurfaceRunMode.Stop)
-        {
-            return;
-        }
-
+        // Rotation (can happen even if we are stopped)
         switch (_surfaceRunRotationMode)
         {
             case SurfaceRunRotationMode.Left:
@@ -897,6 +893,12 @@ public class DesktopRenderer : OpenGlControlBase
             
             default:
                 throw new ArgumentException(nameof(_surfaceRunRotationMode));
+        }
+        
+        // Running
+        if (_surfaceRunMode == SurfaceRunMode.Stop)
+        {
+            return;
         }
         
         // Under camera point
@@ -933,21 +935,5 @@ public class DesktopRenderer : OpenGlControlBase
 
         _camera.Lat = newCameraPositionGeo.Lat;
         _camera.Lon = newCameraPositionGeo.Lon;
-    }
-
-    private double AddAnglesWithLimit(double a1, double a2)
-    {
-        var result = a1 + a2;
-
-        if (result < -Math.PI / 2.0)
-        {
-            result = -Math.PI / 2.0;
-        }
-        else if (result > Math.PI / 2.0)
-        {
-            result = Math.PI / 2.0;
-        }
-
-        return result;
     }
 }
