@@ -80,6 +80,28 @@
                     
                         <ScrollViewer>
                             <StackPanel>
+                                <!-- Surface run speed -->
+                                <StackPanel
+                                    Orientation="Horizontal">
+                            
+                                    <Label>Surface run speed:</Label>
+                        
+                                    <Label
+                                        VerticalAlignment="Center"
+                                        Content="{ Binding SurfaceRunSpeedText }">
+                                    </Label>    
+                                </StackPanel>
+                        
+                                <Slider
+                                    Name="SurfaceRunSpeedSlider"
+                                    Minimum="0.0000005"
+                                    Maximum="0.000005"
+                                    Ticks="100"
+                                    Value="{ Binding SurfaceRunSpeed }"
+                                    VerticalAlignment="Center">
+                                </Slider>
+                                <!-- End of surface run speed -->
+                                
                                 <!-- DEM scale -->
                                 <StackPanel
                                     Orientation="Horizontal">

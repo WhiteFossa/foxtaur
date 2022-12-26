@@ -16,8 +16,12 @@ namespace Foxtaur.Desktop.ViewModels
 
         private string _consoleText;
         private int _consoleCaretIndex;
+        
         private double _demScale;
         private string _demScaleText;
+
+        private double _surfaceRunSpeed;
+        private string _surfaceRunSpeedText;
         
         private Timer _demScaleNotificationTimer = new Timer(1000);
 
@@ -65,6 +69,30 @@ namespace Foxtaur.Desktop.ViewModels
             set => this.RaiseAndSetIfChanged(ref _demScaleText, value);
         }
 
+        /// <summary>
+        /// Surface run speed
+        /// </summary>
+        public double SurfaceRunSpeed
+        {
+            get => _surfaceRunSpeed;
+            set
+            {
+                this.RaiseAndSetIfChanged(ref _surfaceRunSpeed, value);
+                SurfaceRunSpeedText = $"{_surfaceRunSpeed:0.#########}";
+                
+                _settingsService.SetSurfaceRunSpeed(_surfaceRunSpeed);
+            }
+        }
+
+        /// <summary>
+        /// Surface run speed as text
+        /// </summary>
+        public string SurfaceRunSpeedText
+        {
+            get => _surfaceRunSpeedText;
+            set => this.RaiseAndSetIfChanged(ref _surfaceRunSpeedText, value);
+        }
+        
         #endregion
 
         #region DI
@@ -77,6 +105,7 @@ namespace Foxtaur.Desktop.ViewModels
         {
             // Loading settings
             DemScale = _settingsService.GetDemScale();
+            SurfaceRunSpeed = _settingsService.GetSurfaceRunSpeed();
             
             _demScaleNotificationTimer.Elapsed += NotifyAboutDemScaleChange;
             _demScaleNotificationTimer.AutoReset = false;

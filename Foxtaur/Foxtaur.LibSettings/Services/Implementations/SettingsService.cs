@@ -14,7 +14,7 @@ public class SettingsService : ISettingsService
     {
         // TODO: Load from DB instead
         _demScale = 1.0;
-        _surfaceRunSpeed = 0.000001;
+        _surfaceRunSpeed = 0.0000005;
         InvokeOnDemScaleChanged();
     }
     
