@@ -904,15 +904,14 @@ public class DesktopRenderer : OpenGlControlBase
         // Under camera point
         var cameraPoint = _camera.Position3D.AsVector();
         
-        // North vector (normalized by speed)
-        var toNorthVector = (_sphereCoordinatesProvider.GeoToPlanar3D(new GeoPoint(Math.PI / 2.0, 0, _camera.H)).AsVector() - _camera.Position3D.AsVector())
-            .Normalize()
-            * 0.000001;
+        // North vector
+        var toNorthVector = (_sphereCoordinatesProvider.GeoToPlanar3D(new GeoPoint(Math.PI / 2.0, 0, _camera.H)).AsVector() - _camera.Position3D.AsVector());
+            
+        // Target vector (will be added to current coordinates)
+        var targetVector = toNorthVector.Normalize() * _settingsService.GetSurfaceRunSpeed();
         
         // Rotating (to be able to move not only to the North)
-        var targetVector = toNorthVector;
         var nadirVector = GeoConstants.EarthCenter - cameraPoint;
-        
         targetVector = targetVector.RotateAround(nadirVector, _surfaceRunDirection);
         
         // Moving camera
