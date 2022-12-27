@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Reactive;
 using System.Timers;
+using Foxtaur.Desktop.Views;
 using Foxtaur.LibSettings.Services.Abstractions;
 using Microsoft.Extensions.DependencyInjection;
 using ReactiveUI;
@@ -121,14 +123,44 @@ namespace Foxtaur.Desktop.ViewModels
         
         #endregion
 
+        #region Commands
+        
+        /// <summary>
+        /// Show "More settings" dialogue
+        /// </summary>
+        public ReactiveCommand<Unit, Unit> MoreSettingsCommand { get; }
+
+        /// <summary>
+        /// Show "More settings" dialogue
+        /// </summary>
+        private void OnMoreSettingsCommand()
+        {
+            var moreSettingsDialog = new MoreSettingsWindow()
+            {
+                DataContext = _moreSettingsViewModel
+            };
+
+            moreSettingsDialog.ShowDialog(Program.GetMainWindow());
+        }
+        
+        #endregion
+        
         #region DI
 
         private readonly ISettingsService _settingsService = Program.Di.GetService<ISettingsService>();
 
         #endregion
+        
+        private MoreSettingsViewModel _moreSettingsViewModel;
 
         public MainWindowViewModel()
         {
+            // Binding commands
+            MoreSettingsCommand = ReactiveCommand.Create(OnMoreSettingsCommand);
+            
+            // More settings dialogue
+            _moreSettingsViewModel = new MoreSettingsViewModel();
+            
             // Loading settings
             DemScale = _settingsService.GetDemScale();
             SurfaceRunSpeed = _settingsService.GetSurfaceRunSpeed();

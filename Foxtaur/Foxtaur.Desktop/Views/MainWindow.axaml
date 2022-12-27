@@ -146,6 +146,11 @@
                                 </Slider>
                                 <!-- End of DEM scale -->
                         
+                                <!-- More settings -->
+                                <Button
+                                    Content="More settings..."
+                                    Command="{ Binding MoreSettingsCommand }"/>
+                                
                             </StackPanel>        
                         </ScrollViewer>                    
                     </Border>
