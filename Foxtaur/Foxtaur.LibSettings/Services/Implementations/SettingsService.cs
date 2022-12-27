@@ -8,10 +8,12 @@ public class SettingsService : ISettingsService
     private double _demScale;
     private double _surfaceRunSpeed;
     private double _surfaceRunTurnSpeed;
+    private Key _surfaceRunForwardButton;
     
     public event ISettingsService.OnDemScaleChangedHandler? OnDemScaleChanged;
     public event ISettingsService.OnSurfaceRunSpeedChangedHandler? OnSurfaceRunSpeedChanged;
     public event ISettingsService.OnSurfaceRunTurnSpeedChangedHandler? OnSurfaceRunTurnSpeedChanged;
+    public event ISettingsService.OnSurfaceRunForwardButtonChangedHandler? OnSurfaceRunForwardButtonChanged;
 
     public SettingsService()
     {
@@ -19,10 +21,12 @@ public class SettingsService : ISettingsService
         _demScale = 1.0;
         _surfaceRunSpeed = 0.0000005;
         _surfaceRunTurnSpeed = 1.0;
+        _surfaceRunForwardButton = Key.W;
         
         InvokeOnDemScaleChanged();
         InvokeOnSurfaceRunSpeedChanged();
         InvokeOnSurfaceRunTurnSpeedChanged();
+        InvokeOnSurfaceRunForwardButtonChanged();
     }
     
     public double GetDemScale()
@@ -56,6 +60,17 @@ public class SettingsService : ISettingsService
     {
         _surfaceRunTurnSpeed = surfaceRunTurnSpeed;
         InvokeOnSurfaceRunTurnSpeedChanged();
+    }
+
+    public Key GetSurfaceRunForwardButton()
+    {
+        return _surfaceRunForwardButton;
+    }
+
+    public void SetSurfaceRunForwardButton(Key surfaceRunForwardButton)
+    {
+        _surfaceRunForwardButton = surfaceRunForwardButton;
+        InvokeOnSurfaceRunForwardButtonChanged();
     }
 
     public IReadOnlyCollection<Key> GetKeyboardKeysCollection()
@@ -130,5 +145,10 @@ public class SettingsService : ISettingsService
     private void InvokeOnSurfaceRunTurnSpeedChanged()
     {
         OnSurfaceRunTurnSpeedChanged?.Invoke(this, new ISettingsService.OnSurfaceRunTurnSpeedChangedArgs(_surfaceRunTurnSpeed));
+    }
+    
+    private void InvokeOnSurfaceRunForwardButtonChanged()
+    {
+        OnSurfaceRunForwardButtonChanged?.Invoke(this, new ISettingsService.OnSurfaceRunForwardButtonChangedArgs(_surfaceRunForwardButton));
     }
 }

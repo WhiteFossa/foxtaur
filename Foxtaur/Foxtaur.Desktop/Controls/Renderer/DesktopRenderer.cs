@@ -850,7 +850,7 @@ public class DesktopRenderer : OpenGlControlBase
             _surfaceRunRotationMode = SurfaceRunRotationMode.Left;
         }
         
-        if (e.Key == Key.W)
+        if (e.Key == _settingsService.GetSurfaceRunForwardButton())
         {
             // Forward
             _surfaceRunMode = SurfaceRunMode.Forward;
@@ -869,7 +869,7 @@ public class DesktopRenderer : OpenGlControlBase
             _surfaceRunRotationMode = SurfaceRunRotationMode.None;
         }
 
-        if (e.Key == Key.W || e.Key == Key.S)
+        if (e.Key == _settingsService.GetSurfaceRunForwardButton() || e.Key == Key.S)
         {
             _surfaceRunMode = SurfaceRunMode.Stop;            
         }

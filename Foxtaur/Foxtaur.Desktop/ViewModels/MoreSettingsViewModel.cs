@@ -6,6 +6,10 @@ using System.Reflection;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Foxtaur.LibSettings.Services.Abstractions;
+using HarfBuzzSharp;
+using MessageBox.Avalonia;
+using MessageBox.Avalonia.DTO;
+using MessageBox.Avalonia.Enums;
 using ReactiveUI;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -120,7 +124,7 @@ public class MoreSettingsViewModel : ViewModelBase
         CancelPressedCommand = ReactiveCommand.Create<Window>(OnCancelPressedCommand);
 
         // Loading settings from ISettingsService
-        SurfaceRunModeForwardButtonIndex = _settingsService.GetKeyboardKeyIndex(Key.W);
+        SurfaceRunModeForwardButtonIndex = _settingsService.GetKeyboardKeyIndex(_settingsService.GetSurfaceRunForwardButton());
         SurfaceRunModeBackwardButtonIndex = _settingsService.GetKeyboardKeyIndex(Key.S);
         SurfaceRunModeTurnLeftButtonIndex = _settingsService.GetKeyboardKeyIndex(Key.A);
         SurfaceRunModeTurnRightButtonIndex = _settingsService.GetKeyboardKeyIndex(Key.D);
@@ -133,7 +137,24 @@ public class MoreSettingsViewModel : ViewModelBase
     
     private void OnOkPressedCommand(Window window)
     {
-        int a = 10;
+        if (IsAllControlsValid())
+        {
+            _settingsService.SetSurfaceRunForwardButton(_settingsService.GetKeyboardKey(SurfaceRunModeForwardButtonIndex));
+            
+            window.Close();
+            return;
+        }
+
+        // Some values are invalid
+        MessageBoxManager.GetMessageBoxStandardWindow(
+                new MessageBoxStandardParams()
+                {
+                    ContentTitle = "Validation error",
+                    ContentMessage = "Some settings have invalid values.",
+                    Icon = Icon.Error,
+                    ButtonDefinitions = ButtonEnum.Ok
+                })
+            .Show();
     }
     
     private void OnCancelPressedCommand(Window window)
@@ -163,5 +184,13 @@ public class MoreSettingsViewModel : ViewModelBase
             duplicateProperty.SetValue(this, -1);
         }
     }
-    
+
+    /// <summary>
+    /// Returns true if all controls in windows have valid values
+    /// </summary>
+    private bool IsAllControlsValid()
+    {
+        return !_keyProperties
+            .Any(kp => (int)kp.GetValue(this) == -1);
+    }
 }

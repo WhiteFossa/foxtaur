@@ -118,6 +118,43 @@ public interface ISettingsService
     
     #endregion
 
+    #region Surface run forward button
+    
+    public class OnSurfaceRunForwardButtonChangedArgs
+    {
+        /// <summary>
+        /// New forward button
+        /// </summary>
+        public Key SurfaceRunForwardButton { get; }
+
+        public OnSurfaceRunForwardButtonChangedArgs(Key surfaceRunForwardButton)
+        {
+            SurfaceRunForwardButton = surfaceRunForwardButton;
+        }
+    }
+    
+    /// <summary>
+    /// Called when surface run forward button is changed
+    /// </summary>
+    delegate void OnSurfaceRunForwardButtonChangedHandler(object sender, OnSurfaceRunForwardButtonChangedArgs args);
+    
+    /// <summary>
+    /// Event for surface run forward button change
+    /// </summary>
+    event OnSurfaceRunForwardButtonChangedHandler OnSurfaceRunForwardButtonChanged;
+    
+    /// <summary>
+    /// Get current surface run forward button
+    /// </summary>
+    Key GetSurfaceRunForwardButton();
+
+    /// <summary>
+    /// Set surface run forward button
+    /// </summary>
+    void SetSurfaceRunForwardButton(Key surfaceRunForwardButton);
+    
+    #endregion
+    
     /// <summary>
     /// Get keyboard keys collection. Use it in dropdowns for action keys
     /// </summary>
