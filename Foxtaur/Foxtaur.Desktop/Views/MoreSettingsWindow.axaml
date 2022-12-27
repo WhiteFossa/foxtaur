@@ -31,11 +31,12 @@
                                                 ColumnDefinitions="Auto, Auto">
                                                 
                                                 <!-- Forward -->
-                                                <Label Grid.Row="0" Grid.Column="0">Forward:</Label>
+                                                <Label Grid.Row="0" Grid.Column="0">Surface run forward:</Label>
                                                 <ComboBox
                                                         x:Name="surfaceRunForwardButton"
                                                         Grid.Row="0"
-                                                        Grid.Column="1">
+                                                        Grid.Column="1"
+                                                        SelectedIndex="{ Binding SurfaceRunModeForwardButtonIndex }">
                                                         <ComboBox.ItemTemplate>
                                                                 <DataTemplate>
                                                                         <Label Content="{ Binding }" />
@@ -44,11 +45,12 @@
                                                 </ComboBox>
                                                 
                                                 <!-- Backward -->
-                                                <Label Grid.Row="1" Grid.Column="0">Backward:</Label>
+                                                <Label Grid.Row="1" Grid.Column="0">Surface run backward:</Label>
                                                 <ComboBox
                                                         x:Name="surfaceRunBackButton"
                                                         Grid.Row="1"
-                                                        Grid.Column="1">
+                                                        Grid.Column="1"
+                                                        SelectedIndex="{ Binding SurfaceRunModeBackwardButtonIndex }">
                                                         <ComboBox.ItemTemplate>
                                                                 <DataTemplate>
                                                                         <Label Content="{ Binding }" />
@@ -57,11 +59,12 @@
                                                 </ComboBox>
                                                 
                                                 <!-- Left -->
-                                                <Label Grid.Row="2" Grid.Column="0">Left:</Label>
+                                                <Label Grid.Row="2" Grid.Column="0">Surface run turn left:</Label>
                                                 <ComboBox
-                                                        x:Name="surfaceRunLeftButton"
+                                                        x:Name="surfaceRunTurnLeftButton"
                                                         Grid.Row="2"
-                                                        Grid.Column="1">
+                                                        Grid.Column="1"
+                                                        SelectedIndex="{ Binding SurfaceRunModeTurnLeftButtonIndex }">
                                                         <ComboBox.ItemTemplate>
                                                                 <DataTemplate>
                                                                         <Label Content="{ Binding }" />
@@ -70,11 +73,12 @@
                                                 </ComboBox>
                                                 
                                                 <!-- Right -->
-                                                <Label Grid.Row="3" Grid.Column="0">Right:</Label>
+                                                <Label Grid.Row="3" Grid.Column="0">Surface run turn right:</Label>
                                                 <ComboBox
-                                                        x:Name="surfaceRunRightButton"
+                                                        x:Name="surfaceRunTurnRightButton"
                                                         Grid.Row="3"
-                                                        Grid.Column="1">
+                                                        Grid.Column="1"
+                                                        SelectedIndex="{ Binding SurfaceRunModeTurnRightButtonIndex }">
                                                         <ComboBox.ItemTemplate>
                                                                 <DataTemplate>
                                                                         <Label Content="{ Binding }" />
