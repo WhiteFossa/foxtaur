@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reactive;
 using System.Reflection;
+using Avalonia.Controls;
 using Avalonia.Input;
 using Foxtaur.LibSettings.Services.Abstractions;
 using ReactiveUI;
@@ -113,15 +115,35 @@ public class MoreSettingsViewModel : ViewModelBase
             GetType().GetProperty("SurfaceRunModeTurnRightButtonIndex")
         };
         
+        // Commands
+        OkPressedCommand = ReactiveCommand.Create<Window>(OnOkPressedCommand);
+        CancelPressedCommand = ReactiveCommand.Create<Window>(OnCancelPressedCommand);
+
         // Loading settings from ISettingsService
         SurfaceRunModeForwardButtonIndex = _settingsService.GetKeyboardKeyIndex(Key.W);
         SurfaceRunModeBackwardButtonIndex = _settingsService.GetKeyboardKeyIndex(Key.S);
         SurfaceRunModeTurnLeftButtonIndex = _settingsService.GetKeyboardKeyIndex(Key.A);
         SurfaceRunModeTurnRightButtonIndex = _settingsService.GetKeyboardKeyIndex(Key.D);
-        
-
+    }
+    
+    #region Commands
+    
+    public ReactiveCommand<Window, Unit> OkPressedCommand { get; }
+    public ReactiveCommand<Window, Unit> CancelPressedCommand { get; }
+    
+    private void OnOkPressedCommand(Window window)
+    {
+        int a = 10;
+    }
+    
+    private void OnCancelPressedCommand(Window window)
+    {
+        window.Close();
     }
 
+    
+    #endregion
+    
     /// <summary>
     /// Scan all controls and remove keys, which are duplicate to newly assigned key
     /// </summary>
