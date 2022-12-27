@@ -127,7 +127,7 @@ public class MoreSettingsViewModel : ViewModelBase
         SurfaceRunModeForwardButtonIndex = _settingsService.GetKeyboardKeyIndex(_settingsService.GetSurfaceRunForwardButton());
         SurfaceRunModeBackwardButtonIndex = _settingsService.GetKeyboardKeyIndex(_settingsService.GetSurfaceRunBackwardButton());
         SurfaceRunModeTurnLeftButtonIndex = _settingsService.GetKeyboardKeyIndex(_settingsService.GetSurfaceRunTurnLeftButton());
-        SurfaceRunModeTurnRightButtonIndex = _settingsService.GetKeyboardKeyIndex(Key.D);
+        SurfaceRunModeTurnRightButtonIndex = _settingsService.GetKeyboardKeyIndex(_settingsService.GetSurfaceRunTurnRightButton());
     }
     
     #region Commands
@@ -142,6 +142,7 @@ public class MoreSettingsViewModel : ViewModelBase
             _settingsService.SetSurfaceRunForwardButton(_settingsService.GetKeyboardKey(SurfaceRunModeForwardButtonIndex));
             _settingsService.SetSurfaceRunBackwardButton(_settingsService.GetKeyboardKey(SurfaceRunModeBackwardButtonIndex));
             _settingsService.SetSurfaceRunTurnLeftButton(_settingsService.GetKeyboardKey(SurfaceRunModeTurnLeftButtonIndex));
+            _settingsService.SetSurfaceRunTurnRightButton(_settingsService.GetKeyboardKey(SurfaceRunModeTurnRightButtonIndex));
             
             window.Close();
             return;

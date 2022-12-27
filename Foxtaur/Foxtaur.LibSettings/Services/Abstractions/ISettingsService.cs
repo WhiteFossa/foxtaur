@@ -229,6 +229,43 @@ public interface ISettingsService
     
     #endregion
     
+    #region Surface run turn right button
+    
+    public class OnSurfaceRunTurnRightButtonChangedArgs
+    {
+        /// <summary>
+        /// New turn right button
+        /// </summary>
+        public Key SurfaceRunTurnRightButton { get; }
+
+        public OnSurfaceRunTurnRightButtonChangedArgs(Key surfaceRunTurnRightButton)
+        {
+            SurfaceRunTurnRightButton = surfaceRunTurnRightButton;
+        }
+    }
+    
+    /// <summary>
+    /// Called when surface run turn right button is changed
+    /// </summary>
+    delegate void OnSurfaceRunTurnRightButtonChangedHandler(object sender, OnSurfaceRunTurnRightButtonChangedArgs args);
+    
+    /// <summary>
+    /// Event for surface run turn right button change
+    /// </summary>
+    event OnSurfaceRunTurnRightButtonChangedHandler OnSurfaceRunTurnRightButtonChanged;
+    
+    /// <summary>
+    /// Get current surface run turn right button
+    /// </summary>
+    Key GetSurfaceRunTurnRightButton();
+
+    /// <summary>
+    /// Set surface run turn left button
+    /// </summary>
+    void SetSurfaceRunTurnRightButton(Key surfaceRunTurnRightButton);
+    
+    #endregion
+    
     /// <summary>
     /// Get keyboard keys collection. Use it in dropdowns for action keys
     /// </summary>

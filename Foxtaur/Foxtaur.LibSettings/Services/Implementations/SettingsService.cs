@@ -11,6 +11,7 @@ public class SettingsService : ISettingsService
     private Key _surfaceRunForwardButton;
     private Key _surfaceRunBackwardButton;
     private Key _surfaceRunTurnLeftButton;
+    private Key _surfaceRunTurnRightButton;
     
     public event ISettingsService.OnDemScaleChangedHandler? OnDemScaleChanged;
     public event ISettingsService.OnSurfaceRunSpeedChangedHandler? OnSurfaceRunSpeedChanged;
@@ -18,6 +19,7 @@ public class SettingsService : ISettingsService
     public event ISettingsService.OnSurfaceRunForwardButtonChangedHandler? OnSurfaceRunForwardButtonChanged;
     public event ISettingsService.OnSurfaceRunBackwardButtonChangedHandler? OnSurfaceRunBackwardButtonChanged;
     public event ISettingsService.OnSurfaceRunTurnLeftButtonChangedHandler? OnSurfaceRunTurnLeftButtonChanged;
+    public event ISettingsService.OnSurfaceRunTurnRightButtonChangedHandler? OnSurfaceRunTurnRightButtonChanged;
 
     public SettingsService()
     {
@@ -28,6 +30,7 @@ public class SettingsService : ISettingsService
         _surfaceRunForwardButton = Key.W;
         _surfaceRunBackwardButton = Key.S;
         _surfaceRunTurnLeftButton = Key.A;
+        _surfaceRunTurnRightButton = Key.D;
         
         InvokeOnDemScaleChanged();
         InvokeOnSurfaceRunSpeedChanged();
@@ -35,6 +38,7 @@ public class SettingsService : ISettingsService
         InvokeOnSurfaceRunForwardButtonChanged();
         InvokeOnSurfaceRunBackwardButtonChanged();
         InvokeOnSurfaceRunTurnLeftButtonChanged();
+        InvokeOnSurfaceRunTurnRightButtonChanged();
     }
     
     public double GetDemScale()
@@ -101,6 +105,17 @@ public class SettingsService : ISettingsService
     {
         _surfaceRunTurnLeftButton = surfaceRunTurnLeftButton;
         InvokeOnSurfaceRunTurnLeftButtonChanged();
+    }
+
+    public Key GetSurfaceRunTurnRightButton()
+    {
+        return _surfaceRunTurnRightButton;
+    }
+
+    public void SetSurfaceRunTurnRightButton(Key surfaceRunTurnRightButton)
+    {
+        _surfaceRunTurnRightButton = surfaceRunTurnRightButton;
+        InvokeOnSurfaceRunTurnRightButtonChanged();
     }
 
     public IReadOnlyCollection<Key> GetKeyboardKeysCollection()
@@ -190,5 +205,10 @@ public class SettingsService : ISettingsService
     private void InvokeOnSurfaceRunTurnLeftButtonChanged()
     {
         OnSurfaceRunTurnLeftButtonChanged?.Invoke(this, new ISettingsService.OnSurfaceRunTurnLeftButtonChangedArgs(_surfaceRunTurnLeftButton));
+    }
+    
+    private void InvokeOnSurfaceRunTurnRightButtonChanged()
+    {
+        OnSurfaceRunTurnRightButtonChanged?.Invoke(this, new ISettingsService.OnSurfaceRunTurnRightButtonChangedArgs(_surfaceRunTurnRightButton));
     }
 }
