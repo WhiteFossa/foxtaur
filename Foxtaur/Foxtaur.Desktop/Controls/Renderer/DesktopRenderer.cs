@@ -881,11 +881,11 @@ public class DesktopRenderer : OpenGlControlBase
         switch (_surfaceRunRotationMode)
         {
             case SurfaceRunRotationMode.Left:
-                _surfaceRunDirection = _surfaceRunDirection.AddAngleWithWrap(1.0.ToRadians());
+                _surfaceRunDirection = _surfaceRunDirection.AddAngleWithWrap(_settingsService.GetSurfaceRunTurnSpeed().ToRadians());
                 break;
             
             case SurfaceRunRotationMode.Right:
-                _surfaceRunDirection = _surfaceRunDirection.AddAngleWithWrap(-1.0.ToRadians());
+                _surfaceRunDirection = _surfaceRunDirection.AddAngleWithWrap(-1.0 * _settingsService.GetSurfaceRunTurnSpeed().ToRadians());
                 break;
             
             case SurfaceRunRotationMode.None:

@@ -78,5 +78,42 @@ public interface ISettingsService
     void SetSurfaceRunSpeed(double surfaceRunSpeed);
 
     #endregion
+    
+    #region Surface run turn speed
+    
+    public class OnSurfaceRunTurnSpeedChangedArgs
+    {
+        /// <summary>
+        /// New surface run turn speed
+        /// </summary>
+        public double SurfaceRunTurnSpeed { get; }
+
+        public OnSurfaceRunTurnSpeedChangedArgs(double surfaceRunTurnSpeed)
+        {
+            SurfaceRunTurnSpeed = surfaceRunTurnSpeed;
+        }
+    }
+    
+    /// <summary>
+    /// Called when surface run turn speed is changed
+    /// </summary>
+    delegate void OnSurfaceRunTurnSpeedChangedHandler(object sender, OnSurfaceRunTurnSpeedChangedArgs args);
+    
+    /// <summary>
+    /// Event for surface run speed change
+    /// </summary>
+    event OnSurfaceRunTurnSpeedChangedHandler OnSurfaceRunTurnSpeedChanged;
+    
+    /// <summary>
+    /// Get current surface run turn speed
+    /// </summary>
+    double GetSurfaceRunTurnSpeed();
+
+    /// <summary>
+    /// Set surface run turn speed
+    /// </summary>
+    void SetSurfaceRunTurnSpeed(double surfaceRunTurnSpeed);
+    
+    #endregion
 
 }

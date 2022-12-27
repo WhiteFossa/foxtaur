@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Reactive;
 using System.Timers;
 using Foxtaur.LibSettings.Services.Abstractions;
 using Microsoft.Extensions.DependencyInjection;
@@ -22,6 +21,9 @@ namespace Foxtaur.Desktop.ViewModels
 
         private double _surfaceRunSpeed;
         private string _surfaceRunSpeedText;
+
+        private double _surfaceRunTurnSpeed;
+        private string _surfaceRunTurnSpeedText;
         
         private Timer _demScaleNotificationTimer = new Timer(1000);
 
@@ -92,6 +94,30 @@ namespace Foxtaur.Desktop.ViewModels
             get => _surfaceRunSpeedText;
             set => this.RaiseAndSetIfChanged(ref _surfaceRunSpeedText, value);
         }
+
+        /// <summary>
+        /// Surface run turn speed
+        /// </summary>
+        public double SurfaceRunTurnSpeed
+        {
+            get => _surfaceRunTurnSpeed;
+            set
+            {
+                this.RaiseAndSetIfChanged(ref _surfaceRunTurnSpeed, value);
+                SurfaceRunTurnSpeedText = $"{_surfaceRunTurnSpeed:0.##°}";
+                
+                _settingsService.SetSurfaceRunTurnSpeed(_surfaceRunTurnSpeed);
+            }
+        }
+
+        /// <summary>
+        /// Surface run turn speed as text
+        /// </summary>
+        public string SurfaceRunTurnSpeedText
+        {
+            get => _surfaceRunTurnSpeedText;
+            set => this.RaiseAndSetIfChanged(ref _surfaceRunTurnSpeedText, value);
+        }
         
         #endregion
 
@@ -106,6 +132,7 @@ namespace Foxtaur.Desktop.ViewModels
             // Loading settings
             DemScale = _settingsService.GetDemScale();
             SurfaceRunSpeed = _settingsService.GetSurfaceRunSpeed();
+            SurfaceRunTurnSpeed = _settingsService.GetSurfaceRunTurnSpeed();
             
             _demScaleNotificationTimer.Elapsed += NotifyAboutDemScaleChange;
             _demScaleNotificationTimer.AutoReset = false;

@@ -102,6 +102,28 @@
                                 </Slider>
                                 <!-- End of surface run speed -->
                                 
+                                <!-- Surface run turn speed -->
+                                <StackPanel
+                                    Orientation="Horizontal">
+                            
+                                    <Label>Surface run turn speed:</Label>
+                        
+                                    <Label
+                                        VerticalAlignment="Center"
+                                        Content="{ Binding SurfaceRunTurnSpeedText }">
+                                    </Label>    
+                                </StackPanel>
+                        
+                                <Slider
+                                    Name="SurfaceRunTurnSpeedSlider"
+                                    Minimum="0.1"
+                                    Maximum="5"
+                                    Ticks="100"
+                                    Value="{ Binding SurfaceRunTurnSpeed }"
+                                    VerticalAlignment="Center">
+                                </Slider>
+                                <!-- End of surface run turn speed -->
+                                
                                 <!-- DEM scale -->
                                 <StackPanel
                                     Orientation="Horizontal">
