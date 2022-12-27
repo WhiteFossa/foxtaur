@@ -140,6 +140,7 @@ public class MoreSettingsViewModel : ViewModelBase
         if (IsAllControlsValid())
         {
             _settingsService.SetSurfaceRunForwardButton(_settingsService.GetKeyboardKey(SurfaceRunModeForwardButtonIndex));
+            _settingsService.SetSurfaceRunBackwardButton(_settingsService.GetKeyboardKey(SurfaceRunModeBackwardButtonIndex));
             
             window.Close();
             return;

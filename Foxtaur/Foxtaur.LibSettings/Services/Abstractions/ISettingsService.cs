@@ -155,6 +155,43 @@ public interface ISettingsService
     
     #endregion
     
+    #region Surface run backward button
+    
+    public class OnSurfaceRunBackwardButtonChangedArgs
+    {
+        /// <summary>
+        /// New backward button
+        /// </summary>
+        public Key SurfaceRunBackwardButton { get; }
+
+        public OnSurfaceRunBackwardButtonChangedArgs(Key surfaceRunBackwardButton)
+        {
+            SurfaceRunBackwardButton = surfaceRunBackwardButton;
+        }
+    }
+    
+    /// <summary>
+    /// Called when surface run back button is changed
+    /// </summary>
+    delegate void OnSurfaceRunBackwardButtonChangedHandler(object sender, OnSurfaceRunBackwardButtonChangedArgs args);
+    
+    /// <summary>
+    /// Event for surface run back button change
+    /// </summary>
+    event OnSurfaceRunBackwardButtonChangedHandler OnSurfaceRunBackwardButtonChanged;
+    
+    /// <summary>
+    /// Get current surface run back button
+    /// </summary>
+    Key GetSurfaceRunBackwardButton();
+
+    /// <summary>
+    /// Set surface run forward button
+    /// </summary>
+    void SetSurfaceRunBackwardButton(Key surfaceRunBackButton);
+    
+    #endregion
+    
     /// <summary>
     /// Get keyboard keys collection. Use it in dropdowns for action keys
     /// </summary>
