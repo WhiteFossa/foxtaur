@@ -5,5 +5,4 @@ namespace Foxtaur.Desktop.ViewModels;
 /// </summary>
 public class MoreSettingsViewModel : ViewModelBase
 {
-    
 }

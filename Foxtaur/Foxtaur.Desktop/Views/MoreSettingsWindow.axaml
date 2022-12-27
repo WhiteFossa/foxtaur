@@ -2,8 +2,89 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        xmlns:vm="using:Foxtaur.Desktop.ViewModels"
+        mc:Ignorable="d" d:DesignWidth="650" d:DesignHeight="450"
+        Width="650"
         x:Class="Foxtaur.Desktop.Views.MoreSettingsWindow"
         Title="MoreSettingsWindow">
-    Welcome to Avalonia!
+    
+        <Window.Styles>
+                <StyleInclude Source="/Styles/Common.axaml" />
+        </Window.Styles>
+    
+        <Design.DataContext>
+                <vm:MoreSettingsViewModel />
+        </Design.DataContext>
+        
+        <StackPanel>
+                <ScrollViewer>
+                        
+                        <StackPanel>
+                                <!-- Controls -->
+                                <Label>Controls:</Label>
+                                
+                                <Border
+                                        Classes="VisibleBorders">
+                                        
+                                        <Grid
+                                                RowDefinitions="Auto, Auto, Auto, Auto"
+                                                ColumnDefinitions="Auto, Auto">
+                                                
+                                                <!-- Forward -->
+                                                <Label Grid.Row="0" Grid.Column="0">Forward:</Label>
+                                                <ComboBox
+                                                        x:Name="surfaceRunForwardButton"
+                                                        Grid.Row="0"
+                                                        Grid.Column="1">
+                                                        <ComboBox.ItemTemplate>
+                                                                <DataTemplate>
+                                                                        <Label Content="{ Binding }" />
+                                                                </DataTemplate>
+                                                        </ComboBox.ItemTemplate>
+                                                </ComboBox>
+                                                
+                                                <!-- Backward -->
+                                                <Label Grid.Row="1" Grid.Column="0">Backward:</Label>
+                                                <ComboBox
+                                                        x:Name="surfaceRunBackButton"
+                                                        Grid.Row="1"
+                                                        Grid.Column="1">
+                                                        <ComboBox.ItemTemplate>
+                                                                <DataTemplate>
+                                                                        <Label Content="{ Binding }" />
+                                                                </DataTemplate>
+                                                        </ComboBox.ItemTemplate>
+                                                </ComboBox>
+                                                
+                                                <!-- Left -->
+                                                <Label Grid.Row="2" Grid.Column="0">Left:</Label>
+                                                <ComboBox
+                                                        x:Name="surfaceRunLeftButton"
+                                                        Grid.Row="2"
+                                                        Grid.Column="1">
+                                                        <ComboBox.ItemTemplate>
+                                                                <DataTemplate>
+                                                                        <Label Content="{ Binding }" />
+                                                                </DataTemplate>
+                                                        </ComboBox.ItemTemplate>
+                                                </ComboBox>
+                                                
+                                                <!-- Right -->
+                                                <Label Grid.Row="3" Grid.Column="0">Right:</Label>
+                                                <ComboBox
+                                                        x:Name="surfaceRunRightButton"
+                                                        Grid.Row="3"
+                                                        Grid.Column="1">
+                                                        <ComboBox.ItemTemplate>
+                                                                <DataTemplate>
+                                                                        <Label Content="{ Binding }" />
+                                                                </DataTemplate>
+                                                        </ComboBox.ItemTemplate>
+                                                </ComboBox>
+                                        </Grid>
+                                </Border>
+                        </StackPanel>
+                </ScrollViewer>
+        </StackPanel>
+        
 </Window>
