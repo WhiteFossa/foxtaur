@@ -6,4 +6,10 @@
         <Nullable>enable</Nullable>
     </PropertyGroup>
 
+    <ItemGroup>
+      <Reference Include="Avalonia.Input">
+        <HintPath>..\..\..\..\..\.nuget\packages\avalonia\0.10.18\lib\netcoreapp2.0\Avalonia.Input.dll</HintPath>
+      </Reference>
+    </ItemGroup>
+
 </Project>

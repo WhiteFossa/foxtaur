@@ -1,3 +1,4 @@
+using Avalonia.Input;
 using Foxtaur.LibSettings.Services.Abstractions;
 
 namespace Foxtaur.LibSettings.Services.Implementations;
@@ -55,6 +56,65 @@ public class SettingsService : ISettingsService
     {
         _surfaceRunTurnSpeed = surfaceRunTurnSpeed;
         InvokeOnSurfaceRunTurnSpeedChanged();
+    }
+
+    public IReadOnlyCollection<Key> GetKeyboardKeysCollection()
+    {
+        return new List<Key>()
+        {
+            Key.A,
+            Key.B,
+            Key.C,
+            Key.D,
+            Key.E,
+            Key.F,
+            Key.G,
+            Key.H,
+            Key.I,
+            Key.J,
+            Key.K,
+            Key.L,
+            Key.M,
+            Key.N,
+            Key.O,
+            Key.P,
+            Key.Q,
+            Key.R,
+            Key.S,
+            Key.T,
+            Key.U,
+            Key.V,
+            Key.W,
+            Key.X,
+            Key.Y,
+            Key.Z
+        };
+    }
+
+    public int GetKeyboardKeyIndex(Key key)
+    {
+        var result = GetKeyboardKeysCollection()
+            .ToList()
+            .IndexOf(key);
+
+        if (result == -1)
+        {
+            throw new ArgumentException(nameof(key));
+        }
+
+        return result;
+    }
+
+    public Key GetKeyboardKey(int index)
+    {
+        var keys = GetKeyboardKeysCollection();
+
+        if (index < 0 || index >= keys.Count)
+        {
+            throw new ArgumentException(nameof(index));
+        }
+
+        return keys.ToList()[index];
     }
 
     private void InvokeOnDemScaleChanged()

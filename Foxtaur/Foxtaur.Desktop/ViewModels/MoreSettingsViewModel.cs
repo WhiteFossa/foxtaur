@@ -1,4 +1,11 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
+using Avalonia.Input;
+using Foxtaur.LibSettings.Services.Abstractions;
 using ReactiveUI;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Foxtaur.Desktop.ViewModels;
 
@@ -7,6 +14,17 @@ namespace Foxtaur.Desktop.ViewModels;
 /// </summary>
 public class MoreSettingsViewModel : ViewModelBase
 {
+    #region DI
+
+    private readonly ISettingsService _settingsService = Program.Di.GetService<ISettingsService>();
+    
+    #endregion
+
+    /// <summary>
+    /// Settings, which accepts keys
+    /// </summary>
+    private readonly List<PropertyInfo> _keyProperties;
+    
     #region Bound properties
     
     private int _surfaceRunModeForwardButtonIndex;
@@ -20,7 +38,15 @@ public class MoreSettingsViewModel : ViewModelBase
     public int SurfaceRunModeForwardButtonIndex
     {
         get => _surfaceRunModeForwardButtonIndex;
-        set => this.RaiseAndSetIfChanged(ref _surfaceRunModeForwardButtonIndex, value);
+        set
+        {
+            this.RaiseAndSetIfChanged(ref _surfaceRunModeForwardButtonIndex, value);
+
+            if (value != -1)
+            {
+                RemoveDuplicateKeys("SurfaceRunModeForwardButtonIndex", _settingsService.GetKeyboardKey(value));
+            }
+        }
     }
     
     /// <summary>
@@ -29,7 +55,15 @@ public class MoreSettingsViewModel : ViewModelBase
     public int SurfaceRunModeBackwardButtonIndex
     {
         get => _surfaceRunModeBackwardButtonIndex;
-        set => this.RaiseAndSetIfChanged(ref _surfaceRunModeBackwardButtonIndex, value);
+        set
+        {
+            this.RaiseAndSetIfChanged(ref _surfaceRunModeBackwardButtonIndex, value);
+
+            if (value != -1)
+            {
+                RemoveDuplicateKeys("SurfaceRunModeBackwardButtonIndex", _settingsService.GetKeyboardKey(value));
+            }
+        }
     }
     
     /// <summary>
@@ -38,7 +72,15 @@ public class MoreSettingsViewModel : ViewModelBase
     public int SurfaceRunModeTurnLeftButtonIndex
     {
         get => _surfaceRunModeTurnLeftButtonIndex;
-        set => this.RaiseAndSetIfChanged(ref _surfaceRunModeTurnLeftButtonIndex, value);
+        set
+        {
+            this.RaiseAndSetIfChanged(ref _surfaceRunModeTurnLeftButtonIndex, value);
+
+            if (value != -1)
+            {
+                RemoveDuplicateKeys("SurfaceRunModeTurnLeftButtonIndex", _settingsService.GetKeyboardKey(value));
+            }
+        }
     }
     
     /// <summary>
@@ -47,9 +89,57 @@ public class MoreSettingsViewModel : ViewModelBase
     public int SurfaceRunModeTurnRightButtonIndex
     {
         get => _surfaceRunModeTurnRightButtonIndex;
-        set => this.RaiseAndSetIfChanged(ref _surfaceRunModeTurnRightButtonIndex, value);
+        set
+        {
+            this.RaiseAndSetIfChanged(ref _surfaceRunModeTurnRightButtonIndex, value);
+
+            if (value != -1)
+            {
+                RemoveDuplicateKeys("SurfaceRunModeTurnRightButtonIndex", _settingsService.GetKeyboardKey(value));
+            }
+        }
     }
     
     #endregion
+
+    public MoreSettingsViewModel()
+    {
+        // Key-accepting properties
+        _keyProperties = new List<PropertyInfo>()
+        {
+            GetType().GetProperty("SurfaceRunModeForwardButtonIndex"),
+            GetType().GetProperty("SurfaceRunModeBackwardButtonIndex"),
+            GetType().GetProperty("SurfaceRunModeTurnLeftButtonIndex"),
+            GetType().GetProperty("SurfaceRunModeTurnRightButtonIndex")
+        };
+        
+        // Loading settings from ISettingsService
+        SurfaceRunModeForwardButtonIndex = _settingsService.GetKeyboardKeyIndex(Key.W);
+        SurfaceRunModeBackwardButtonIndex = _settingsService.GetKeyboardKeyIndex(Key.S);
+        SurfaceRunModeTurnLeftButtonIndex = _settingsService.GetKeyboardKeyIndex(Key.A);
+        SurfaceRunModeTurnRightButtonIndex = _settingsService.GetKeyboardKeyIndex(Key.D);
+        
+
+    }
+
+    /// <summary>
+    /// Scan all controls and remove keys, which are duplicate to newly assigned key
+    /// </summary>
+    private void RemoveDuplicateKeys(string currentPropertyName, Key newlyAssignedKey)
+    {
+        var propertiesToCheck = _keyProperties
+            .Where(kp => !kp.Name.Equals(currentPropertyName, StringComparison.InvariantCulture));
+
+        var newlyAssignedKeyIndex = _settingsService.GetKeyboardKeyIndex(newlyAssignedKey);
+        
+        var duplicatedPropertines = propertiesToCheck
+            .Where(p => (int)p.GetValue(this) == newlyAssignedKeyIndex);
+        
+        // Resetting duplicates
+        foreach (var duplicateProperty in duplicatedPropertines)
+        {
+            duplicateProperty.SetValue(this, -1);
+        }
+    }
     
 }

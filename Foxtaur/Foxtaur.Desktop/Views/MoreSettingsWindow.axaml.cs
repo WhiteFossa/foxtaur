@@ -3,43 +3,14 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Markup.Xaml;
+using Foxtaur.LibSettings.Services.Abstractions;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Foxtaur.Desktop.Views;
 
 public partial class MoreSettingsWindow : Window
 {
-    /// <summary>
-    /// Keys, available to select as keyboard controls
-    /// </summary>
-    private readonly List<Key> AvailableKeys = new List<Key>()
-    {
-        Key.A,
-        Key.B,
-        Key.C,
-        Key.D,
-        Key.E,
-        Key.F,
-        Key.G,
-        Key.H,
-        Key.I,
-        Key.J,
-        Key.K,
-        Key.L,
-        Key.M,
-        Key.N,
-        Key.O,
-        Key.P,
-        Key.Q,
-        Key.R,
-        Key.S,
-        Key.T,
-        Key.U,
-        Key.V,
-        Key.W,
-        Key.X,
-        Key.Y,
-        Key.Z
-    };
+    private readonly ISettingsService _settingsService = Program.Di.GetService<ISettingsService>();
     
     public MoreSettingsWindow()
     {
@@ -57,18 +28,18 @@ public partial class MoreSettingsWindow : Window
         
         // Forward
         var surfaceRunModeForwardButtonCombobox = this.Find<ComboBox>("surfaceRunForwardButton");
-        surfaceRunModeForwardButtonCombobox.Items = AvailableKeys;
+        surfaceRunModeForwardButtonCombobox.Items = _settingsService.GetKeyboardKeysCollection();
         
         // Back
         var surfaceRunModeBackButtonCombobox = this.Find<ComboBox>("surfaceRunBackButton");
-        surfaceRunModeBackButtonCombobox.Items = AvailableKeys;
+        surfaceRunModeBackButtonCombobox.Items = _settingsService.GetKeyboardKeysCollection();
         
         // Left
         var surfaceRunModeTurnLeftButtonCombobox = this.Find<ComboBox>("surfaceRunTurnLeftButton");
-        surfaceRunModeTurnLeftButtonCombobox.Items = AvailableKeys;
+        surfaceRunModeTurnLeftButtonCombobox.Items = _settingsService.GetKeyboardKeysCollection();
         
         // Right
         var surfaceRunModeTurnRightButtonCombobox = this.Find<ComboBox>("surfaceRunTurnRightButton");
-        surfaceRunModeTurnRightButtonCombobox.Items = AvailableKeys;
+        surfaceRunModeTurnRightButtonCombobox.Items = _settingsService.GetKeyboardKeysCollection();
     }
 }

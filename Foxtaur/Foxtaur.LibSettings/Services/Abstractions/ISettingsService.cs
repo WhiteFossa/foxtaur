@@ -1,3 +1,5 @@
+using Avalonia.Input;
+
 namespace Foxtaur.LibSettings.Services.Abstractions;
 
 /// <summary>
@@ -115,5 +117,20 @@ public interface ISettingsService
     void SetSurfaceRunTurnSpeed(double surfaceRunTurnSpeed);
     
     #endregion
+
+    /// <summary>
+    /// Get keyboard keys collection. Use it in dropdowns for action keys
+    /// </summary>
+    IReadOnlyCollection<Key> GetKeyboardKeysCollection();
+
+    /// <summary>
+    /// Get keyboard key index by key
+    /// </summary>
+    int GetKeyboardKeyIndex(Key key);
+
+    /// <summary>
+    /// Get keyboard key by index
+    /// </summary>
+    Key GetKeyboardKey(int index);
 
 }
