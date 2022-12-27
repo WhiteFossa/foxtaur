@@ -845,7 +845,7 @@ public class DesktopRenderer : OpenGlControlBase
             _surfaceRunRotationMode = SurfaceRunRotationMode.Right;
         }
         
-        if (e.Key == Key.A)
+        if (e.Key == _settingsService.GetSurfaceRunTurnLeftButton())
         {
             _surfaceRunRotationMode = SurfaceRunRotationMode.Left;
         }
@@ -864,7 +864,7 @@ public class DesktopRenderer : OpenGlControlBase
 
     public void OnKeyReleased(KeyEventArgs e)
     {
-        if (e.Key == Key.D || e.Key == Key.A)
+        if (e.Key == Key.D || e.Key == _settingsService.GetSurfaceRunTurnLeftButton())
         {
             _surfaceRunRotationMode = SurfaceRunRotationMode.None;
         }

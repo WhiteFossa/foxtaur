@@ -186,9 +186,46 @@ public interface ISettingsService
     Key GetSurfaceRunBackwardButton();
 
     /// <summary>
-    /// Set surface run forward button
+    /// Set surface run backward button
     /// </summary>
     void SetSurfaceRunBackwardButton(Key surfaceRunBackButton);
+    
+    #endregion
+    
+    #region Surface run turn left button
+    
+    public class OnSurfaceRunTurnLeftButtonChangedArgs
+    {
+        /// <summary>
+        /// New turn left button
+        /// </summary>
+        public Key SurfaceRunTurnLeftButton { get; }
+
+        public OnSurfaceRunTurnLeftButtonChangedArgs(Key surfaceRunTurnLeftButton)
+        {
+            SurfaceRunTurnLeftButton = surfaceRunTurnLeftButton;
+        }
+    }
+    
+    /// <summary>
+    /// Called when surface run turn left button is changed
+    /// </summary>
+    delegate void OnSurfaceRunTurnLeftButtonChangedHandler(object sender, OnSurfaceRunTurnLeftButtonChangedArgs args);
+    
+    /// <summary>
+    /// Event for surface run turn left button change
+    /// </summary>
+    event OnSurfaceRunTurnLeftButtonChangedHandler OnSurfaceRunTurnLeftButtonChanged;
+    
+    /// <summary>
+    /// Get current surface run turn left button
+    /// </summary>
+    Key GetSurfaceRunTurnLeftButton();
+
+    /// <summary>
+    /// Set surface run turn left button
+    /// </summary>
+    void SetSurfaceRunTurnLeftButton(Key surfaceRunTurnLeftButton);
     
     #endregion
     
