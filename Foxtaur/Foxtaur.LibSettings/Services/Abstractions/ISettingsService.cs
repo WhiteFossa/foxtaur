@@ -1,3 +1,5 @@
+using Avalonia.Input;
+
 namespace Foxtaur.LibSettings.Services.Abstractions;
 
 /// <summary>
@@ -115,5 +117,168 @@ public interface ISettingsService
     void SetSurfaceRunTurnSpeed(double surfaceRunTurnSpeed);
     
     #endregion
+
+    #region Surface run forward button
+    
+    public class OnSurfaceRunForwardButtonChangedArgs
+    {
+        /// <summary>
+        /// New forward button
+        /// </summary>
+        public Key SurfaceRunForwardButton { get; }
+
+        public OnSurfaceRunForwardButtonChangedArgs(Key surfaceRunForwardButton)
+        {
+            SurfaceRunForwardButton = surfaceRunForwardButton;
+        }
+    }
+    
+    /// <summary>
+    /// Called when surface run forward button is changed
+    /// </summary>
+    delegate void OnSurfaceRunForwardButtonChangedHandler(object sender, OnSurfaceRunForwardButtonChangedArgs args);
+    
+    /// <summary>
+    /// Event for surface run forward button change
+    /// </summary>
+    event OnSurfaceRunForwardButtonChangedHandler OnSurfaceRunForwardButtonChanged;
+    
+    /// <summary>
+    /// Get current surface run forward button
+    /// </summary>
+    Key GetSurfaceRunForwardButton();
+
+    /// <summary>
+    /// Set surface run forward button
+    /// </summary>
+    void SetSurfaceRunForwardButton(Key surfaceRunForwardButton);
+    
+    #endregion
+    
+    #region Surface run backward button
+    
+    public class OnSurfaceRunBackwardButtonChangedArgs
+    {
+        /// <summary>
+        /// New backward button
+        /// </summary>
+        public Key SurfaceRunBackwardButton { get; }
+
+        public OnSurfaceRunBackwardButtonChangedArgs(Key surfaceRunBackwardButton)
+        {
+            SurfaceRunBackwardButton = surfaceRunBackwardButton;
+        }
+    }
+    
+    /// <summary>
+    /// Called when surface run back button is changed
+    /// </summary>
+    delegate void OnSurfaceRunBackwardButtonChangedHandler(object sender, OnSurfaceRunBackwardButtonChangedArgs args);
+    
+    /// <summary>
+    /// Event for surface run back button change
+    /// </summary>
+    event OnSurfaceRunBackwardButtonChangedHandler OnSurfaceRunBackwardButtonChanged;
+    
+    /// <summary>
+    /// Get current surface run back button
+    /// </summary>
+    Key GetSurfaceRunBackwardButton();
+
+    /// <summary>
+    /// Set surface run backward button
+    /// </summary>
+    void SetSurfaceRunBackwardButton(Key surfaceRunBackButton);
+    
+    #endregion
+    
+    #region Surface run turn left button
+    
+    public class OnSurfaceRunTurnLeftButtonChangedArgs
+    {
+        /// <summary>
+        /// New turn left button
+        /// </summary>
+        public Key SurfaceRunTurnLeftButton { get; }
+
+        public OnSurfaceRunTurnLeftButtonChangedArgs(Key surfaceRunTurnLeftButton)
+        {
+            SurfaceRunTurnLeftButton = surfaceRunTurnLeftButton;
+        }
+    }
+    
+    /// <summary>
+    /// Called when surface run turn left button is changed
+    /// </summary>
+    delegate void OnSurfaceRunTurnLeftButtonChangedHandler(object sender, OnSurfaceRunTurnLeftButtonChangedArgs args);
+    
+    /// <summary>
+    /// Event for surface run turn left button change
+    /// </summary>
+    event OnSurfaceRunTurnLeftButtonChangedHandler OnSurfaceRunTurnLeftButtonChanged;
+    
+    /// <summary>
+    /// Get current surface run turn left button
+    /// </summary>
+    Key GetSurfaceRunTurnLeftButton();
+
+    /// <summary>
+    /// Set surface run turn left button
+    /// </summary>
+    void SetSurfaceRunTurnLeftButton(Key surfaceRunTurnLeftButton);
+    
+    #endregion
+    
+    #region Surface run turn right button
+    
+    public class OnSurfaceRunTurnRightButtonChangedArgs
+    {
+        /// <summary>
+        /// New turn right button
+        /// </summary>
+        public Key SurfaceRunTurnRightButton { get; }
+
+        public OnSurfaceRunTurnRightButtonChangedArgs(Key surfaceRunTurnRightButton)
+        {
+            SurfaceRunTurnRightButton = surfaceRunTurnRightButton;
+        }
+    }
+    
+    /// <summary>
+    /// Called when surface run turn right button is changed
+    /// </summary>
+    delegate void OnSurfaceRunTurnRightButtonChangedHandler(object sender, OnSurfaceRunTurnRightButtonChangedArgs args);
+    
+    /// <summary>
+    /// Event for surface run turn right button change
+    /// </summary>
+    event OnSurfaceRunTurnRightButtonChangedHandler OnSurfaceRunTurnRightButtonChanged;
+    
+    /// <summary>
+    /// Get current surface run turn right button
+    /// </summary>
+    Key GetSurfaceRunTurnRightButton();
+
+    /// <summary>
+    /// Set surface run turn left button
+    /// </summary>
+    void SetSurfaceRunTurnRightButton(Key surfaceRunTurnRightButton);
+    
+    #endregion
+    
+    /// <summary>
+    /// Get keyboard keys collection. Use it in dropdowns for action keys
+    /// </summary>
+    IReadOnlyCollection<Key> GetKeyboardKeysCollection();
+
+    /// <summary>
+    /// Get keyboard key index by key
+    /// </summary>
+    int GetKeyboardKeyIndex(Key key);
+
+    /// <summary>
+    /// Get keyboard key by index
+    /// </summary>
+    Key GetKeyboardKey(int index);
 
 }

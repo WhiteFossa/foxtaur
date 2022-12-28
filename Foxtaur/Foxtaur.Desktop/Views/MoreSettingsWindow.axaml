@@ -1,0 +1,109 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="using:Foxtaur.Desktop.ViewModels"
+        mc:Ignorable="d" d:DesignWidth="650" d:DesignHeight="450"
+        Width="650"
+        x:Class="Foxtaur.Desktop.Views.MoreSettingsWindow"
+        Title="MoreSettingsWindow">
+    
+        <Window.Styles>
+                <StyleInclude Source="/Styles/Common.axaml" />
+        </Window.Styles>
+    
+        <Design.DataContext>
+                <vm:MoreSettingsViewModel />
+        </Design.DataContext>
+        
+        <StackPanel>
+                <ScrollViewer>
+                        <StackPanel>
+                                <!-- Controls -->
+                                <Label>Controls:</Label>
+                                
+                                <Border
+                                        Classes="VisibleBorders">
+                                        
+                                        <Grid
+                                                RowDefinitions="Auto, Auto, Auto, Auto"
+                                                ColumnDefinitions="Auto, Auto">
+                                                
+                                                <!-- Forward -->
+                                                <Label Grid.Row="0" Grid.Column="0">Surface run forward:</Label>
+                                                <ComboBox
+                                                        x:Name="surfaceRunForwardButton"
+                                                        Grid.Row="0"
+                                                        Grid.Column="1"
+                                                        SelectedIndex="{ Binding SurfaceRunModeForwardButtonIndex }">
+                                                        <ComboBox.ItemTemplate>
+                                                                <DataTemplate>
+                                                                        <Label Content="{ Binding }" />
+                                                                </DataTemplate>
+                                                        </ComboBox.ItemTemplate>
+                                                </ComboBox>
+                                                
+                                                <!-- Backward -->
+                                                <Label Grid.Row="1" Grid.Column="0">Surface run backward:</Label>
+                                                <ComboBox
+                                                        x:Name="surfaceRunBackButton"
+                                                        Grid.Row="1"
+                                                        Grid.Column="1"
+                                                        SelectedIndex="{ Binding SurfaceRunModeBackwardButtonIndex }">
+                                                        <ComboBox.ItemTemplate>
+                                                                <DataTemplate>
+                                                                        <Label Content="{ Binding }" />
+                                                                </DataTemplate>
+                                                        </ComboBox.ItemTemplate>
+                                                </ComboBox>
+                                                
+                                                <!-- Left -->
+                                                <Label Grid.Row="2" Grid.Column="0">Surface run turn left:</Label>
+                                                <ComboBox
+                                                        x:Name="surfaceRunTurnLeftButton"
+                                                        Grid.Row="2"
+                                                        Grid.Column="1"
+                                                        SelectedIndex="{ Binding SurfaceRunModeTurnLeftButtonIndex }">
+                                                        <ComboBox.ItemTemplate>
+                                                                <DataTemplate>
+                                                                        <Label Content="{ Binding }" />
+                                                                </DataTemplate>
+                                                        </ComboBox.ItemTemplate>
+                                                </ComboBox>
+                                                
+                                                <!-- Right -->
+                                                <Label Grid.Row="3" Grid.Column="0">Surface run turn right:</Label>
+                                                <ComboBox
+                                                        x:Name="surfaceRunTurnRightButton"
+                                                        Grid.Row="3"
+                                                        Grid.Column="1"
+                                                        SelectedIndex="{ Binding SurfaceRunModeTurnRightButtonIndex }">
+                                                        <ComboBox.ItemTemplate>
+                                                                <DataTemplate>
+                                                                        <Label Content="{ Binding }" />
+                                                                </DataTemplate>
+                                                        </ComboBox.ItemTemplate>
+                                                </ComboBox>
+                                        </Grid>
+                                </Border>
+                        </StackPanel>
+                </ScrollViewer>
+                
+                <Grid ColumnDefinitions="Auto, *, Auto" RowDefinitions="Auto">
+                        <Button
+                                Grid.Column="0"
+                                Grid.Row="0"
+                                Content="Cancel"
+                                Command="{ Binding CancelPressedCommand }"
+                                CommandParameter="{ Binding $parent[Window] }" />
+
+                        <Button
+                                Grid.Column="2"
+                                Grid.Row="0"
+                                Content="OK"
+                                Command="{ Binding OkPressedCommand }"
+                                CommandParameter="{ Binding $parent[Window] }" />
+                </Grid>
+        </StackPanel>
+        
+</Window>

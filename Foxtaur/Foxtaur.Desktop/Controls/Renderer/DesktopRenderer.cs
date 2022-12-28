@@ -840,22 +840,22 @@ public class DesktopRenderer : OpenGlControlBase
     public void OnKeyPressed(KeyEventArgs e)
     {
         // Surface run direction
-        if (e.Key == Key.D)
+        if (e.Key == _settingsService.GetSurfaceRunTurnRightButton())
         {
             _surfaceRunRotationMode = SurfaceRunRotationMode.Right;
         }
         
-        if (e.Key == Key.A)
+        if (e.Key == _settingsService.GetSurfaceRunTurnLeftButton())
         {
             _surfaceRunRotationMode = SurfaceRunRotationMode.Left;
         }
         
-        if (e.Key == Key.W)
+        if (e.Key == _settingsService.GetSurfaceRunForwardButton())
         {
             // Forward
             _surfaceRunMode = SurfaceRunMode.Forward;
         }
-        else if (e.Key == Key.S)
+        else if (e.Key == _settingsService.GetSurfaceRunBackwardButton())
         {
             // Backward
             _surfaceRunMode = SurfaceRunMode.Backward;
@@ -864,12 +864,12 @@ public class DesktopRenderer : OpenGlControlBase
 
     public void OnKeyReleased(KeyEventArgs e)
     {
-        if (e.Key == Key.D || e.Key == Key.A)
+        if (e.Key == _settingsService.GetSurfaceRunTurnRightButton() || e.Key == _settingsService.GetSurfaceRunTurnLeftButton())
         {
             _surfaceRunRotationMode = SurfaceRunRotationMode.None;
         }
 
-        if (e.Key == Key.W || e.Key == Key.S)
+        if (e.Key == _settingsService.GetSurfaceRunForwardButton() || e.Key == _settingsService.GetSurfaceRunBackwardButton())
         {
             _surfaceRunMode = SurfaceRunMode.Stop;            
         }
