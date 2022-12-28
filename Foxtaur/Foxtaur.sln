@@ -12,6 +12,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Foxtaur.Helpers", "Foxtaur.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Foxtaur.LibSettings", "Foxtaur.LibSettings\Foxtaur.LibSettings.csproj", "{BBAE765D-0E76-4FFA-8CFD-AB24B260D19D}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Foxtaur.LibWebClient", "Foxtaur.LibWebClient\Foxtaur.LibWebClient.csproj", "{13AD3589-4B18-4AB1-A481-68174DF1FDCE}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -42,5 +44,9 @@ Global
 		{BBAE765D-0E76-4FFA-8CFD-AB24B260D19D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BBAE765D-0E76-4FFA-8CFD-AB24B260D19D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BBAE765D-0E76-4FFA-8CFD-AB24B260D19D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{13AD3589-4B18-4AB1-A481-68174DF1FDCE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{13AD3589-4B18-4AB1-A481-68174DF1FDCE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{13AD3589-4B18-4AB1-A481-68174DF1FDCE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{13AD3589-4B18-4AB1-A481-68174DF1FDCE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
