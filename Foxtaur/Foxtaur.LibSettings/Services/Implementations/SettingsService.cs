@@ -1,4 +1,6 @@
+using System.Text.Json;
 using Avalonia.Input;
+using Foxtaur.LibSettings.Constants;
 using Foxtaur.LibSettings.Services.Abstractions;
 
 namespace Foxtaur.LibSettings.Services.Implementations;
@@ -21,24 +23,14 @@ public class SettingsService : ISettingsService
     public event ISettingsService.OnSurfaceRunTurnLeftButtonChangedHandler? OnSurfaceRunTurnLeftButtonChanged;
     public event ISettingsService.OnSurfaceRunTurnRightButtonChangedHandler? OnSurfaceRunTurnRightButtonChanged;
 
+    private string _configFilePath;
+
     public SettingsService()
     {
-        // TODO: Load from DB instead
-        _demScale = 1.0;
-        _surfaceRunSpeed = 0.0000005;
-        _surfaceRunTurnSpeed = 1.0;
-        _surfaceRunForwardButton = Key.W;
-        _surfaceRunBackwardButton = Key.S;
-        _surfaceRunTurnLeftButton = Key.A;
-        _surfaceRunTurnRightButton = Key.D;
+        // Path to config
+        _configFilePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), SettingsConstants.ConfigFileName);
         
-        InvokeOnDemScaleChanged();
-        InvokeOnSurfaceRunSpeedChanged();
-        InvokeOnSurfaceRunTurnSpeedChanged();
-        InvokeOnSurfaceRunForwardButtonChanged();
-        InvokeOnSurfaceRunBackwardButtonChanged();
-        InvokeOnSurfaceRunTurnLeftButtonChanged();
-        InvokeOnSurfaceRunTurnRightButtonChanged();
+        LoadSettings();
     }
     
     public double GetDemScale()
@@ -49,6 +41,8 @@ public class SettingsService : ISettingsService
     public void SetDemScale(double demScale)
     {
         _demScale = demScale;
+        SaveSettings();
+        
         InvokeOnDemScaleChanged();
     }
     
@@ -60,6 +54,8 @@ public class SettingsService : ISettingsService
     public void SetSurfaceRunSpeed(double surfaceRunSpeed)
     {
         _surfaceRunSpeed = surfaceRunSpeed;
+        SaveSettings();
+        
         InvokeOnSurfaceRunSpeedChanged();
     }
     
@@ -71,6 +67,8 @@ public class SettingsService : ISettingsService
     public void SetSurfaceRunTurnSpeed(double surfaceRunTurnSpeed)
     {
         _surfaceRunTurnSpeed = surfaceRunTurnSpeed;
+        SaveSettings();
+        
         InvokeOnSurfaceRunTurnSpeedChanged();
     }
 
@@ -82,6 +80,8 @@ public class SettingsService : ISettingsService
     public void SetSurfaceRunForwardButton(Key surfaceRunForwardButton)
     {
         _surfaceRunForwardButton = surfaceRunForwardButton;
+        SaveSettings();
+        
         InvokeOnSurfaceRunForwardButtonChanged();
     }
     
@@ -93,6 +93,8 @@ public class SettingsService : ISettingsService
     public void SetSurfaceRunBackwardButton(Key surfaceRunBackButton)
     {
         _surfaceRunBackwardButton = surfaceRunBackButton;
+        SaveSettings();
+        
         InvokeOnSurfaceRunBackwardButtonChanged();
     }
 
@@ -104,6 +106,8 @@ public class SettingsService : ISettingsService
     public void SetSurfaceRunTurnLeftButton(Key surfaceRunTurnLeftButton)
     {
         _surfaceRunTurnLeftButton = surfaceRunTurnLeftButton;
+        SaveSettings();
+        
         InvokeOnSurfaceRunTurnLeftButtonChanged();
     }
 
@@ -115,6 +119,8 @@ public class SettingsService : ISettingsService
     public void SetSurfaceRunTurnRightButton(Key surfaceRunTurnRightButton)
     {
         _surfaceRunTurnRightButton = surfaceRunTurnRightButton;
+        SaveSettings();
+        
         InvokeOnSurfaceRunTurnRightButtonChanged();
     }
 
@@ -211,4 +217,45 @@ public class SettingsService : ISettingsService
     {
         OnSurfaceRunTurnRightButtonChanged?.Invoke(this, new ISettingsService.OnSurfaceRunTurnRightButtonChangedArgs(_surfaceRunTurnRightButton));
     }
+    
+    #region Save and load
+
+    private void SaveSettings()
+    {
+        var settings = new SerializableSettings()
+        {
+            DemScale = GetDemScale(),
+            SurfaceRunSpeed = GetSurfaceRunSpeed(),
+            SurfaceRunTurnSpeed = GetSurfaceRunTurnSpeed(),
+            SurfaceRunForwardButton = GetSurfaceRunForwardButton(),
+            SurfaceRunBackwardButton = GetSurfaceRunBackwardButton(),
+            SurfaceRunTurnLeftButton = GetSurfaceRunTurnLeftButton(),
+            SurfaceRunTurnRightButton = GetSurfaceRunTurnRightButton()
+        };
+        
+        var serializedSettings = JsonSerializer.Serialize(settings);
+        
+        File.WriteAllText(_configFilePath, serializedSettings);
+    }
+
+    private void LoadSettings()
+    {
+        if (!File.Exists(_configFilePath))
+        {
+            // First run, we need to create config file
+            SaveSettings();
+        }
+        
+        var settings = JsonSerializer.Deserialize<SerializableSettings>(File.ReadAllText(_configFilePath));
+        
+        SetDemScale(settings.DemScale);
+        SetSurfaceRunSpeed(settings.SurfaceRunSpeed);
+        SetSurfaceRunTurnSpeed(settings.SurfaceRunTurnSpeed);
+        SetSurfaceRunForwardButton(settings.SurfaceRunForwardButton);
+        SetSurfaceRunBackwardButton(settings.SurfaceRunBackwardButton);
+        SetSurfaceRunTurnLeftButton(settings.SurfaceRunTurnLeftButton);
+        SetSurfaceRunTurnRightButton(settings.SurfaceRunTurnRightButton);
+    }
+    
+    #endregion
 }
