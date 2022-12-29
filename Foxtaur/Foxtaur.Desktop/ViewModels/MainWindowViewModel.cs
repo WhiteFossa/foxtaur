@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reactive;
 using System.Timers;
+using Foxtaur.Desktop.Models;
 using Foxtaur.Desktop.Views;
 using Foxtaur.LibSettings.Services.Abstractions;
 using Foxtaur.LibWebClient.Models;
@@ -133,6 +135,16 @@ namespace Foxtaur.Desktop.ViewModels
             set
             {
                 this.RaiseAndSetIfChanged(ref _selectedDistanceIndex, value);
+                
+                // Loading full distance data into model
+                if (value == -1)
+                {
+                    _mainModel.Distance = null;
+                }
+                else
+                {
+                    _mainModel.Distance = _webClient.GetDistanceByIdAsync(_distances[value].Id).Result;
+                }
             }
         }
         
@@ -169,10 +181,14 @@ namespace Foxtaur.Desktop.ViewModels
         
         private Timer _demScaleNotificationTimer = new Timer(1000);
         private MoreSettingsViewModel _moreSettingsViewModel;
-        private IReadOnlyCollection<Distance> _distances;
+        private IList<Distance> _distances;
 
-        public MainWindowViewModel()
+        private MainModel _mainModel;
+
+        public MainWindowViewModel(MainModel mainModel)
         {
+            _mainModel = mainModel ?? throw new ArgumentNullException(nameof(mainModel));
+            
             // Binding commands
             MoreSettingsCommand = ReactiveCommand.Create(OnMoreSettingsCommand);
             
@@ -190,13 +206,15 @@ namespace Foxtaur.Desktop.ViewModels
             
             // Asking for distances
             SelectedDistanceIndex = -1;
-            _distances = _webClient.GetDistancesWithoutIncludeAsync().Result;
+            _distances = _webClient.GetDistancesWithoutIncludeAsync()
+                .Result
+                .ToList();
         }
 
         /// <summary>
         /// Return distances list
         /// </summary>
-        public IReadOnlyCollection<Distance> GetDistances()
+        public IList<Distance> GetDistances()
         {
             return _distances;
         }

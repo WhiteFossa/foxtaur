@@ -50,7 +50,7 @@ public class WebClientRawStub : IWebClientRaw
         var finishLocationId = new Guid("53ECF004-F388-4623-AABC-486BE60B6AC8");
 
         
-        switch (id.ToString())
+        switch (id.ToString().ToUpperInvariant())
         {
             case "6550C9C5-6945-40F1-BDC6-17898C116A32":
                 // Start

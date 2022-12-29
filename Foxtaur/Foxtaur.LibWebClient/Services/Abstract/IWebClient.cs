@@ -12,4 +12,9 @@ public interface IWebClient
     /// </summary>
     /// <returns></returns>
     Task<IReadOnlyCollection<Distance>> GetDistancesWithoutIncludeAsync();
+
+    /// <summary>
+    /// Get distance by ID
+    /// </summary>
+    Task<Distance> GetDistanceByIdAsync(Guid distanceId);
 }
