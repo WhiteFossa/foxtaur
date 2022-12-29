@@ -66,12 +66,12 @@
                 
                 <!-- Distances -->
                 <StackPanel Grid.Column="0" Grid.Row="0">
-                    <Label>Distances:</Label>
+                    <Label>Distance:</Label>
                     
                     <ComboBox
-                        x:Name="distances"
+                        x:Name="Distances"
                         HorizontalAlignment="Stretch"
-                        SelectedIndex="-1">
+                        SelectedIndex="{ Binding SelectedDistanceIndex }">
                         <ComboBox.ItemTemplate>
                             <DataTemplate>
                                 <Label Content="{ Binding }" />

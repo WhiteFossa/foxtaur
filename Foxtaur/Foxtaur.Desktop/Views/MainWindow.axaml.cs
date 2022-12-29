@@ -20,7 +20,7 @@ namespace Foxtaur.Desktop.Views
 
             DataContext = dataContext;
             
-            var distancesComboBox = this.Find<ComboBox>("distances");
+            var distancesComboBox = this.Find<ComboBox>("Distances");
             distancesComboBox.Items = ((MainWindowViewModel)DataContext)
                 .GetDistances()
                 .Select(d => d.Name);

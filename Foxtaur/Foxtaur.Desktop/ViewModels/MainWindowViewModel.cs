@@ -30,7 +30,7 @@ namespace Foxtaur.Desktop.ViewModels
         private double _surfaceRunTurnSpeed;
         private string _surfaceRunTurnSpeedText;
         
-        private Timer _demScaleNotificationTimer = new Timer(1000);
+        private int _selectedDistanceIndex;
 
         /// <summary>
         /// Text in console
@@ -123,6 +123,18 @@ namespace Foxtaur.Desktop.ViewModels
             get => _surfaceRunTurnSpeedText;
             set => this.RaiseAndSetIfChanged(ref _surfaceRunTurnSpeedText, value);
         }
+
+        /// <summary>
+        /// Selected distance index
+        /// </summary>
+        public int SelectedDistanceIndex
+        {
+            get => _selectedDistanceIndex;
+            set
+            {
+                this.RaiseAndSetIfChanged(ref _selectedDistanceIndex, value);
+            }
+        }
         
         #endregion
 
@@ -155,8 +167,8 @@ namespace Foxtaur.Desktop.ViewModels
 
         #endregion
         
+        private Timer _demScaleNotificationTimer = new Timer(1000);
         private MoreSettingsViewModel _moreSettingsViewModel;
-
         private IReadOnlyCollection<Distance> _distances;
 
         public MainWindowViewModel()
@@ -177,6 +189,7 @@ namespace Foxtaur.Desktop.ViewModels
             _demScaleNotificationTimer.Enabled = false;
             
             // Asking for distances
+            SelectedDistanceIndex = -1;
             _distances = _webClient.GetDistancesWithoutIncludeAsync().Result;
         }
 
