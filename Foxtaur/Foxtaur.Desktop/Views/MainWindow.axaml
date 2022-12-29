@@ -82,7 +82,7 @@
                     <!-- Distance focus button -->
                     <Button
                         Content="Focus"
-                        Command="{ Binding FocusDistanceCommand }"/>
+                        Command="{ Binding FocusOnDistanceCommand }"/>
 
                 </StackPanel>
                 

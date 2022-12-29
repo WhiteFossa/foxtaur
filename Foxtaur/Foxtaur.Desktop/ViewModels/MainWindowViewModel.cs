@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reactive;
 using System.Timers;
+using Avalonia.Metadata;
 using Foxtaur.Desktop.Controls.Renderer;
 using Foxtaur.Desktop.Models;
 using Foxtaur.Desktop.Views;
@@ -179,16 +180,16 @@ namespace Foxtaur.Desktop.ViewModels
         /// <summary>
         /// Focus on distance
         /// </summary>
-        public ReactiveCommand<Unit, Unit> FocusDistanceCommand { get; }
+        public ReactiveCommand<Unit, Unit> FocusOnDistanceCommand { get; }
 
         /// <summary>
         /// Focus on distance
         /// </summary>
-        private void OnFocusDistanceCommand()
+        private void OnFocusOnDistanceCommand()
         {
             Renderer.FocusOnDistance();
         }
-        
+
         #endregion
         
         #region DI
@@ -212,7 +213,12 @@ namespace Foxtaur.Desktop.ViewModels
             
             // Binding commands
             MoreSettingsCommand = ReactiveCommand.Create(OnMoreSettingsCommand);
-            FocusDistanceCommand = ReactiveCommand.Create(OnFocusDistanceCommand);
+            
+            var CanFocusOnDistanceCommand = this.WhenAnyValue(
+                x => x.SelectedDistanceIndex,
+                (selectedIndex) => selectedIndex != -1);
+            
+            FocusOnDistanceCommand = ReactiveCommand.Create(OnFocusOnDistanceCommand, CanFocusOnDistanceCommand);
             
             // More settings dialogue
             _moreSettingsViewModel = new MoreSettingsViewModel();
