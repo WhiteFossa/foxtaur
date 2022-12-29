@@ -1,8 +1,11 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Reactive;
 using System.Timers;
 using Foxtaur.Desktop.Views;
 using Foxtaur.LibSettings.Services.Abstractions;
+using Foxtaur.LibWebClient.Models;
+using Foxtaur.LibWebClient.Services.Abstract;
 using Microsoft.Extensions.DependencyInjection;
 using ReactiveUI;
 
@@ -148,10 +151,13 @@ namespace Foxtaur.Desktop.ViewModels
         #region DI
 
         private readonly ISettingsService _settingsService = Program.Di.GetService<ISettingsService>();
+        private readonly IWebClient _webClient = Program.Di.GetService<IWebClient>();
 
         #endregion
         
         private MoreSettingsViewModel _moreSettingsViewModel;
+
+        private IReadOnlyCollection<Distance> _distances;
 
         public MainWindowViewModel()
         {
@@ -169,6 +175,9 @@ namespace Foxtaur.Desktop.ViewModels
             _demScaleNotificationTimer.Elapsed += NotifyAboutDemScaleChange;
             _demScaleNotificationTimer.AutoReset = false;
             _demScaleNotificationTimer.Enabled = false;
+            
+            // Asking for distances
+            _distances = _webClient.GetDistancesWithoutIncludeAsync().Result;
         }
 
         private void NotifyAboutDemScaleChange(object sender, ElapsedEventArgs e)
