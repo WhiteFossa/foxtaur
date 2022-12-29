@@ -512,6 +512,7 @@ public class DesktopRenderer : OpenGlControlBase
                 _camera.Zoom = RendererConstants.SurfaceRunMinZoom;
                 
                 _currentMapsSurfaceAltitudeIncrement = RendererConstants.MapsAltitudeIncrementSurfaceRunMode;
+                _distanceProvider.DisposeDistanceSegment(); // We need to regenerate because of changed altitude increment
             }
             else
             {
@@ -520,6 +521,7 @@ public class DesktopRenderer : OpenGlControlBase
                 _camera.Up = Vector<double>.Build.DenseOfArray(new double[] { 0.0, -1.0, 0.0 });
                 
                 _currentMapsSurfaceAltitudeIncrement = RendererConstants.MapsAltitudeIncrementSatelliteMode;
+                _distanceProvider.DisposeDistanceSegment();
 
                 _isSurfaceRunMode = false;
             }
@@ -790,6 +792,8 @@ public class DesktopRenderer : OpenGlControlBase
     {
         _earthSegments
             .ForEach(es => es.MarkToRegeneration());
+        
+        _distanceProvider.DisposeDistanceSegment();
     }
 
     public void OnKeyPressed(KeyEventArgs e)

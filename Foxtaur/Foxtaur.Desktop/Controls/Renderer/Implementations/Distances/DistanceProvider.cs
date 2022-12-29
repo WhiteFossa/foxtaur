@@ -82,6 +82,20 @@ public class DistanceProvider : IDistanceProvider
         }
     }
 
+    public void DisposeDistanceSegment()
+    {
+        if (_mapSegment == null)
+        {
+            // Oy vey
+            throw new InvalidOperationException("Attempt to dispose not-allocated distance segment!");
+        }
+        
+        _mapSegment.Mesh.Dispose();
+        _mapSegment.Texture.Dispose();
+
+        _mapSegment = null;
+    }
+
     public unsafe void DrawDistance(GL silkGlContext)
     {
         if (_mapSegment != null)
