@@ -78,6 +78,11 @@
                             </DataTemplate>
                         </ComboBox.ItemTemplate>
                     </ComboBox>
+                    
+                    <!-- Distance focus button -->
+                    <Button
+                        Content="Focus"
+                        Command="{ Binding FocusDistanceCommand }"/>
 
                 </StackPanel>
                 

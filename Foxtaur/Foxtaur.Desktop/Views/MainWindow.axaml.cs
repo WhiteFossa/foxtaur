@@ -24,6 +24,8 @@ namespace Foxtaur.Desktop.Views
             distancesComboBox.Items = ((MainWindowViewModel)DataContext)
                 .GetDistances()
                 .Select(d => d.Name);
+
+            ((MainWindowViewModel)DataContext).Renderer = EarthRenderer;
         }
 
         protected override void OnKeyDown(KeyEventArgs e)

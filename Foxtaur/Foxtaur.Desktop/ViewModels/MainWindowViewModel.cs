@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reactive;
 using System.Timers;
+using Foxtaur.Desktop.Controls.Renderer;
 using Foxtaur.Desktop.Models;
 using Foxtaur.Desktop.Views;
 using Foxtaur.LibSettings.Services.Abstractions;
@@ -145,6 +146,11 @@ namespace Foxtaur.Desktop.ViewModels
                 {
                     _mainModel.Distance = _webClient.GetDistanceByIdAsync(_distances[value].Id).Result;
                 }
+
+                if (Renderer != null)
+                {
+                    Renderer.SetActiveDistance(_mainModel.Distance);                    
+                }
             }
         }
         
@@ -170,6 +176,19 @@ namespace Foxtaur.Desktop.ViewModels
             moreSettingsDialog.ShowDialog(Program.GetMainWindow());
         }
         
+        /// <summary>
+        /// Focus on distance
+        /// </summary>
+        public ReactiveCommand<Unit, Unit> FocusDistanceCommand { get; }
+
+        /// <summary>
+        /// Focus on distance
+        /// </summary>
+        private void OnFocusDistanceCommand()
+        {
+            Renderer.FocusOnDistance();
+        }
+        
         #endregion
         
         #region DI
@@ -185,12 +204,15 @@ namespace Foxtaur.Desktop.ViewModels
 
         private MainModel _mainModel;
 
+        public DesktopRenderer Renderer;
+
         public MainWindowViewModel(MainModel mainModel)
         {
             _mainModel = mainModel ?? throw new ArgumentNullException(nameof(mainModel));
             
             // Binding commands
             MoreSettingsCommand = ReactiveCommand.Create(OnMoreSettingsCommand);
+            FocusDistanceCommand = ReactiveCommand.Create(OnFocusDistanceCommand);
             
             // More settings dialogue
             _moreSettingsViewModel = new MoreSettingsViewModel();

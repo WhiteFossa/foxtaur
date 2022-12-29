@@ -29,6 +29,7 @@ using Foxtaur.LibResources.Constants;
 using Foxtaur.LibResources.Models;
 using Foxtaur.LibResources.Models.HighResMap;
 using Foxtaur.LibSettings.Services.Abstractions;
+using Foxtaur.LibWebClient.Models;
 using MathNet.Numerics.LinearAlgebra;
 using Microsoft.Extensions.DependencyInjection;
 using NLog;
@@ -232,6 +233,12 @@ public class DesktopRenderer : OpenGlControlBase
 
     private bool _isDavydovoLoaded;
 
+    #endregion
+    
+    #region Distance
+    
+    private Distance _activeDistance;
+    
     #endregion
 
     /// <summary>
@@ -934,5 +941,32 @@ public class DesktopRenderer : OpenGlControlBase
 
         _camera.Lat = newCameraPositionGeo.Lat;
         _camera.Lon = newCameraPositionGeo.Lon;
+    }
+
+    /// <summary>
+    /// Set active distance
+    /// </summary>
+    public void SetActiveDistance(Distance distance)
+    {
+        _activeDistance = distance ?? throw new ArgumentNullException(nameof(distance));
+    }
+
+    /// <summary>
+    /// Move camera to the center of distance (if we have active distance of course)
+    /// We believe that distances are small and don't pass over 180 lon
+    /// TODO: Fix it
+    /// </summary>
+    public void FocusOnDistance()
+    {
+        if (_activeDistance == null)
+        {
+            return;
+        }
+
+        var latCenter = (_activeDistance.Map.NorthLat + _activeDistance.Map.SouthLat) / 2.0;
+        var lonCenter = (_activeDistance.Map.EastLon + _activeDistance.Map.WestLon) / 2.0;
+
+        _camera.Lat = latCenter;
+        _camera.Lon = lonCenter;
     }
 }
