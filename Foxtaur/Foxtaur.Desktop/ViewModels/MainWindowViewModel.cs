@@ -180,6 +180,14 @@ namespace Foxtaur.Desktop.ViewModels
             _distances = _webClient.GetDistancesWithoutIncludeAsync().Result;
         }
 
+        /// <summary>
+        /// Return distances list
+        /// </summary>
+        public IReadOnlyCollection<Distance> GetDistances()
+        {
+            return _distances;
+        }
+
         private void NotifyAboutDemScaleChange(object sender, ElapsedEventArgs e)
         {
             // Notifying
