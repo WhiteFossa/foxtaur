@@ -9,6 +9,7 @@ using Avalonia.Input;
 using Avalonia.OpenGL;
 using Avalonia.OpenGL.Controls;
 using Avalonia.Threading;
+using Foxtaur.Desktop.Controls.Renderer.Abstractions.Distances;
 using Foxtaur.Desktop.Controls.Renderer.Abstractions.Generators;
 using Foxtaur.Desktop.Controls.Renderer.Abstractions.UI;
 using Foxtaur.Desktop.Controls.Renderer.Enums;
@@ -209,6 +210,7 @@ public class DesktopRenderer : OpenGlControlBase
     private IZoomService _zoomService = Program.Di.GetService<IZoomService>();
     private IMapSegmentGenerator _mapSegmentGenerator = Program.Di.GetService<IMapSegmentGenerator>();
     private ISettingsService _settingsService = Program.Di.GetService<ISettingsService>();
+    private IDistanceProvider _distanceProvider = Program.Di.GetService<IDistanceProvider>();
 
     #endregion
     
@@ -218,23 +220,6 @@ public class DesktopRenderer : OpenGlControlBase
 
     #endregion
 
-    #region Debug
-
-    private HighResMapFragment _davydovoFragment = new HighResMapFragment(54.807812457.ToRadians(),
-        54.757759918.ToRadians(),
-        -39.823302090.ToRadians(),
-        -39.879142801.ToRadians(),
-        ResourcesConstants.MapsRemotePath + @"Davydovo/Davydovo.tif.zst",
-        false);
-
-    private HighResMap _davydovoHighResMap;
-
-    private MapSegment _davydovoMapSegment;
-
-    private bool _isDavydovoLoaded;
-
-    #endregion
-    
     #region Distance
     
     private Distance _activeDistance;
@@ -254,20 +239,8 @@ public class DesktopRenderer : OpenGlControlBase
         
         // DEM scale change
         _settingsService.OnDemScaleChanged += OnDemScaleChanged;
-
-        // Debug
-        _davydovoHighResMap = new HighResMap(Guid.NewGuid(), "Davydovo", _davydovoFragment);
-        
-        var davydovoThread = new Thread(() => _davydovoFragment.Download(OnDavydovoLoad));
-        davydovoThread.Start();
     }
 
-    private void OnDavydovoLoad(FragmentedResourceBase davydovo)
-    {
-        // Now we have texture loaded, time to generate map segment
-        _isDavydovoLoaded = true;
-    }
-    
     private void OnPropertyChangedListener(object sender, AvaloniaPropertyChangedEventArgs e)
     {
         if (e.Property.Name.Equals("Bounds"))
@@ -413,30 +386,9 @@ public class DesktopRenderer : OpenGlControlBase
         // Draw Earth
         DrawEarth(silkGlContext);
 
-        // Draw maps
-        if (_isDavydovoLoaded)
-        {
-            if (_davydovoMapSegment == null)
-            {
-                _davydovoMapSegment = _mapSegmentGenerator.Generate(_davydovoHighResMap, _currentMapsSurfaceAltitudeIncrement);
-            }
-            
-            // Do we have texture?
-            if (_davydovoMapSegment.Texture == null)
-            {
-                _davydovoMapSegment.UpdateTexture(new Texture(silkGlContext, _davydovoMapSegment.Map.Fragment.GetImage()));
-            }
-
-            if (_davydovoMapSegment.Mesh.VerticesBufferObject == null)
-            {
-                _davydovoMapSegment.Mesh.GenerateBuffers(silkGlContext);
-            }
-            
-            _davydovoMapSegment.Texture.Bind();
-            _davydovoMapSegment.Mesh.BindBuffers(silkGlContext);
-            
-            silkGlContext.DrawElements(PrimitiveType.Triangles, (uint)_davydovoMapSegment.Mesh.Indices.Count, DrawElementsType.UnsignedInt, null);
-        }
+        // Draw the distance
+        _distanceProvider.GenerateDistanceSegment(silkGlContext, _currentMapsSurfaceAltitudeIncrement);
+        _distanceProvider.DrawDistance(silkGlContext);
         
         // UI
         _ui.DrawUi(silkGlContext, _viewportWidth, _viewportHeight, _uiData);
@@ -560,7 +512,6 @@ public class DesktopRenderer : OpenGlControlBase
                 _camera.Zoom = RendererConstants.SurfaceRunMinZoom;
                 
                 _currentMapsSurfaceAltitudeIncrement = RendererConstants.MapsAltitudeIncrementSurfaceRunMode;
-                _davydovoMapSegment = null;
             }
             else
             {
@@ -569,7 +520,6 @@ public class DesktopRenderer : OpenGlControlBase
                 _camera.Up = Vector<double>.Build.DenseOfArray(new double[] { 0.0, -1.0, 0.0 });
                 
                 _currentMapsSurfaceAltitudeIncrement = RendererConstants.MapsAltitudeIncrementSatelliteMode;
-                _davydovoMapSegment = null;
 
                 _isSurfaceRunMode = false;
             }
@@ -840,8 +790,6 @@ public class DesktopRenderer : OpenGlControlBase
     {
         _earthSegments
             .ForEach(es => es.MarkToRegeneration());
-
-        _davydovoMapSegment = null; // TODO: Remove me when map manager is ready
     }
 
     public void OnKeyPressed(KeyEventArgs e)
@@ -949,6 +897,8 @@ public class DesktopRenderer : OpenGlControlBase
     public void SetActiveDistance(Distance distance)
     {
         _activeDistance = distance ?? throw new ArgumentNullException(nameof(distance));
+        
+        _distanceProvider.SetActiveDistance(_activeDistance);
     }
 
     /// <summary>
