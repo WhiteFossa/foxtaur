@@ -392,7 +392,6 @@ public class DesktopRenderer : OpenGlControlBase
         if (_isDistanceRegenerationNeeded)
         {
             _distanceProvider.DisposeDistanceSegment();
-            _distanceProvider.SetActiveDistance(_activeDistance);
 
             _isDistanceRegenerationNeeded = false;
         }
@@ -912,6 +911,7 @@ public class DesktopRenderer : OpenGlControlBase
         _activeDistance = distance ?? throw new ArgumentNullException(nameof(distance));
         
         _isDistanceRegenerationNeeded= true;
+        _distanceProvider.SetActiveDistance(_activeDistance);
     }
 
     /// <summary>
