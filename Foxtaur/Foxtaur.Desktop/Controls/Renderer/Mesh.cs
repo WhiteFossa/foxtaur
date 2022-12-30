@@ -83,6 +83,10 @@ public class Mesh : IDisposable
     {
         _ = silkGl ?? throw new ArgumentNullException(nameof(silkGl));
         
+        VerticesArrayObject.Bind();
+        VerticesBufferObject.Bind();
+        ElementsBufferObject.Bind();
+        
         //Telling the VAO object how to lay out the attribute pointers
         VerticesArrayObject.VertexAttributePointer(VerticesPositionLocation, VertexCoordsSize, VertexAttribPointerType.Float, VertexSize, 0);
         VerticesArrayObject.VertexAttributePointer(VerticesTextureCoordsLocation, TextureCoordsSize, VertexAttribPointerType.Float, VertexSize, VertexCoordsSize);

@@ -20,9 +20,6 @@ public class VertexArrayObject<TVertexType, TIndexType> : IDisposable
         _ = elementsBufferObject ?? throw new ArgumentNullException(nameof(elementsBufferObject));
 
         _handle = _silkGl.GenVertexArray();
-        Bind();
-        verticesBufferObject.Bind();
-        elementsBufferObject.Bind();
     }
 
     public unsafe void VertexAttributePointer(uint index, int count, VertexAttribPointerType type, uint vertexSize,
