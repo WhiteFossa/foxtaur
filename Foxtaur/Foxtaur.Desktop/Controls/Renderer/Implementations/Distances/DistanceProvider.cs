@@ -29,6 +29,7 @@ public class DistanceProvider : IDistanceProvider
     {
         // Disposing stuff
         _isDistanceLoaded = false;
+        DisposeDistanceSegment();
 
         _activeDistance = distance ?? throw new ArgumentNullException(nameof(distance));
 
