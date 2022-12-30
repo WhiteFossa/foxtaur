@@ -4,8 +4,10 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.ReactiveUI;
+using Foxtaur.Desktop.Controls.Renderer.Abstractions.Distances;
 using Foxtaur.Desktop.Controls.Renderer.Abstractions.Generators;
 using Foxtaur.Desktop.Controls.Renderer.Abstractions.UI;
+using Foxtaur.Desktop.Controls.Renderer.Implementations.Distances;
 using Foxtaur.Desktop.Controls.Renderer.Implementations.Generators;
 using Foxtaur.Desktop.Controls.Renderer.Implementations.UI;
 using Foxtaur.Desktop.Logging;
@@ -21,6 +23,8 @@ using Foxtaur.LibRenderer.Services.Implementations.Drawers;
 using Foxtaur.LibRenderer.Services.Implementations.Zoom;
 using Foxtaur.LibSettings.Services.Abstractions;
 using Foxtaur.LibSettings.Services.Implementations;
+using Foxtaur.LibWebClient.Services.Abstract;
+using Foxtaur.LibWebClient.Services.Implementations;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using NLog;
@@ -89,6 +93,9 @@ namespace Foxtaur.Desktop
             services.AddSingleton<IZoomService, ZoomService>();
             services.AddSingleton<IMapSegmentGenerator, MapSegmentGenerator>();
             services.AddSingleton<ISettingsService, SettingsService>();
+            services.AddSingleton<IWebClientRaw, WebClientRawStub>();
+            services.AddSingleton<IWebClient, WebClient>();
+            services.AddSingleton<IDistanceProvider, DistanceProvider>();
 
             return services;
         }

@@ -22,6 +22,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\Foxtaur.LibGeo\Foxtaur.LibGeo.csproj" />
+      <ProjectReference Include="..\Foxtaur.LibWebClient\Foxtaur.LibWebClient.csproj" />
     </ItemGroup>
 
     <ItemGroup>

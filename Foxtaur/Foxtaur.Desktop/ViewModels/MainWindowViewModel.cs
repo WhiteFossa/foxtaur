@@ -1,8 +1,15 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Reactive;
 using System.Timers;
+using Avalonia.Metadata;
+using Foxtaur.Desktop.Controls.Renderer;
+using Foxtaur.Desktop.Models;
 using Foxtaur.Desktop.Views;
 using Foxtaur.LibSettings.Services.Abstractions;
+using Foxtaur.LibWebClient.Models;
+using Foxtaur.LibWebClient.Services.Abstract;
 using Microsoft.Extensions.DependencyInjection;
 using ReactiveUI;
 
@@ -27,7 +34,7 @@ namespace Foxtaur.Desktop.ViewModels
         private double _surfaceRunTurnSpeed;
         private string _surfaceRunTurnSpeedText;
         
-        private Timer _demScaleNotificationTimer = new Timer(1000);
+        private int _selectedDistanceIndex;
 
         /// <summary>
         /// Text in console
@@ -120,6 +127,33 @@ namespace Foxtaur.Desktop.ViewModels
             get => _surfaceRunTurnSpeedText;
             set => this.RaiseAndSetIfChanged(ref _surfaceRunTurnSpeedText, value);
         }
+
+        /// <summary>
+        /// Selected distance index
+        /// </summary>
+        public int SelectedDistanceIndex
+        {
+            get => _selectedDistanceIndex;
+            set
+            {
+                this.RaiseAndSetIfChanged(ref _selectedDistanceIndex, value);
+                
+                // Loading full distance data into model
+                if (value == -1)
+                {
+                    _mainModel.Distance = null;
+                }
+                else
+                {
+                    _mainModel.Distance = _webClient.GetDistanceByIdAsync(_distances[value].Id).Result;
+                }
+
+                if (Renderer != null)
+                {
+                    Renderer.SetActiveDistance(_mainModel.Distance);                    
+                }
+            }
+        }
         
         #endregion
 
@@ -143,20 +177,48 @@ namespace Foxtaur.Desktop.ViewModels
             moreSettingsDialog.ShowDialog(Program.GetMainWindow());
         }
         
+        /// <summary>
+        /// Focus on distance
+        /// </summary>
+        public ReactiveCommand<Unit, Unit> FocusOnDistanceCommand { get; }
+
+        /// <summary>
+        /// Focus on distance
+        /// </summary>
+        private void OnFocusOnDistanceCommand()
+        {
+            Renderer.FocusOnDistance();
+        }
+
         #endregion
         
         #region DI
 
         private readonly ISettingsService _settingsService = Program.Di.GetService<ISettingsService>();
+        private readonly IWebClient _webClient = Program.Di.GetService<IWebClient>();
 
         #endregion
         
+        private Timer _demScaleNotificationTimer = new Timer(1000);
         private MoreSettingsViewModel _moreSettingsViewModel;
+        private IList<Distance> _distances;
 
-        public MainWindowViewModel()
+        private MainModel _mainModel;
+
+        public DesktopRenderer Renderer;
+
+        public MainWindowViewModel(MainModel mainModel)
         {
+            _mainModel = mainModel ?? throw new ArgumentNullException(nameof(mainModel));
+            
             // Binding commands
             MoreSettingsCommand = ReactiveCommand.Create(OnMoreSettingsCommand);
+            
+            var CanFocusOnDistanceCommand = this.WhenAnyValue(
+                x => x.SelectedDistanceIndex,
+                (selectedIndex) => selectedIndex != -1);
+            
+            FocusOnDistanceCommand = ReactiveCommand.Create(OnFocusOnDistanceCommand, CanFocusOnDistanceCommand);
             
             // More settings dialogue
             _moreSettingsViewModel = new MoreSettingsViewModel();
@@ -169,6 +231,20 @@ namespace Foxtaur.Desktop.ViewModels
             _demScaleNotificationTimer.Elapsed += NotifyAboutDemScaleChange;
             _demScaleNotificationTimer.AutoReset = false;
             _demScaleNotificationTimer.Enabled = false;
+            
+            // Asking for distances
+            SelectedDistanceIndex = -1;
+            _distances = _webClient.GetDistancesWithoutIncludeAsync()
+                .Result
+                .ToList();
+        }
+
+        /// <summary>
+        /// Return distances list
+        /// </summary>
+        public IList<Distance> GetDistances()
+        {
+            return _distances;
         }
 
         private void NotifyAboutDemScaleChange(object sender, ElapsedEventArgs e)
