@@ -176,12 +176,10 @@ public class Ui : IUi
 
         _uiMeshTop.BindBuffers(silkGlContext);
         _uiTextureTop.Bind();
-        silkGlContext.DrawElements(PrimitiveType.Triangles, (uint)_uiMeshTop.Indices.Count,
-            DrawElementsType.UnsignedInt, null);
+        silkGlContext.DrawElements(PrimitiveType.Triangles, (uint)_uiMeshTop.Indices.Count, DrawElementsType.UnsignedInt, null);
 
         _uiMeshBottom.BindBuffers(silkGlContext);
         _uiTextureBottom.Bind();
-        silkGlContext.DrawElements(PrimitiveType.Triangles, (uint)_uiMeshBottom.Indices.Count,
-            DrawElementsType.UnsignedInt, null);
+        silkGlContext.DrawElements(PrimitiveType.Triangles, (uint)_uiMeshBottom.Indices.Count, DrawElementsType.UnsignedInt, null);
     }
 }
