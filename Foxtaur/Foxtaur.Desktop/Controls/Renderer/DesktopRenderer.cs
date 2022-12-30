@@ -715,7 +715,6 @@ public class DesktopRenderer : OpenGlControlBase
     {
         _earthTexture.Bind();
         
-        // For now we treat all segments as visible
         foreach (var earthSegment in _visibleEarthSegments)
         {
             if (earthSegment.Mesh == null)
