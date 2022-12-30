@@ -37,7 +37,7 @@ public interface IDistanceProvider
     void GenerateDistanceSegment(GL silkGlContext, double altitudeIncrement);
 
     /// <summary>
-    /// Dispose segment (new one can be generated then)
+    /// Dispose segment (new one can be generated then). If segment is not generated, do nothing
     /// </summary>
     void DisposeDistanceSegment();
     

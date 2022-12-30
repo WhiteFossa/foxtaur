@@ -86,8 +86,7 @@ public class DistanceProvider : IDistanceProvider
     {
         if (_mapSegment == null)
         {
-            // Oy vey
-            throw new InvalidOperationException("Attempt to dispose not-allocated distance segment!");
+            return;
         }
         
         _mapSegment.Mesh.Dispose();
