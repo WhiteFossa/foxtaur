@@ -222,6 +222,8 @@ public class DesktopRenderer : OpenGlControlBase
 
     #region Distance
     
+    private bool _isDistanceRegenerationNeeded = false;
+
     private Distance _activeDistance;
     
     #endregion
@@ -387,6 +389,14 @@ public class DesktopRenderer : OpenGlControlBase
         DrawEarth(silkGlContext);
 
         // Draw the distance
+        if (_isDistanceRegenerationNeeded)
+        {
+            _distanceProvider.DisposeDistanceSegment();
+            _distanceProvider.SetActiveDistance(_activeDistance);
+
+            _isDistanceRegenerationNeeded = false;
+        }
+
         _distanceProvider.GenerateDistanceSegment(silkGlContext, _currentMapsSurfaceAltitudeIncrement);
         _distanceProvider.DrawDistance(silkGlContext);
         
@@ -512,7 +522,7 @@ public class DesktopRenderer : OpenGlControlBase
                 _camera.Zoom = RendererConstants.SurfaceRunMinZoom;
                 
                 _currentMapsSurfaceAltitudeIncrement = RendererConstants.MapsAltitudeIncrementSurfaceRunMode;
-                _distanceProvider.DisposeDistanceSegment(); // We need to regenerate because of changed altitude increment
+                _isDistanceRegenerationNeeded = true; // We need to regenerate because of changed altitude increment
             }
             else
             {
@@ -521,7 +531,7 @@ public class DesktopRenderer : OpenGlControlBase
                 _camera.Up = Vector<double>.Build.DenseOfArray(new double[] { 0.0, -1.0, 0.0 });
                 
                 _currentMapsSurfaceAltitudeIncrement = RendererConstants.MapsAltitudeIncrementSatelliteMode;
-                _distanceProvider.DisposeDistanceSegment();
+                _isDistanceRegenerationNeeded = true;
 
                 _isSurfaceRunMode = false;
             }
@@ -792,7 +802,7 @@ public class DesktopRenderer : OpenGlControlBase
         _earthSegments
             .ForEach(es => es.MarkToRegeneration());
         
-        _distanceProvider.DisposeDistanceSegment();
+        _isDistanceRegenerationNeeded = true;
     }
 
     public void OnKeyPressed(KeyEventArgs e)
@@ -901,7 +911,7 @@ public class DesktopRenderer : OpenGlControlBase
     {
         _activeDistance = distance ?? throw new ArgumentNullException(nameof(distance));
         
-        _distanceProvider.SetActiveDistance(_activeDistance);
+        _isDistanceRegenerationNeeded= true;
     }
 
     /// <summary>
