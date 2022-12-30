@@ -243,6 +243,14 @@ public class SettingsService : ISettingsService
         if (!File.Exists(_configFilePath))
         {
             // First run, we need to create config file
+            SetDemScale(1.0);
+            SetSurfaceRunSpeed(0.000001);
+            SetSurfaceRunTurnSpeed(1.0);
+            SetSurfaceRunForwardButton(Key.W);
+            SetSurfaceRunBackwardButton(Key.S);
+            SetSurfaceRunTurnLeftButton(Key.A);
+            SetSurfaceRunTurnRightButton(Key.D);
+
             SaveSettings();
         }
         
