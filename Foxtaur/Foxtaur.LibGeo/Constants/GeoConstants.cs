@@ -46,4 +46,9 @@ public static class GeoConstants
     /// Earth center coordinates
     /// </summary>
     public static readonly Vector<double> EarthCenter = Vector<double>.Build.DenseOfArray(new double[] { 0.0, 0.0, 0.0 });
+    
+    /// <summary>
+    /// Earth radius in meters
+    /// </summary>
+    public const double MetersPerEarthRadius = 6371000.0;
 }

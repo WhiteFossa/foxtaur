@@ -585,6 +585,7 @@ public class DesktopRenderer : OpenGlControlBase
         {
             _uiData.MouseLat = geoCoordinates.Lat;
             _uiData.MouseLon = geoCoordinates.Lon;
+            _uiData.MouseH = geoCoordinates.H;
         }
 
         _uiData.MarkForRegeneration();
@@ -654,7 +655,12 @@ public class DesktopRenderer : OpenGlControlBase
             return null;
         }
 
-        return _sphereCoordinatesProvider.Planar3DToGeo(closestIntersection);
+        var result = _sphereCoordinatesProvider.Planar3DToGeo(closestIntersection);
+
+        // Asking DEM provider for actual altitude
+        var altitude = _demProvider.GetSurfaceAltitude(result.Lat, result.Lon, _zoomService.ZoomLevel);
+
+        return new GeoPoint(result.Lat, result.Lon, altitude);
     }
 
     /// <summary>

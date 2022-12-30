@@ -31,6 +31,11 @@ public class UiData
     public double MouseLon { get; set; }
 
     /// <summary>
+    /// Mouse altitude
+    /// </summary>
+    public double MouseH { get; set; }
+
+    /// <summary>
     /// Mark UI for regeneration
     /// </summary>
     public void MarkForRegeneration()
