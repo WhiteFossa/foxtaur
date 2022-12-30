@@ -121,16 +121,15 @@ public class Ui : IUi
         }
 
         // Bottom
-        using (var uiBottomPanelImage = new MagickImage(RendererConstants.UiPanelsBackgroundColor, uiWidth,
-                   RendererConstants.UiBottomPanelHeight))
+        using (var uiBottomPanelImage = new MagickImage(RendererConstants.UiPanelsBackgroundColor, uiWidth, RendererConstants.UiBottomPanelHeight))
         {
             // Mouse coordinates
             var latText = data.IsMouseInEarth ? data.MouseLat.ToLatString() : "N/A";
             var lonText = data.IsMouseInEarth ? data.MouseLon.ToLonString() : "N/A";
-            var mouseCoordsText = $"Latitude: {latText}, Longitude: {lonText}";
+            var altitudeText = data.IsMouseInEarth ? data.MouseH.ToAltitudeString() : "N/A";
+            var mouseCoordsText = $"Latitude: {latText}, Longitude: {lonText}, Altitude: {altitudeText}";
 
-            var mouseCoordsTextSize =
-                _textDrawer.GetTextBounds(uiBottomPanelImage, RendererConstants.UiFontSize, mouseCoordsText);
+            var mouseCoordsTextSize = _textDrawer.GetTextBounds(uiBottomPanelImage, RendererConstants.UiFontSize, mouseCoordsText);
             var mouseCoordsTextShiftY = RendererConstants.UiTopPanelHeight - (RendererConstants.UiTopPanelHeight - mouseCoordsTextSize.TextHeight) / 2.0 + mouseCoordsTextSize.Descent;
 
             _textDrawer.DrawText(uiBottomPanelImage,
