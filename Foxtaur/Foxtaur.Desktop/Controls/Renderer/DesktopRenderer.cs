@@ -401,7 +401,6 @@ public class DesktopRenderer : OpenGlControlBase
         _distanceProvider.DrawDistance(silkGlContext);
 
         // UI
-        _uiData.CameraH = _camera.H;
         _ui.DrawUi(silkGlContext, _viewportWidth, _viewportHeight, _uiData);
 
         // Everything is drawn
@@ -446,10 +445,7 @@ public class DesktopRenderer : OpenGlControlBase
         LimitSurfaceRunViewAngles();
         
         // Camera height
-        var cameraH = (RendererConstants.SurfaceRunModeCameraOrbitHeight + _demProvider.GetSurfaceAltitude(_camera.Lat, _camera.Lon, _zoomService.ZoomLevel)).ScaleAltitude(_settingsService.GetDemScale());
-        //var cameraH = RendererConstants.SurfaceRunModeCameraOrbitHeight + _demProvider.GetSurfaceAltitude(_camera.Lat, _camera.Lon, _zoomService.ZoomLevel).ScaleAltitude(_settingsService.GetDemScale());
-
-        _camera.H = cameraH;
+        _camera.H = RendererConstants.SurfaceRunModeCameraOrbitHeight + _demProvider.GetSurfaceAltitude(_camera.Lat, _camera.Lon, _zoomService.ZoomLevel).ScaleAltitude(_settingsService.GetDemScale());
 
         // Up
         var nadirVector = GeoConstants.EarthCenter - _camera.Position3D.AsVector();

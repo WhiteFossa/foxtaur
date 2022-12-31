@@ -126,9 +126,8 @@ public class Ui : IUi
             var latText = data.IsMouseInEarth ? data.MouseLat.ToLatString() : "N/A";
             var lonText = data.IsMouseInEarth ? data.MouseLon.ToLonString() : "N/A";
             var altitudeText = data.IsMouseInEarth ? data.MouseH.ToAltitudeString() : "N/A";
-            var cameraAltitudeText = data.CameraH.ToAltitudeString();
-            
-            var bottomText = $"Latitude: {latText}, Longitude: {lonText}, Altitude: {altitudeText}, Camera altitude: {cameraAltitudeText}";
+
+            var bottomText = $"Latitude: {latText}, Longitude: {lonText}, Altitude: {altitudeText}";
 
             var bottomTextSize = _textDrawer.GetTextBounds(uiBottomPanelImage, RendererConstants.UiFontSize, bottomText);
             var bottomTextShiftY = RendererConstants.UiTopPanelHeight - (RendererConstants.UiTopPanelHeight - bottomTextSize.TextHeight) / 2.0 + bottomTextSize.Descent;

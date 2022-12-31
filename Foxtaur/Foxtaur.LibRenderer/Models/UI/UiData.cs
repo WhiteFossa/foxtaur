@@ -36,11 +36,6 @@ public class UiData
     public double MouseH { get; set; }
 
     /// <summary>
-    /// Camera altitude
-    /// </summary>
-    public double CameraH { get; set; }
-
-    /// <summary>
     /// Mark UI for regeneration
     /// </summary>
     public void MarkForRegeneration()
