@@ -18,5 +18,10 @@ public enum ZoomLevel
     /// <summary>
     /// Maximal zoom, more details
     /// </summary>
-    ZoomLevel2
+    ZoomLevel2,
+    
+    /// <summary>
+    /// Very high details, for surface run mode only
+    /// </summary>
+    ZoomLevelSurfaceRun
 }

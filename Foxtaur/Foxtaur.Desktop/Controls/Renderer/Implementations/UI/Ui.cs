@@ -123,20 +123,21 @@ public class Ui : IUi
         // Bottom
         using (var uiBottomPanelImage = new MagickImage(RendererConstants.UiPanelsBackgroundColor, uiWidth, RendererConstants.UiBottomPanelHeight))
         {
-            // Mouse coordinates
             var latText = data.IsMouseInEarth ? data.MouseLat.ToLatString() : "N/A";
             var lonText = data.IsMouseInEarth ? data.MouseLon.ToLonString() : "N/A";
             var altitudeText = data.IsMouseInEarth ? data.MouseH.ToAltitudeString() : "N/A";
-            var mouseCoordsText = $"Latitude: {latText}, Longitude: {lonText}, Altitude: {altitudeText}";
+            var cameraAltitudeText = data.CameraH.ToAltitudeString();
+            
+            var bottomText = $"Latitude: {latText}, Longitude: {lonText}, Altitude: {altitudeText}, Camera altitude: {cameraAltitudeText}";
 
-            var mouseCoordsTextSize = _textDrawer.GetTextBounds(uiBottomPanelImage, RendererConstants.UiFontSize, mouseCoordsText);
-            var mouseCoordsTextShiftY = RendererConstants.UiTopPanelHeight - (RendererConstants.UiTopPanelHeight - mouseCoordsTextSize.TextHeight) / 2.0 + mouseCoordsTextSize.Descent;
+            var bottomTextSize = _textDrawer.GetTextBounds(uiBottomPanelImage, RendererConstants.UiFontSize, bottomText);
+            var bottomTextShiftY = RendererConstants.UiTopPanelHeight - (RendererConstants.UiTopPanelHeight - bottomTextSize.TextHeight) / 2.0 + bottomTextSize.Descent;
 
             _textDrawer.DrawText(uiBottomPanelImage,
                 RendererConstants.UiFontSize,
                 RendererConstants.UiTextColor,
-                new PlanarPoint2D(RendererConstants.UiMouseCoordsTextXPosition, mouseCoordsTextShiftY),
-                mouseCoordsText);
+                new PlanarPoint2D(RendererConstants.UiBottomTextXPosition, bottomTextShiftY),
+                bottomText);
 
             if (_uiTextureBottom != null)
             {

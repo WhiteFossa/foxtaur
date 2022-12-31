@@ -23,10 +23,11 @@ public class DemProvider : IDemProvider
     private Mutex _demRegenerationLock = new Mutex();
 
     /// <summary>
-    /// Zoom levels, ordered from higher to lower Fresolution
+    /// Zoom levels, ordered from higher to lower resolution
     /// </summary>
     private List<ZoomLevel> _orderedZoomLevels = new List<ZoomLevel>()
     {
+        ZoomLevel.ZoomLevelSurfaceRun,
         ZoomLevel.ZoomLevel2,
         ZoomLevel.ZoomLevel1,
         ZoomLevel.ZoomLevel0

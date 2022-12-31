@@ -93,7 +93,7 @@ public static class RendererConstants
     /// <summary>
     /// Mouse coords text X position
     /// </summary>
-    public const double UiMouseCoordsTextXPosition = 10;
+    public const double UiBottomTextXPosition = 10;
 
     #endregion
 
