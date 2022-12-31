@@ -27,6 +27,7 @@ using Foxtaur.LibRenderer.Models.UI;
 using Foxtaur.LibRenderer.Services.Abstractions.Camera;
 using Foxtaur.LibRenderer.Services.Abstractions.Zoom;
 using Foxtaur.LibResources.Constants;
+using Foxtaur.LibResources.Enums;
 using Foxtaur.LibResources.Models;
 using Foxtaur.LibResources.Models.HighResMap;
 using Foxtaur.LibSettings.Services.Abstractions;
@@ -398,7 +399,7 @@ public class DesktopRenderer : OpenGlControlBase
 
         _distanceProvider.GenerateDistanceSegment(silkGlContext, _currentMapsSurfaceAltitudeIncrement);
         _distanceProvider.DrawDistance(silkGlContext);
-        
+
         // UI
         _ui.DrawUi(silkGlContext, _viewportWidth, _viewportHeight, _uiData);
 
@@ -444,8 +445,7 @@ public class DesktopRenderer : OpenGlControlBase
         LimitSurfaceRunViewAngles();
         
         // Camera height
-        var cameraH = (RendererConstants.SurfaceRunModeCameraOrbitHeight + _demProvider.GetSurfaceAltitude(_camera.Lat, _camera.Lon, _zoomService.ZoomLevel)).ScaleAltitude(_settingsService.GetDemScale());
-        _camera.H = cameraH;
+        _camera.H = RendererConstants.SurfaceRunModeCameraOrbitHeight + _demProvider.GetSurfaceAltitude(_camera.Lat, _camera.Lon, _zoomService.ZoomLevel).ScaleAltitude(_settingsService.GetDemScale());
 
         // Up
         var nadirVector = GeoConstants.EarthCenter - _camera.Position3D.AsVector();
@@ -518,6 +518,7 @@ public class DesktopRenderer : OpenGlControlBase
                 _isSurfaceRunMode = true;
                 
                 _camera.Zoom = RendererConstants.SurfaceRunMinZoom;
+                _zoomService.IsSurfaceRunMode = true;
                 
                 _currentMapsSurfaceAltitudeIncrement = RendererConstants.MapsAltitudeIncrementSurfaceRunMode;
                 _isDistanceRegenerationNeeded = true; // We need to regenerate because of changed altitude increment
@@ -531,6 +532,7 @@ public class DesktopRenderer : OpenGlControlBase
                 _currentMapsSurfaceAltitudeIncrement = RendererConstants.MapsAltitudeIncrementSatelliteMode;
                 _isDistanceRegenerationNeeded = true;
 
+                _zoomService.IsSurfaceRunMode = false;
                 _isSurfaceRunMode = false;
             }
 

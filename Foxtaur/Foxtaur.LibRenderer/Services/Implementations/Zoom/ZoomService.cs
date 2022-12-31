@@ -26,7 +26,22 @@ public class ZoomService : IZoomService
         {
             _zoom = value;
 
-            ZoomLevel = GetZoomLevelByCameraZoom(_zoom);
+            ZoomLevel = GetZoomLevelByCameraZoom(_zoom, IsSurfaceRunMode);
+        }
+    }
+
+    public bool IsSurfaceRunMode
+    {
+        get
+        {
+            return _isSurfaceRunMode;
+        }
+
+        set
+        {
+            _isSurfaceRunMode = value;
+
+            ZoomLevel = GetZoomLevelByCameraZoom(Zoom, _isSurfaceRunMode);
         }
     }
 
@@ -66,13 +81,14 @@ public class ZoomService : IZoomService
     }
 
     private double _zoom = RendererConstants.CameraMinZoom;
+    private bool _isSurfaceRunMode = false;
     private ZoomLevel _zoomLevel;
     private Models.Zoom.ZoomLevel _zoomLevelData;
 
     private List<Models.Zoom.ZoomLevel> _zoomLevels = new()
     {
         new(ZoomLevel.ZoomLevel0,
-            Math.PI / 2.0f,
+            Math.PI / 2.0,
             0.5,
             10.0.ToRadians(),
             0.5.ToRadians()),
@@ -87,18 +103,31 @@ public class ZoomService : IZoomService
             0.1,
             0.0,
             1.0.ToRadians(),
-            0.05.ToRadians())
+            0.05.ToRadians()),
+        
+        new(ZoomLevel.ZoomLevelSurfaceRun,
+            Math.PI / 2.0,
+            0.0,
+            0.1.ToRadians(),
+            0.005.ToRadians())
     };
 
     public ZoomService()
     {
-        ZoomLevel = GetZoomLevelByCameraZoom(Zoom);
+        ZoomLevel = GetZoomLevelByCameraZoom(Zoom, IsSurfaceRunMode);
         ZoomLevelData = GetZoomLevel(ZoomLevel);
     }
     
-    private ZoomLevel GetZoomLevelByCameraZoom(double cameraZoom)
+    private ZoomLevel GetZoomLevelByCameraZoom(double cameraZoom, bool isSurfaceRunMode)
     {
+        // In case of surface run mode we always want to have higher resolution
+        if (isSurfaceRunMode)
+        {
+            return ZoomLevel.ZoomLevelSurfaceRun;
+        }
+        
         return _zoomLevels
+            .Where(zl => zl.Level != ZoomLevel.ZoomLevelSurfaceRun)
             .First(zl => zl.MinZoom >= cameraZoom && zl.MaxZoom < cameraZoom)
             .Level;
     }

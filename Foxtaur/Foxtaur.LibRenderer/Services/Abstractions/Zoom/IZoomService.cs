@@ -33,6 +33,12 @@ public interface IZoomService
     double Zoom { get; set; }
 
     /// <summary>
+    /// Surface run mode. Write it here (from renderer). In case of IsSurfaceRunMode == true,
+    /// special zoom level(s) will be activated
+    /// </summary>
+    bool IsSurfaceRunMode { get; set; }
+
+    /// <summary>
     /// Current zoom level
     /// </summary>
     ZoomLevel ZoomLevel { get; }
