@@ -680,6 +680,9 @@ public class DesktopRenderer : OpenGlControlBase
                 {
                     segment.MarkToRegeneration();
                 }
+                
+                // Marking distance's map for regeneration too
+                _isDistanceRegenerationNeeded = true;
             }
         });
     }
