@@ -770,10 +770,10 @@ public class DesktopRenderer : OpenGlControlBase
         foreach (var earthSegment in _earthSegments)
         {
             // Removing far-side segments
-            var p1 = _sphereCoordinatesProvider.GeoToPlanar3D(new GeoPoint(earthSegment.GeoSegment.SouthLat, earthSegment.GeoSegment.WestLon, GeoConstants.EarthRadius));
-            var p2 = _sphereCoordinatesProvider.GeoToPlanar3D(new GeoPoint(earthSegment.GeoSegment.NorthLat, earthSegment.GeoSegment.WestLon, GeoConstants.EarthRadius));
-            var p3 = _sphereCoordinatesProvider.GeoToPlanar3D(new GeoPoint(earthSegment.GeoSegment.NorthLat, earthSegment.GeoSegment.EastLon, GeoConstants.EarthRadius));
-            var p4 = _sphereCoordinatesProvider.GeoToPlanar3D(new GeoPoint(earthSegment.GeoSegment.SouthLat, earthSegment.GeoSegment.EastLon, GeoConstants.EarthRadius));
+            var p1 = _sphereCoordinatesProvider.GeoToPlanar3D(earthSegment.GeoSegment.SouthLat, earthSegment.GeoSegment.WestLon, GeoConstants.EarthRadius);
+            var p2 = _sphereCoordinatesProvider.GeoToPlanar3D(earthSegment.GeoSegment.NorthLat, earthSegment.GeoSegment.WestLon, GeoConstants.EarthRadius);
+            var p3 = _sphereCoordinatesProvider.GeoToPlanar3D(earthSegment.GeoSegment.NorthLat, earthSegment.GeoSegment.EastLon, GeoConstants.EarthRadius);
+            var p4 = _sphereCoordinatesProvider.GeoToPlanar3D(earthSegment.GeoSegment.SouthLat, earthSegment.GeoSegment.EastLon, GeoConstants.EarthRadius);
 
             if (!(_camera.IsPointOnCameraSideOfEarth(undergroundPoint, p1)
                   && _camera.IsPointOnCameraSideOfEarth(undergroundPoint, p2)
@@ -786,25 +786,25 @@ public class DesktopRenderer : OpenGlControlBase
             var viewportSegment = _camera.ProjectSegmentToViewport(earthSegment.GeoSegment);
             
             // Segment corners
-            if ((new PlanarPoint2D(viewportSegment.Left, viewportSegment.Bottom)).IsPointInCullingViewport())
+            if (RendererHelper.IsPointInCullingViewport(viewportSegment.Left, viewportSegment.Bottom))
             {
                 _visibleEarthSegments.Add(earthSegment);
                 continue;
             }
-
-            if ((new PlanarPoint2D(viewportSegment.Left, viewportSegment.Top)).IsPointInCullingViewport())
+            
+            if (RendererHelper.IsPointInCullingViewport(viewportSegment.Left, viewportSegment.Top))
             {
                 _visibleEarthSegments.Add(earthSegment);
                 continue;
             }
-
-            if ((new PlanarPoint2D(viewportSegment.Right, viewportSegment.Top)).IsPointInCullingViewport())
+            
+            if (RendererHelper.IsPointInCullingViewport(viewportSegment.Right, viewportSegment.Top))
             {
                 _visibleEarthSegments.Add(earthSegment);
                 continue;
             }
-
-            if ((new PlanarPoint2D(viewportSegment.Right, viewportSegment.Bottom)).IsPointInCullingViewport())
+            
+            if (RendererHelper.IsPointInCullingViewport(viewportSegment.Right, viewportSegment.Bottom))
             {
                 _visibleEarthSegments.Add(earthSegment);
                 continue;

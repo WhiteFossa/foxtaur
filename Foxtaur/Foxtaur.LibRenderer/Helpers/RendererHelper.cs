@@ -66,15 +66,15 @@ public static class RendererHelper
     /// <summary>
     /// Is point in culling viewport?
     /// </summary>
-    public static bool IsPointInCullingViewport(this PlanarPoint2D point)
+    public static bool IsPointInCullingViewport(double x, double y)
     {
-        return point.X >= -1.0
+        return x >= -1.0
                &&
-               point.X <= 1.0
+               x <= 1.0
                &&
-               point.Y >= -1.0
+               y >= -1.0
                &&
-               point.Y <= 1.0;
+               y <= 1.0;
     }
 
     /// <summary>
