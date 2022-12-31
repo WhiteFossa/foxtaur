@@ -375,6 +375,7 @@ public class DesktopRenderer : OpenGlControlBase
         // If zoom level changed, we have to regenerate everything Earth-related
         if (_isZoomLevelChanged)
         {
+            GenerateEarthSegments();
             _earthSegments.ForEach(es => es.MarkToRegeneration());
             
             _isZoomLevelChanged = false;
@@ -691,7 +692,7 @@ public class DesktopRenderer : OpenGlControlBase
     {
         _earthSegments.Clear();
         
-        for (var lat = -0.5 * Math.PI; lat < 0.5 * Math.PI; lat += _zoomService.ZoomLevelData.SegmentSize)
+        for (var lat = -0.5 * Math.PI; lat < GeoPoint.SumLatitudesWithWrap(0.5 * Math.PI, -1.0 * _zoomService.ZoomLevelData.SegmentSize); lat += _zoomService.ZoomLevelData.SegmentSize)
         {
             for (var lon = Math.PI; lon > GeoPoint.SumLongitudesWithWrap(-1.0 * Math.PI, _zoomService.ZoomLevelData.SegmentSize); lon -= _zoomService.ZoomLevelData.SegmentSize)
             {
@@ -707,6 +708,12 @@ public class DesktopRenderer : OpenGlControlBase
 
     private void RegenerateEarthSegments(GL silkGl)
     {
+        var toRegenerateTotal = _visibleEarthSegments.Count(es => es.IsRegenerationNeeded);
+        if (toRegenerateTotal == 0)
+        {
+            return;
+        }
+
         var toRegenerateInThisFrame = _visibleEarthSegments
             .Where(es => es.IsRegenerationNeeded)
             .TakeLast(RendererConstants.MaxSegmentsPerFrameRegeneration);

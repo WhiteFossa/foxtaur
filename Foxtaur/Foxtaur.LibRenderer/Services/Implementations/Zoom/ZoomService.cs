@@ -96,19 +96,19 @@ public class ZoomService : IZoomService
         new(ZoomLevel.ZoomLevel1,
             0.5,
             0.1,
-            2.0.ToRadians(),
+            5.0.ToRadians(),
             0.1.ToRadians()),
         
         new(ZoomLevel.ZoomLevel2,
             0.1,
             0.0,
-            1.0.ToRadians(),
+            2.0.ToRadians(),
             0.05.ToRadians()),
         
         new(ZoomLevel.ZoomLevelSurfaceRun,
             Math.PI / 2.0,
             0.0,
-            0.1.ToRadians(),
+            2.0.ToRadians(),
             0.005.ToRadians())
     };
 
