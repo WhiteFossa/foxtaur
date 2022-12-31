@@ -692,13 +692,19 @@ public class DesktopRenderer : OpenGlControlBase
     {
         _earthSegments.Clear();
         
-        for (var lat = -0.5 * Math.PI; lat < GeoPoint.SumLatitudesWithWrap(0.5 * Math.PI, -1.0 * _zoomService.ZoomLevelData.SegmentSize); lat += _zoomService.ZoomLevelData.SegmentSize)
+        for (var lat = -0.5 * Math.PI; lat < 0.5 * Math.PI; lat += _zoomService.ZoomLevelData.SegmentSize)
         {
+            var nLat = lat + _zoomService.ZoomLevelData.SegmentSize;
+            if (nLat > 0.5 * Math.PI)
+            {
+                nLat = 0.5 * Math.PI;
+            }
+            
             for (var lon = Math.PI; lon > GeoPoint.SumLongitudesWithWrap(-1.0 * Math.PI, _zoomService.ZoomLevelData.SegmentSize); lon -= _zoomService.ZoomLevelData.SegmentSize)
             {
                 _earthSegments.Add(_earthGenerator.GenerateEarthSegment(
                     new GeoSegment(
-                        GeoPoint.SumLatitudesWithWrap(lat, _zoomService.ZoomLevelData.SegmentSize),
+                        nLat,
                         lon,
                         lat,
                         GeoPoint.SumLongitudesWithWrap(lon, -1.0 * _zoomService.ZoomLevelData.SegmentSize))));
@@ -763,36 +769,51 @@ public class DesktopRenderer : OpenGlControlBase
         
         foreach (var earthSegment in _earthSegments)
         {
+            // Removing far-side segments
+            var p1 = _sphereCoordinatesProvider.GeoToPlanar3D(new GeoPoint(earthSegment.GeoSegment.SouthLat, earthSegment.GeoSegment.WestLon, GeoConstants.EarthRadius));
+            var p2 = _sphereCoordinatesProvider.GeoToPlanar3D(new GeoPoint(earthSegment.GeoSegment.NorthLat, earthSegment.GeoSegment.WestLon, GeoConstants.EarthRadius));
+            var p3 = _sphereCoordinatesProvider.GeoToPlanar3D(new GeoPoint(earthSegment.GeoSegment.NorthLat, earthSegment.GeoSegment.EastLon, GeoConstants.EarthRadius));
+            var p4 = _sphereCoordinatesProvider.GeoToPlanar3D(new GeoPoint(earthSegment.GeoSegment.SouthLat, earthSegment.GeoSegment.EastLon, GeoConstants.EarthRadius));
+
+            if (!(_camera.IsPointOnCameraSideOfEarth(undergroundPoint, p1)
+                  && _camera.IsPointOnCameraSideOfEarth(undergroundPoint, p2)
+                  && _camera.IsPointOnCameraSideOfEarth(undergroundPoint, p3)
+                  && _camera.IsPointOnCameraSideOfEarth(undergroundPoint, p4)))
+            {
+                continue;
+            }
+            
             var viewportSegment = _camera.ProjectSegmentToViewport(earthSegment.GeoSegment);
             
             // Segment corners
-            var c1 = new PlanarPoint2D(viewportSegment.Left, viewportSegment.Bottom);
-            var c2 = new PlanarPoint2D(viewportSegment.Left, viewportSegment.Top);
-            var c3 = new PlanarPoint2D(viewportSegment.Right, viewportSegment.Top);
-            var c4 = new PlanarPoint2D(viewportSegment.Right, viewportSegment.Bottom);
-
-            var isC1InViewport = c1.IsPointInCullingViewport();
-            var isC2InViewport = c2.IsPointInCullingViewport();
-            var isC3InViewport = c3.IsPointInCullingViewport();
-            var isC4InViewport = c4.IsPointInCullingViewport();
-
-            var isViewportCoveredBySegment = viewportSegment.IsCullingViewpointCoveredBySegment();
-
-            if (isC1InViewport || isC2InViewport || isC3InViewport || isC4InViewport || isViewportCoveredBySegment)
+            if ((new PlanarPoint2D(viewportSegment.Left, viewportSegment.Bottom)).IsPointInCullingViewport())
             {
-                // Removing far-side segments
-                var p1 = _sphereCoordinatesProvider.GeoToPlanar3D(new GeoPoint(earthSegment.GeoSegment.SouthLat, earthSegment.GeoSegment.WestLon, GeoConstants.EarthRadius));
-                var p2 = _sphereCoordinatesProvider.GeoToPlanar3D(new GeoPoint(earthSegment.GeoSegment.NorthLat, earthSegment.GeoSegment.WestLon, GeoConstants.EarthRadius));
-                var p3 = _sphereCoordinatesProvider.GeoToPlanar3D(new GeoPoint(earthSegment.GeoSegment.NorthLat, earthSegment.GeoSegment.EastLon, GeoConstants.EarthRadius));
-                var p4 = _sphereCoordinatesProvider.GeoToPlanar3D(new GeoPoint(earthSegment.GeoSegment.SouthLat, earthSegment.GeoSegment.EastLon, GeoConstants.EarthRadius));
+                _visibleEarthSegments.Add(earthSegment);
+                continue;
+            }
 
-                if (_camera.IsPointOnCameraSideOfEarth(undergroundPoint, p1)
-                    || _camera.IsPointOnCameraSideOfEarth(undergroundPoint, p2)
-                    || _camera.IsPointOnCameraSideOfEarth(undergroundPoint, p3)
-                    || _camera.IsPointOnCameraSideOfEarth(undergroundPoint, p4))
-                {
-                    _visibleEarthSegments.Add(earthSegment);    
-                }
+            if ((new PlanarPoint2D(viewportSegment.Left, viewportSegment.Top)).IsPointInCullingViewport())
+            {
+                _visibleEarthSegments.Add(earthSegment);
+                continue;
+            }
+
+            if ((new PlanarPoint2D(viewportSegment.Right, viewportSegment.Top)).IsPointInCullingViewport())
+            {
+                _visibleEarthSegments.Add(earthSegment);
+                continue;
+            }
+
+            if ((new PlanarPoint2D(viewportSegment.Right, viewportSegment.Bottom)).IsPointInCullingViewport())
+            {
+                _visibleEarthSegments.Add(earthSegment);
+                continue;
+            }
+
+            if (viewportSegment.IsCullingViewpointCoveredBySegment())
+            {
+                _visibleEarthSegments.Add(earthSegment);
+                continue;
             }
         }
     }
