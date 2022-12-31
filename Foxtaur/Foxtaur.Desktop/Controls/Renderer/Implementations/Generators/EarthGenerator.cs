@@ -3,12 +3,14 @@ using Foxtaur.Desktop.Controls.Renderer.Abstractions.Generators;
 using Foxtaur.Desktop.Controls.Renderer.Helpers;
 using Foxtaur.Desktop.Controls.Renderer.Models;
 using Foxtaur.LibGeo.Constants;
+using Foxtaur.LibGeo.Helpers;
 using Foxtaur.LibGeo.Models;
 using Foxtaur.LibGeo.Services.Abstractions.CoordinateProviders;
 using Foxtaur.LibGeo.Services.Abstractions.DemProviders;
 using Foxtaur.LibRenderer.Models;
 using Foxtaur.LibRenderer.Services.Abstractions.Zoom;
 using Foxtaur.LibResources.Enums;
+using Foxtaur.LibSettings.Services.Abstractions;
 
 namespace Foxtaur.Desktop.Controls.Renderer.Implementations.Generators;
 
@@ -17,14 +19,17 @@ public class EarthGenerator : IEarthGenerator
     private readonly ISphereCoordinatesProvider _sphereCoordinatesProvider;
     private readonly IDemProvider _demProvider;
     private readonly IZoomService _zoomService;
+    private readonly ISettingsService _settingsService;
 
     public EarthGenerator(ISphereCoordinatesProvider sphereCoordinatesProvider,
         IDemProvider demProvider,
-        IZoomService zoomService)
+        IZoomService zoomService,
+        ISettingsService settingsService)
     {
         _sphereCoordinatesProvider = sphereCoordinatesProvider;
         _demProvider = demProvider;
         _zoomService = zoomService;
+        _settingsService = settingsService;
     }
     
     public EarthSegment GenerateEarthSegment(GeoSegment segment)
@@ -36,6 +41,8 @@ public class EarthGenerator : IEarthGenerator
     {
         _ = segment ?? throw new ArgumentNullException(nameof(segment));
         
+        var altitudeScalingFactor = _settingsService.GetDemScale();
+        
         var segmentMesh = new Mesh();
         
         for (var lat = segment.GeoSegment.SouthLat.GetClosestLatNode(_zoomService.ZoomLevelData.MeshesStep); lat < segment.GeoSegment.NorthLat; lat += _zoomService.ZoomLevelData.MeshesStep)
@@ -45,7 +52,7 @@ public class EarthGenerator : IEarthGenerator
             var granulatedWestLon = segment.GeoSegment.WestLon.GetClosestLonNodeWest(_zoomService.ZoomLevelData.MeshesStep);
 
             // First two points of a stripe
-            var firstPair = GenerateAndAddPointsPair(segmentMesh, lat, granulatedWestLon, latNorther, granulatedWestLon, _zoomService.ZoomLevelData.Level);
+            var firstPair = GenerateAndAddPointsPair(segmentMesh, lat, granulatedWestLon, latNorther, granulatedWestLon, _zoomService.ZoomLevel, altitudeScalingFactor);
             var i3D0 = firstPair.Item1;
             var i3D1 = firstPair.Item2;
 
@@ -54,7 +61,7 @@ public class EarthGenerator : IEarthGenerator
             
             for (var lon = granulatedWestLon - _zoomService.ZoomLevelData.MeshesStep; lon > granulatedEastLon; lon -= _zoomService.ZoomLevelData.MeshesStep)
             {
-                var intermediatePair = GenerateAndAddPointsPair(segmentMesh, lat, lon, latNorther, lon, _zoomService.ZoomLevelData.Level);
+                var intermediatePair = GenerateAndAddPointsPair(segmentMesh, lat, lon, latNorther, lon, _zoomService.ZoomLevel, altitudeScalingFactor);
                 var i3D2 = intermediatePair.Item1;
                 var i3D3 = intermediatePair.Item2;
 
@@ -71,7 +78,7 @@ public class EarthGenerator : IEarthGenerator
             }
             
             // Two last triangles of a stripe
-            var lastPair = GenerateAndAddPointsPair(segmentMesh, lat, granulatedEastLon, latNorther, granulatedEastLon, _zoomService.ZoomLevelData.Level);
+            var lastPair = GenerateAndAddPointsPair(segmentMesh, lat, granulatedEastLon, latNorther, granulatedEastLon, _zoomService.ZoomLevel, altitudeScalingFactor);
             var i3last0 = lastPair.Item1;
             var i3last1 = lastPair.Item2;
 
@@ -101,15 +108,16 @@ public class EarthGenerator : IEarthGenerator
         double p0Lon,
         double p1Lat,
         double p1Lon,
-        ZoomLevel desiredZoomLevel)
+        ZoomLevel desiredZoomLevel,
+        double altitudeScalingFactor)
     {
         _ = mesh ?? throw new ArgumentNullException(nameof(mesh));
-
+        
         // Geopoints
-        var altitude0 = _demProvider.GetSurfaceAltitude(p0Lat, p0Lon, desiredZoomLevel);
+        var altitude0 = _demProvider.GetSurfaceAltitude(p0Lat, p0Lon, desiredZoomLevel).ScaleAltitude(altitudeScalingFactor);
         var geoPoint0 = new GeoPoint(p0Lat, p0Lon, altitude0);
 
-        var altitude1 = _demProvider.GetSurfaceAltitude(p1Lat, p1Lon, desiredZoomLevel);
+        var altitude1 = _demProvider.GetSurfaceAltitude(p1Lat, p1Lon, desiredZoomLevel).ScaleAltitude(altitudeScalingFactor);
         var geoPoint1 = new GeoPoint(p1Lat, p1Lon, altitude1);
 
         // Planar coordinates (3D + Texture)
