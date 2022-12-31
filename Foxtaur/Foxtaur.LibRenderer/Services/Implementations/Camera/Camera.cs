@@ -11,7 +11,7 @@ namespace Foxtaur.LibRenderer.Services.Implementations.Camera;
 
 public class Camera : ICamera
 {
-    private ICoordinatesProvider _sphereCoordinatesProvider = new SphereCoordinatesProvider();
+    private ICoordinatesProvider _sphereCoordinatesProvider;
 
     /// <summary>
     /// Camera latitude

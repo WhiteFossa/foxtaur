@@ -65,4 +65,12 @@ public static class GeoHelper
 
         return $"{meters:0.00m}";
     }
+    
+    /// <summary>
+    /// Scale altitude by scaling factor. Use ONLY on meshes generation
+    /// </summary>
+    public static double ScaleAltitude(this double originalAltitude, double scaleFactor)
+    {
+        return (originalAltitude - GeoConstants.EarthRadius) * scaleFactor + GeoConstants.EarthRadius;
+    }
 }

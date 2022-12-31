@@ -444,8 +444,7 @@ public class DesktopRenderer : OpenGlControlBase
         LimitSurfaceRunViewAngles();
         
         // Camera height
-        var cameraH = RendererConstants.SurfaceRunModeCameraOrbitHeight * _settingsService.GetDemScale() + _demProvider.GetSurfaceAltitude(_camera.Lat, _camera.Lon, _zoomService.ZoomLevel);
-        //var cameraH = GeoConstants.EarthRadius + RendererConstants.SurfaceRunModeCameraOrbitHeight;
+        var cameraH = (RendererConstants.SurfaceRunModeCameraOrbitHeight + _demProvider.GetSurfaceAltitude(_camera.Lat, _camera.Lon, _zoomService.ZoomLevel)).ScaleAltitude(_settingsService.GetDemScale());
         _camera.H = cameraH;
 
         // Up

@@ -77,7 +77,7 @@ public class DemProvider : IDemProvider
             return GeoConstants.EarthRadius;
         }
 
-        return GeoConstants.EarthRadius + _settingsService.GetDemScale() * ResourcesConstants.DemScalingFactor * (h.Value - ResourcesConstants.DemSeaLevel);
+        return GeoConstants.EarthRadius + ResourcesConstants.DemScalingFactor * (h.Value - ResourcesConstants.DemSeaLevel);
     }
 
     private DemFragment? StartFragmentLoad(double lat, double lon, ZoomLevel zoomLevel)
