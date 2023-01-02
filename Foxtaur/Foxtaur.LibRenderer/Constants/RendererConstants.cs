@@ -118,9 +118,9 @@ public static class RendererConstants
     public const double MapsAltitudeIncrementSurfaceRunMode = 0.00000015;
 
     /// <summary>
-    /// Do not show segments, further than given distance (in Earth's radiuses)
+    /// Do not show segments, further than given distance (in Earth's radiuses) (for surface run mode)
     /// </summary>
-    public const double SegmentsCullingDistance = 0.1;
+    public const double SurfaceRunSegmentsCullingDistance = 0.03;
 
     /// <summary>
     /// Number of Earth segments regeneration threads

@@ -76,7 +76,7 @@ public class EarthSegment
     /// <summary>
     /// Regenerate segment's mesh (designed to be called in separate thread)
     /// </summary>
-    public void RegenerateMesh()
+    public void RegenerateMesh(ref int threadsCount)
     {
         RegenerationLimiter.WaitOne();
 
@@ -103,6 +103,8 @@ public class EarthSegment
         finally
         {
             RegenerationLimiter.Release();
+
+            threadsCount--;
         }
     }
 }

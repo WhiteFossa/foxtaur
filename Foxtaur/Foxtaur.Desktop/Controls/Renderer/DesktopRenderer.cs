@@ -228,9 +228,11 @@ public class DesktopRenderer : OpenGlControlBase
     
     private bool _isDistanceRegenerationNeeded = false;
 
-    private Distance _activeDistance;
-    
+    private int _activeRegenerationThreads = 0;
+
     #endregion
+    
+    private Distance _activeDistance;
 
     /// <summary>
     /// Constructor
@@ -725,14 +727,19 @@ public class DesktopRenderer : OpenGlControlBase
     private void RegenerateEarthSegments(GL silkGl)
     {
         // Regenerating meshes
-        var toRegenerateMeshes = _visibleEarthSegments
-            .Where(ves => !ves.IsMeshReady);
-        
-        foreach (var segment in toRegenerateMeshes)
+        if (_activeRegenerationThreads < RendererConstants.SegmentsRegenerationThreads)
         {
-            var meshGenerationThread = new Thread(() => segment.RegenerateMesh());
-            meshGenerationThread.Start();
+            var toRegenerateMeshes = _visibleEarthSegments
+                .Where(ves => !ves.IsMeshReady);
+        
+            foreach (var segment in toRegenerateMeshes)
+            {
+                _activeRegenerationThreads++;
+                var meshGenerationThread = new Thread(() => segment.RegenerateMesh(ref _activeRegenerationThreads));
+                meshGenerationThread.Start();
+            }
         }
+        
 
         // Regenerating buffers
         var toRegenerateBuffers = _visibleEarthSegments
@@ -800,12 +807,11 @@ public class DesktopRenderer : OpenGlControlBase
         // Removig far segments for surface run mode case
         if (_isSurfaceRunMode)
         {
-            /*var averagedX = (p1.X + p2.X + p3.X + p4.X) / 4.0;
+            var averagedX = (p1.X + p2.X + p3.X + p4.X) / 4.0;
             var averagedY = (p1.Y + p2.Y + p3.Y + p4.Y) / 4.0;
             var averagedZ = (p1.Z + p2.Z + p3.Z + p4.Z) / 4.0;
             
-            if (p1.DistanceTo(averagedX, averagedY, averagedZ) > RendererConstants.SegmentsCullingDistance)*/
-            if (p1.DistanceTo(p1.X, p1.Y, p1.Z) > RendererConstants.SegmentsCullingDistance)
+            if (_camera.Position3D.DistanceTo(averagedX, averagedY, averagedZ) > RendererConstants.SurfaceRunSegmentsCullingDistance)
             {
                 return false;
             }
