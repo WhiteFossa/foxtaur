@@ -126,4 +126,9 @@ public static class RendererConstants
     /// Number of Earth segments regeneration threads
     /// </summary>
     public const int SegmentsRegenerationThreads = 1;
+
+    /// <summary>
+    /// Regenerate no more than this number of buffers per frame
+    /// </summary>
+    public const int RegenerateBuffersPerFrame = 32;
 }

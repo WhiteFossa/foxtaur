@@ -751,7 +751,7 @@ public class DesktopRenderer : OpenGlControlBase
         // Regenerating buffers
         var toRegenerateBuffers = _visibleEarthSegments
             .Where(ves => ves.Status == EarthSegmentStatus.ReadyForBuffersGeneration)
-            .Take(1);
+            .Take(RendererConstants.RegenerateBuffersPerFrame);
         
         foreach (var segment in toRegenerateBuffers)
         {
