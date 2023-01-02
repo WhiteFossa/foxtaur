@@ -109,7 +109,7 @@ public class ZoomService : IZoomService
             Math.PI / 2.0,
             0.0,
             5.0.ToRadians(),
-            0.002.ToRadians())
+            0.005.ToRadians())
     };
 
     public ZoomService()

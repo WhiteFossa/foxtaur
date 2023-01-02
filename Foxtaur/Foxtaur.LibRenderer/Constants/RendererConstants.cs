@@ -101,11 +101,6 @@ public static class RendererConstants
     /// Precision for finding is point on ray
     /// </summary>
     public const double TestIsPointOnRayPrecision = 0.00001;
-    
-    /// <summary>
-    /// Regenerate no more than this amount of segments per frame
-    /// </summary>
-    public const int MaxSegmentsPerFrameRegeneration = 2;
 
     /// <summary>
     /// Underground plane height for surface walk mode segments culling
@@ -126,4 +121,9 @@ public static class RendererConstants
     /// Do not show segments, further than given distance (in Earth's radiuses)
     /// </summary>
     public const double SegmentsCullingDistance = 0.1;
+
+    /// <summary>
+    /// Number of Earth segments regeneration threads
+    /// </summary>
+    public const int SegmentsRegenerationThreads = 1;
 }

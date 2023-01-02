@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Threading;
@@ -339,77 +340,84 @@ public class DesktopRenderer : OpenGlControlBase
     /// </summary>
     protected override unsafe void OnOpenGlRender(GlInterface gl, int fb)
     {
-        var silkGlContext = GL.GetApi(gl.GetProcAddress);
-        
-        silkGlContext.ClearColor(Color.Black);
-        silkGlContext.Clear((uint)(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit));
-        silkGlContext.Enable(EnableCap.DepthTest);
-
-        // Blending
-        silkGlContext.Enable(EnableCap.Blend);
-        silkGlContext.BlendFunc(GLEnum.SrcAlpha, GLEnum.OneMinusSrcAlpha);
-
-        silkGlContext.Viewport(0, 0, (uint)_viewportWidth, (uint)_viewportHeight);
-
-        // Surface mode camera positioning
-        if (_isSurfaceRunMode)
+        try
         {
-            ProcessSurfaceRunMovement();
+            var silkGlContext = GL.GetApi(gl.GetProcAddress);
             
-            SurfaceRunPositionCamera();
-        }
+            silkGlContext.ClearColor(Color.Black);
+            silkGlContext.Clear((uint)(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit));
+            silkGlContext.Enable(EnableCap.DepthTest);
 
-        _defaultShader.Use();
+            // Blending
+            silkGlContext.Enable(EnableCap.Blend);
+            silkGlContext.BlendFunc(GLEnum.SrcAlpha, GLEnum.OneMinusSrcAlpha);
 
-        // Setting shader parameters (common)
-        //_defaultShader.SetUniform2f("resolution", new Vector2(_viewportWidth, _viewportHeight));
+            silkGlContext.Viewport(0, 0, (uint)_viewportWidth, (uint)_viewportHeight);
 
-        // Setting shader parameters (vertices)
-        _defaultShader.SetUniform4f("uModel", _camera.ModelMatrix.ToMatrix4x4());
-        _defaultShader.SetUniform4f("uView", _camera.ViewMatrix.ToMatrix4x4());
-        _defaultShader.SetUniform4f("uProjection", _camera.ProjectionMatrix.ToMatrix4x4());
+            // Surface mode camera positioning
+            if (_isSurfaceRunMode)
+            {
+                ProcessSurfaceRunMovement();
+                
+                SurfaceRunPositionCamera();
+            }
 
-        // Setting shader parameters (fragments)
-        _defaultShader.SetUniform1i("ourTexture", 0);
+            _defaultShader.Use();
 
-        //silkGlContext.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Line);
+            // Setting shader parameters (common)
+            //_defaultShader.SetUniform2f("resolution", new Vector2(_viewportWidth, _viewportHeight));
 
-        // If zoom level changed, we have to regenerate everything Earth-related
-        if (_isZoomLevelChanged)
-        {
-            GenerateEarthSegments();
-            _earthSegments.ForEach(es => es.MarkToRegeneration());
+            // Setting shader parameters (vertices)
+            _defaultShader.SetUniform4f("uModel", _camera.ModelMatrix.ToMatrix4x4());
+            _defaultShader.SetUniform4f("uView", _camera.ViewMatrix.ToMatrix4x4());
+            _defaultShader.SetUniform4f("uProjection", _camera.ProjectionMatrix.ToMatrix4x4());
+
+            // Setting shader parameters (fragments)
+            _defaultShader.SetUniform1i("ourTexture", 0);
+
+            //silkGlContext.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Line);
+
+            // If zoom level changed, we have to regenerate everything Earth-related
+            if (_isZoomLevelChanged)
+            {
+                GenerateEarthSegments();
+                _earthSegments.ForEach(es => es.MarkToRegeneration());
+                
+                _isZoomLevelChanged = false;
+            }
             
-            _isZoomLevelChanged = false;
-        }
-        
-        // Work only with those segments
-        FindVisibleEarthSegments();
-        
-        // Regenerating Earth segments
-        RegenerateEarthSegments(silkGlContext);
-        
-        // Draw Earth
-        DrawEarth(silkGlContext);
+            // Work only with those segments
+            FindVisibleEarthSegments();
+            
+            // Regenerating Earth segments
+            RegenerateEarthSegments(silkGlContext);
+            
+            // Draw Earth
+            DrawEarth(silkGlContext);
 
-        // Draw the distance
-        if (_isDistanceRegenerationNeeded)
+            // Draw the distance
+            if (_isDistanceRegenerationNeeded)
+            {
+                _distanceProvider.DisposeDistanceSegment();
+
+                _isDistanceRegenerationNeeded = false;
+            }
+
+            _distanceProvider.GenerateDistanceSegment(silkGlContext, _currentMapsSurfaceAltitudeIncrement);
+            _distanceProvider.DrawDistance(silkGlContext);
+
+            // UI
+            _ui.DrawUi(silkGlContext, _viewportWidth, _viewportHeight, _uiData);
+
+            // Everything is drawn
+            _framesDrawn++;
+
+            Dispatcher.UIThread.Post(InvalidateVisual, DispatcherPriority.Background);
+        }
+        catch (Exception e)
         {
-            _distanceProvider.DisposeDistanceSegment();
-
-            _isDistanceRegenerationNeeded = false;
+            _logger.Error($"{ e.Message } Stack trace: { e.StackTrace }");
         }
-
-        _distanceProvider.GenerateDistanceSegment(silkGlContext, _currentMapsSurfaceAltitudeIncrement);
-        _distanceProvider.DrawDistance(silkGlContext);
-
-        // UI
-        _ui.DrawUi(silkGlContext, _viewportWidth, _viewportHeight, _uiData);
-
-        // Everything is drawn
-        _framesDrawn++;
-
-        Dispatcher.UIThread.Post(InvalidateVisual, DispatcherPriority.Background);
     }
 
     /// <summary>
@@ -716,32 +724,23 @@ public class DesktopRenderer : OpenGlControlBase
 
     private void RegenerateEarthSegments(GL silkGl)
     {
-        var toRegenerateTotal = _visibleEarthSegments.Count(es => es.IsRegenerationNeeded);
-        if (toRegenerateTotal == 0)
-        {
-            return;
-        }
-
-        var toRegenerateInThisFrame = _visibleEarthSegments
-            .Where(es => es.IsRegenerationNeeded)
-            .TakeLast(RendererConstants.MaxSegmentsPerFrameRegeneration);
-
         // Regenerating meshes
-        foreach (var segment in toRegenerateInThisFrame)
+        var toRegenerateMeshes = _visibleEarthSegments
+            .Where(ves => !ves.IsMeshReady);
+        
+        foreach (var segment in toRegenerateMeshes)
         {
-            _earthGenerator.GenerateMeshForSegment(segment);
+            var meshGenerationThread = new Thread(() => segment.RegenerateMesh());
+            meshGenerationThread.Start();
         }
 
         // Regenerating buffers
-        foreach (var segment in toRegenerateInThisFrame)
+        var toRegenerateBuffers = _visibleEarthSegments
+            .Where(ves => ves.IsMeshReady && !ves.IsBufferReady);
+        foreach (var segment in toRegenerateBuffers)
         {
             segment.Mesh.GenerateBuffers(silkGl);
-        }
-
-        // Done
-        foreach (var segment in toRegenerateInThisFrame)
-        {
-            segment.MarkAsRegenerated();
+            segment.IsBufferReady = true;
         }
     }
 
@@ -751,9 +750,9 @@ public class DesktopRenderer : OpenGlControlBase
         
         foreach (var earthSegment in _visibleEarthSegments)
         {
-            if (earthSegment.Mesh == null)
+            if (!earthSegment.IsMeshReady || !earthSegment.IsBufferReady)
             {
-                continue; // Mesh is not generated yet
+                continue; // Not ready yet
             }
             
             earthSegment.Mesh.BindBuffers(silkGl);
@@ -801,11 +800,12 @@ public class DesktopRenderer : OpenGlControlBase
         // Removig far segments for surface run mode case
         if (_isSurfaceRunMode)
         {
-            var averagedX = (p1.X + p2.X + p3.X + p4.X) / 4.0;
+            /*var averagedX = (p1.X + p2.X + p3.X + p4.X) / 4.0;
             var averagedY = (p1.Y + p2.Y + p3.Y + p4.Y) / 4.0;
             var averagedZ = (p1.Z + p2.Z + p3.Z + p4.Z) / 4.0;
             
-            if (p1.DistanceTo(averagedX, averagedY, averagedZ) > RendererConstants.SegmentsCullingDistance)
+            if (p1.DistanceTo(averagedX, averagedY, averagedZ) > RendererConstants.SegmentsCullingDistance)*/
+            if (p1.DistanceTo(p1.X, p1.Y, p1.Z) > RendererConstants.SegmentsCullingDistance)
             {
                 return false;
             }

@@ -1,5 +1,10 @@
 using System;
+using System.Threading;
+using Foxtaur.Desktop.Controls.Renderer.Abstractions.Generators;
 using Foxtaur.LibGeo.Models;
+using Foxtaur.LibRenderer.Constants;
+using Microsoft.Extensions.DependencyInjection;
+using NLog;
 
 namespace Foxtaur.Desktop.Controls.Renderer.Models;
 
@@ -19,9 +24,25 @@ public class EarthSegment
     public Mesh Mesh { get; private set; }
 
     /// <summary>
-    /// If true, then we need to regenerate mesh for this segment
+    /// If true, then mesh is successfully regenerated and it's time to regenerate buffer
     /// </summary>
-    public bool IsRegenerationNeeded { get; private set; }
+    public bool IsMeshReady { get; set; }
+
+    /// <summary>
+    /// Mesh regeneration process initiated, but not completed yet
+    /// </summary>
+    public bool IsMeshRegenerating { get; set; }
+
+    /// <summary>
+    /// If true, then buffer (and segment as a whole) is ready
+    /// </summary>
+    public bool IsBufferReady { get; set; }
+    
+    private IEarthGenerator _earthGenerator = Program.Di.GetService<IEarthGenerator>();
+    
+    private Logger _logger = LogManager.GetCurrentClassLogger();
+
+    protected static Semaphore RegenerationLimiter = new Semaphore(RendererConstants.SegmentsRegenerationThreads, RendererConstants.SegmentsRegenerationThreads);
 
     public EarthSegment(GeoSegment geoSegment)
     {
@@ -35,15 +56,8 @@ public class EarthSegment
     /// </summary>
     public void MarkToRegeneration()
     {
-        IsRegenerationNeeded = true;
-    }
-
-    /// <summary>
-    /// Mark as regenerated
-    /// </summary>
-    public void MarkAsRegenerated()
-    {
-        IsRegenerationNeeded = false;
+        IsMeshReady = false;
+        IsBufferReady = false;
     }
 
     /// <summary>
@@ -57,5 +71,38 @@ public class EarthSegment
         }
         
         Mesh = mesh ?? throw new ArgumentNullException(nameof(mesh));
+    }
+
+    /// <summary>
+    /// Regenerate segment's mesh (designed to be called in separate thread)
+    /// </summary>
+    public void RegenerateMesh()
+    {
+        RegenerationLimiter.WaitOne();
+
+        try
+        {
+            if (IsMeshReady)
+            {
+                return;
+            }
+
+            if (IsMeshRegenerating)
+            {
+                return;
+            }
+
+            IsMeshRegenerating = true;
+
+            // Actual regeneration
+            _earthGenerator.GenerateMeshForSegment(this);
+
+            IsMeshRegenerating = false;
+            IsMeshReady = true;
+        }
+        finally
+        {
+            RegenerationLimiter.Release();
+        }
     }
 }
