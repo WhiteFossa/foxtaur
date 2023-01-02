@@ -121,4 +121,9 @@ public static class RendererConstants
     /// Maps are higher than Earth surface by this value (surface run mode)
     /// </summary>
     public const double MapsAltitudeIncrementSurfaceRunMode = 0.00000015;
+
+    /// <summary>
+    /// Do not show segments, further than given distance (in Earth's radiuses)
+    /// </summary>
+    public const double SegmentsCullingDistance = 0.03;
 }

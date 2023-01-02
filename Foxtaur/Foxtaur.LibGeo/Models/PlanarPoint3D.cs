@@ -26,6 +26,14 @@ public class PlanarPoint3D : PlanarPoint2D
     }
 
     /// <summary>
+    /// Calculate distance from this point to a given point (coordinates overload)
+    /// </summary>
+    public double DistanceTo(double x, double y, double z)
+    {
+        return Math.Sqrt(Math.Pow(x - X, 2) + Math.Pow(y - Y, 2) + Math.Pow(z - Z, 2));
+    }
+
+    /// <summary>
     /// Returns closest point
     /// </summary>
     public PlanarPoint3D GetClosesPoint(IReadOnlyCollection<PlanarPoint3D> points)
