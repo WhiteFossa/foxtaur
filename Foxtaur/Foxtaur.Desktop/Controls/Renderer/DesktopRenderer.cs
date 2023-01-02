@@ -342,84 +342,77 @@ public class DesktopRenderer : OpenGlControlBase
     /// </summary>
     protected override unsafe void OnOpenGlRender(GlInterface gl, int fb)
     {
-        try
+        var silkGlContext = GL.GetApi(gl.GetProcAddress);
+        
+        silkGlContext.ClearColor(Color.Black);
+        silkGlContext.Clear((uint)(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit));
+        silkGlContext.Enable(EnableCap.DepthTest);
+
+        // Blending
+        silkGlContext.Enable(EnableCap.Blend);
+        silkGlContext.BlendFunc(GLEnum.SrcAlpha, GLEnum.OneMinusSrcAlpha);
+
+        silkGlContext.Viewport(0, 0, (uint)_viewportWidth, (uint)_viewportHeight);
+
+        // Surface mode camera positioning
+        if (_isSurfaceRunMode)
         {
-            var silkGlContext = GL.GetApi(gl.GetProcAddress);
+            ProcessSurfaceRunMovement();
             
-            silkGlContext.ClearColor(Color.Black);
-            silkGlContext.Clear((uint)(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit));
-            silkGlContext.Enable(EnableCap.DepthTest);
-
-            // Blending
-            silkGlContext.Enable(EnableCap.Blend);
-            silkGlContext.BlendFunc(GLEnum.SrcAlpha, GLEnum.OneMinusSrcAlpha);
-
-            silkGlContext.Viewport(0, 0, (uint)_viewportWidth, (uint)_viewportHeight);
-
-            // Surface mode camera positioning
-            if (_isSurfaceRunMode)
-            {
-                ProcessSurfaceRunMovement();
-                
-                SurfaceRunPositionCamera();
-            }
-
-            _defaultShader.Use();
-
-            // Setting shader parameters (common)
-            //_defaultShader.SetUniform2f("resolution", new Vector2(_viewportWidth, _viewportHeight));
-
-            // Setting shader parameters (vertices)
-            _defaultShader.SetUniform4f("uModel", _camera.ModelMatrix.ToMatrix4x4());
-            _defaultShader.SetUniform4f("uView", _camera.ViewMatrix.ToMatrix4x4());
-            _defaultShader.SetUniform4f("uProjection", _camera.ProjectionMatrix.ToMatrix4x4());
-
-            // Setting shader parameters (fragments)
-            _defaultShader.SetUniform1i("ourTexture", 0);
-
-            //silkGlContext.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Line);
-
-            // If zoom level changed, we have to regenerate everything Earth-related
-            if (_isZoomLevelChanged)
-            {
-                GenerateEarthSegments();
-                _earthSegments.ForEach(es => es.MarkToRegeneration());
-                
-                _isZoomLevelChanged = false;
-            }
-            
-            // Work only with those segments
-            FindVisibleEarthSegments();
-            
-            // Regenerating Earth segments
-            RegenerateEarthSegments(silkGlContext);
-            
-            // Draw Earth
-            DrawEarth(silkGlContext);
-
-            // Draw the distance
-            if (_isDistanceRegenerationNeeded)
-            {
-                _distanceProvider.DisposeDistanceSegment();
-
-                _isDistanceRegenerationNeeded = false;
-            }
-
-            _distanceProvider.GenerateDistanceSegment(silkGlContext, _currentMapsSurfaceAltitudeIncrement);
-            _distanceProvider.DrawDistance(silkGlContext);
-
-            // UI
-            _ui.DrawUi(silkGlContext, _viewportWidth, _viewportHeight, _uiData);
-
-            // Everything is drawn
-            _framesDrawn++;
-
-            Dispatcher.UIThread.Post(InvalidateVisual, DispatcherPriority.Background);
+            SurfaceRunPositionCamera();
         }
-        catch (Exception e)
+
+        _defaultShader.Use();
+
+        // Setting shader parameters (common)
+        //_defaultShader.SetUniform2f("resolution", new Vector2(_viewportWidth, _viewportHeight));
+
+        // Setting shader parameters (vertices)
+        _defaultShader.SetUniform4f("uModel", _camera.ModelMatrix.ToMatrix4x4());
+        _defaultShader.SetUniform4f("uView", _camera.ViewMatrix.ToMatrix4x4());
+        _defaultShader.SetUniform4f("uProjection", _camera.ProjectionMatrix.ToMatrix4x4());
+
+        // Setting shader parameters (fragments)
+        _defaultShader.SetUniform1i("ourTexture", 0);
+
+        //silkGlContext.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Line);
+
+        // If zoom level changed, we have to regenerate everything Earth-related
+        if (_isZoomLevelChanged)
         {
-            _logger.Error($"{ e.Message } Stack trace: { e.StackTrace }");
+            GenerateEarthSegments();
+            _earthSegments.ForEach(es => es.MarkToRegeneration());
+            
+            _isZoomLevelChanged = false;
         }
+        
+        // Work only with those segments
+        FindVisibleEarthSegments();
+        
+        // Regenerating Earth segments
+        RegenerateEarthSegments(silkGlContext);
+        
+        // Draw Earth
+        DrawEarth(silkGlContext);
+
+        // Draw the distance
+        if (_isDistanceRegenerationNeeded)
+        {
+            _distanceProvider.DisposeDistanceSegment();
+
+            _isDistanceRegenerationNeeded = false;
+        }
+
+        _distanceProvider.GenerateDistanceSegment(silkGlContext, _currentMapsSurfaceAltitudeIncrement);
+        _distanceProvider.DrawDistance(silkGlContext);
+
+        // UI
+        _ui.DrawUi(silkGlContext, _viewportWidth, _viewportHeight, _uiData);
+
+        // Everything is drawn
+        _framesDrawn++;
+
+        Dispatcher.UIThread.Post(InvalidateVisual, DispatcherPriority.Background);
     }
 
     /// <summary>
@@ -740,10 +733,18 @@ public class DesktopRenderer : OpenGlControlBase
             }
         }
         
+        // Updating meshes
+        var toReplaceMeshes = _visibleEarthSegments
+            .Where(ves => ves.IsMeshReady && ves.NewMesh != null);
+
+        foreach (var segment in toReplaceMeshes)
+        {
+            segment.UpdateMesh();
+        }
 
         // Regenerating buffers
         var toRegenerateBuffers = _visibleEarthSegments
-            .Where(ves => ves.IsMeshReady && !ves.IsBufferReady);
+            .Where(ves => ves.IsMeshReady && ves.Mesh != null && !ves.IsBufferReady);
         foreach (var segment in toRegenerateBuffers)
         {
             segment.Mesh.GenerateBuffers(silkGl);

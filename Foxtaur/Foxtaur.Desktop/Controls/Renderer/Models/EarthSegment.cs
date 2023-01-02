@@ -24,6 +24,11 @@ public class EarthSegment
     public Mesh Mesh { get; private set; }
 
     /// <summary>
+    /// New mesh, just a mesh will be replaced with it on next frame if this one is not null
+    /// </summary>
+    public Mesh NewMesh { get; set; }
+
+    /// <summary>
     /// If true, then mesh is successfully regenerated and it's time to regenerate buffer
     /// </summary>
     public bool IsMeshReady { get; set; }
@@ -63,14 +68,15 @@ public class EarthSegment
     /// <summary>
     /// Update mesh
     /// </summary>
-    public void UpdateMesh(Mesh mesh)
+    public void UpdateMesh()
     {
         if (Mesh != null)
         {
             Mesh.Dispose();
         }
         
-        Mesh = mesh ?? throw new ArgumentNullException(nameof(mesh));
+        Mesh = NewMesh ?? throw new ArgumentNullException(nameof(NewMesh));
+        NewMesh = null;
     }
 
     /// <summary>

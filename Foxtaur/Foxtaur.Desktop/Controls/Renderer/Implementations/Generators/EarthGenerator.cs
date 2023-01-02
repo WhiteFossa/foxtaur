@@ -43,7 +43,7 @@ public class EarthGenerator : IEarthGenerator
         
         var altitudeScalingFactor = _settingsService.GetDemScale();
         
-        var segmentMesh = new Mesh();
+        segment.NewMesh = new Mesh();
         
         for (var lat = segment.GeoSegment.SouthLat.GetClosestLatNode(_zoomService.ZoomLevelData.MeshesStep); lat < segment.GeoSegment.NorthLat; lat += _zoomService.ZoomLevelData.MeshesStep)
         {
@@ -52,7 +52,7 @@ public class EarthGenerator : IEarthGenerator
             var granulatedWestLon = segment.GeoSegment.WestLon.GetClosestLonNodeWest(_zoomService.ZoomLevelData.MeshesStep);
 
             // First two points of a stripe
-            var firstPair = GenerateAndAddPointsPair(segmentMesh, lat, granulatedWestLon, latNorther, granulatedWestLon, _zoomService.ZoomLevel, altitudeScalingFactor);
+            var firstPair = GenerateAndAddPointsPair(segment.NewMesh, lat, granulatedWestLon, latNorther, granulatedWestLon, _zoomService.ZoomLevel, altitudeScalingFactor);
             var i3D0 = firstPair.Item1;
             var i3D1 = firstPair.Item2;
 
@@ -61,37 +61,35 @@ public class EarthGenerator : IEarthGenerator
             
             for (var lon = granulatedWestLon - _zoomService.ZoomLevelData.MeshesStep; lon > granulatedEastLon; lon -= _zoomService.ZoomLevelData.MeshesStep)
             {
-                var intermediatePair = GenerateAndAddPointsPair(segmentMesh, lat, lon, latNorther, lon, _zoomService.ZoomLevel, altitudeScalingFactor);
+                var intermediatePair = GenerateAndAddPointsPair(segment.NewMesh, lat, lon, latNorther, lon, _zoomService.ZoomLevel, altitudeScalingFactor);
                 var i3D2 = intermediatePair.Item1;
                 var i3D3 = intermediatePair.Item2;
 
-                segmentMesh.AddIndex(i3D0);
-                segmentMesh.AddIndex(i3D1);
-                segmentMesh.AddIndex(i3D3);
+                segment.NewMesh.AddIndex(i3D0);
+                segment.NewMesh.AddIndex(i3D1);
+                segment.NewMesh.AddIndex(i3D3);
 
-                segmentMesh.AddIndex(i3D3);
-                segmentMesh.AddIndex(i3D2);
-                segmentMesh.AddIndex(i3D0);
+                segment.NewMesh.AddIndex(i3D3);
+                segment.NewMesh.AddIndex(i3D2);
+                segment.NewMesh.AddIndex(i3D0);
 
                 i3D0 = i3D2;
                 i3D1 = i3D3;
             }
             
             // Two last triangles of a stripe
-            var lastPair = GenerateAndAddPointsPair(segmentMesh, lat, granulatedEastLon, latNorther, granulatedEastLon, _zoomService.ZoomLevel, altitudeScalingFactor);
+            var lastPair = GenerateAndAddPointsPair(segment.NewMesh, lat, granulatedEastLon, latNorther, granulatedEastLon, _zoomService.ZoomLevel, altitudeScalingFactor);
             var i3last0 = lastPair.Item1;
             var i3last1 = lastPair.Item2;
 
-            segmentMesh.AddIndex(i3D0);
-            segmentMesh.AddIndex(i3D1);
-            segmentMesh.AddIndex(i3last1);
+            segment.NewMesh.AddIndex(i3D0);
+            segment.NewMesh.AddIndex(i3D1);
+            segment.NewMesh.AddIndex(i3last1);
 
-            segmentMesh.AddIndex(i3last1);
-            segmentMesh.AddIndex(i3last0);
-            segmentMesh.AddIndex(i3D0);
+            segment.NewMesh.AddIndex(i3last1);
+            segment.NewMesh.AddIndex(i3last0);
+            segment.NewMesh.AddIndex(i3D0);
         }
-        
-        segment.UpdateMesh(segmentMesh);
     }
 
     public Sphere GenerateEarthSphere()
