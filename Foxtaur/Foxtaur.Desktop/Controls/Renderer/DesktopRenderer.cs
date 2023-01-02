@@ -684,7 +684,7 @@ public class DesktopRenderer : OpenGlControlBase
 
                 foreach (var segment in segmentsToRegenerate)
                 {
-                    _earthSegments.ForEach(es => es.SetStatus(EarthSegmentStatus.ReadyForPurge));
+                    segment.SetStatus(EarthSegmentStatus.ReadyForPurge);
                 }
                 
                 // Marking distance's map for regeneration too
@@ -726,11 +726,8 @@ public class DesktopRenderer : OpenGlControlBase
         var toPurge = _visibleEarthSegments
             .Where(ves => ves.Status == EarthSegmentStatus.ReadyForPurge);
 
-        foreach (var segment in toPurge)
-        {
-            segment.Purge();
-        }
-        
+        Parallel.ForEach(toPurge, segment => segment.Purge());
+
         // Regenerating meshes
         if (_activeRegenerationThreads < RendererConstants.SegmentsRegenerationThreads)
         {
@@ -749,14 +746,13 @@ public class DesktopRenderer : OpenGlControlBase
         var toSwapMeshes = _visibleEarthSegments
             .Where(ves => ves.Status == EarthSegmentStatus.ReadyForMeshesSwap);
 
-        foreach (var segment in toSwapMeshes)
-        {
-            segment.SwapMeshes();
-        }
+        Parallel.ForEach(toSwapMeshes, segment => segment.SwapMeshes());
 
         // Regenerating buffers
         var toRegenerateBuffers = _visibleEarthSegments
-            .Where(ves => ves.Status == EarthSegmentStatus.ReadyForBuffersGeneration);
+            .Where(ves => ves.Status == EarthSegmentStatus.ReadyForBuffersGeneration)
+            .Take(1);
+        
         foreach (var segment in toRegenerateBuffers)
         {
             segment.GenerateBuffers(silkGl);
