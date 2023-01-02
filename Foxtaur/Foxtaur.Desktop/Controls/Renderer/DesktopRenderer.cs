@@ -381,7 +381,7 @@ public class DesktopRenderer : OpenGlControlBase
         if (_isZoomLevelChanged)
         {
             GenerateEarthSegments();
-            _earthSegments.ForEach(es => es.MarkToRegeneration());
+            _earthSegments.ForEach(es => es.SetStatus(EarthSegmentStatus.ReadyForPurge));
             
             _isZoomLevelChanged = false;
         }
@@ -684,7 +684,7 @@ public class DesktopRenderer : OpenGlControlBase
 
                 foreach (var segment in segmentsToRegenerate)
                 {
-                    segment.MarkToRegeneration();
+                    _earthSegments.ForEach(es => es.SetStatus(EarthSegmentStatus.ReadyForPurge));
                 }
                 
                 // Marking distance's map for regeneration too
@@ -717,13 +717,25 @@ public class DesktopRenderer : OpenGlControlBase
         }
     }
 
+    /// <summary>
+    /// Call me only from OnOpenGlRender() !!!
+    /// </summary>
     private void RegenerateEarthSegments(GL silkGl)
     {
+        // Clearing existing segments
+        var toPurge = _visibleEarthSegments
+            .Where(ves => ves.Status == EarthSegmentStatus.ReadyForPurge);
+
+        foreach (var segment in toPurge)
+        {
+            segment.Purge();
+        }
+        
         // Regenerating meshes
         if (_activeRegenerationThreads < RendererConstants.SegmentsRegenerationThreads)
         {
             var toRegenerateMeshes = _visibleEarthSegments
-                .Where(ves => !ves.IsMeshReady);
+                .Where(ves => ves.Status == EarthSegmentStatus.ReadyForRegeneration);
         
             foreach (var segment in toRegenerateMeshes)
             {
@@ -733,22 +745,21 @@ public class DesktopRenderer : OpenGlControlBase
             }
         }
         
-        // Updating meshes
-        var toReplaceMeshes = _visibleEarthSegments
-            .Where(ves => ves.IsMeshReady && ves.NewMesh != null);
+        // Swapping meshes
+        var toSwapMeshes = _visibleEarthSegments
+            .Where(ves => ves.Status == EarthSegmentStatus.ReadyForMeshesSwap);
 
-        foreach (var segment in toReplaceMeshes)
+        foreach (var segment in toSwapMeshes)
         {
-            segment.UpdateMesh();
+            segment.SwapMeshes();
         }
 
         // Regenerating buffers
         var toRegenerateBuffers = _visibleEarthSegments
-            .Where(ves => ves.IsMeshReady && ves.Mesh != null && !ves.IsBufferReady);
+            .Where(ves => ves.Status == EarthSegmentStatus.ReadyForBuffersGeneration);
         foreach (var segment in toRegenerateBuffers)
         {
-            segment.Mesh.GenerateBuffers(silkGl);
-            segment.IsBufferReady = true;
+            segment.GenerateBuffers(silkGl);
         }
     }
 
@@ -758,7 +769,7 @@ public class DesktopRenderer : OpenGlControlBase
         
         foreach (var earthSegment in _visibleEarthSegments)
         {
-            if (!earthSegment.IsMeshReady || !earthSegment.IsBufferReady)
+            if (earthSegment.Status != EarthSegmentStatus.Ready)
             {
                 continue; // Not ready yet
             }
@@ -867,8 +878,7 @@ public class DesktopRenderer : OpenGlControlBase
 
     private void OnDemScaleChanged(object sender, ISettingsService.OnDemScaleChangedArgs args)
     {
-        _earthSegments
-            .ForEach(es => es.MarkToRegeneration());
+        _earthSegments.ForEach(es => es.SetStatus(EarthSegmentStatus.ReadyForPurge));
         
         _isDistanceRegenerationNeeded = true;
     }

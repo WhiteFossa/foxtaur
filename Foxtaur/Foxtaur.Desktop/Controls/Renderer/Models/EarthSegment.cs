@@ -1,10 +1,12 @@
 using System;
 using System.Threading;
 using Foxtaur.Desktop.Controls.Renderer.Abstractions.Generators;
+using Foxtaur.Desktop.Controls.Renderer.Enums;
 using Foxtaur.LibGeo.Models;
 using Foxtaur.LibRenderer.Constants;
 using Microsoft.Extensions.DependencyInjection;
 using NLog;
+using Silk.NET.OpenGL;
 
 namespace Foxtaur.Desktop.Controls.Renderer.Models;
 
@@ -13,6 +15,11 @@ namespace Foxtaur.Desktop.Controls.Renderer.Models;
 /// </summary>
 public class EarthSegment
 {
+    /// <summary>
+    /// Earth segment status
+    /// </summary>
+    public EarthSegmentStatus Status { get; private set; }
+
     /// <summary>
     /// Coordinates of segment
     /// </summary>
@@ -28,21 +35,6 @@ public class EarthSegment
     /// </summary>
     public Mesh NewMesh { get; set; }
 
-    /// <summary>
-    /// If true, then mesh is successfully regenerated and it's time to regenerate buffer
-    /// </summary>
-    public bool IsMeshReady { get; set; }
-
-    /// <summary>
-    /// Mesh regeneration process initiated, but not completed yet
-    /// </summary>
-    public bool IsMeshRegenerating { get; set; }
-
-    /// <summary>
-    /// If true, then buffer (and segment as a whole) is ready
-    /// </summary>
-    public bool IsBufferReady { get; set; }
-    
     private IEarthGenerator _earthGenerator = Program.Di.GetService<IEarthGenerator>();
     
     private Logger _logger = LogManager.GetCurrentClassLogger();
@@ -52,24 +44,45 @@ public class EarthSegment
     public EarthSegment(GeoSegment geoSegment)
     {
         GeoSegment = geoSegment ?? throw new ArgumentNullException(nameof(geoSegment));
-
-        MarkToRegeneration();
+        
+        Status = EarthSegmentStatus.ReadyForRegeneration;
     }
 
     /// <summary>
-    /// Mark segment as needing regeneration
+    /// Purge segment, call only from rendering code
     /// </summary>
-    public void MarkToRegeneration()
+    public void Purge()
     {
-        IsMeshReady = false;
-        IsBufferReady = false;
-    }
+        if (Status != EarthSegmentStatus.ReadyForPurge)
+        {
+            throw new InvalidOperationException($"Trying to purge segment, but it is in { Status } state!");
+        }
+        
+        if (NewMesh != null)
+        {
+            NewMesh.Dispose();
+            NewMesh = null;
+        }
 
+        if (Mesh != null)
+        {
+            Mesh.Dispose();
+            Mesh = null;
+        }
+
+        SetStatus(EarthSegmentStatus.ReadyForRegeneration);
+    }
+    
     /// <summary>
-    /// Update mesh
+    /// Swap meshes, call only from rendering code
     /// </summary>
-    public void UpdateMesh()
+    public void SwapMeshes()
     {
+        if (Status != EarthSegmentStatus.ReadyForMeshesSwap)
+        {
+            throw new InvalidOperationException($"Trying to swap meshes, but segment is in { Status } state!");
+        }
+        
         if (Mesh != null)
         {
             Mesh.Dispose();
@@ -77,6 +90,23 @@ public class EarthSegment
         
         Mesh = NewMesh ?? throw new ArgumentNullException(nameof(NewMesh));
         NewMesh = null;
+
+        SetStatus(EarthSegmentStatus.ReadyForBuffersGeneration);
+    }
+
+    /// <summary>
+    /// Generate buffers, call only from rendering code
+    /// </summary>
+    public void GenerateBuffers(GL silkGl)
+    {
+        if (Status != EarthSegmentStatus.ReadyForBuffersGeneration)
+        {
+            throw new InvalidOperationException($"Trying to generate buffers, but segment is in { Status } state!");
+        }
+        
+        Mesh.GenerateBuffers(silkGl);
+        
+        SetStatus(EarthSegmentStatus.Ready);
     }
 
     /// <summary>
@@ -88,29 +118,40 @@ public class EarthSegment
 
         try
         {
-            if (IsMeshReady)
+            if (Status != EarthSegmentStatus.ReadyForRegeneration)
             {
-                return;
+                throw new InvalidOperationException($"Attempt to regenerate segment, while it is in { Status } state!");
             }
 
-            if (IsMeshRegenerating)
-            {
-                return;
-            }
-
-            IsMeshRegenerating = true;
+            Status = EarthSegmentStatus.NewMeshGeneration;
 
             // Actual regeneration
             _earthGenerator.GenerateMeshForSegment(this);
 
-            IsMeshRegenerating = false;
-            IsMeshReady = true;
+            Status = EarthSegmentStatus.ReadyForMeshesSwap;
         }
         finally
         {
             RegenerationLimiter.Release();
 
             threadsCount--;
+        }
+    }
+
+    /// <summary>
+    /// Set new status
+    /// </summary>
+    public void SetStatus(EarthSegmentStatus status)
+    {
+        RegenerationLimiter.WaitOne();
+
+        try
+        {
+            Status = status;
+        }
+        finally
+        {
+            RegenerationLimiter.Release();
         }
     }
 }
