@@ -101,11 +101,6 @@ public static class RendererConstants
     /// Precision for finding is point on ray
     /// </summary>
     public const double TestIsPointOnRayPrecision = 0.00001;
-    
-    /// <summary>
-    /// Regenerate no more than this amount of segments per frame
-    /// </summary>
-    public const int MaxSegmentsPerFrameRegeneration = 2;
 
     /// <summary>
     /// Underground plane height for surface walk mode segments culling
@@ -121,4 +116,14 @@ public static class RendererConstants
     /// Maps are higher than Earth surface by this value (surface run mode)
     /// </summary>
     public const double MapsAltitudeIncrementSurfaceRunMode = 0.00000015;
+
+    /// <summary>
+    /// Do not show segments, further than given distance (in Earth's radiuses) (for surface run mode)
+    /// </summary>
+    public const double SurfaceRunSegmentsCullingDistance = 0.03;
+
+    /// <summary>
+    /// Number of Earth segments regeneration threads
+    /// </summary>
+    public const int SegmentsRegenerationThreads = 1;
 }

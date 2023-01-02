@@ -1,8 +1,11 @@
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Timers;
 using Avalonia;
 using Avalonia.Input;
@@ -225,9 +228,11 @@ public class DesktopRenderer : OpenGlControlBase
     
     private bool _isDistanceRegenerationNeeded = false;
 
-    private Distance _activeDistance;
-    
+    private int _activeRegenerationThreads = 0;
+
     #endregion
+    
+    private Distance _activeDistance;
 
     /// <summary>
     /// Constructor
@@ -337,76 +342,84 @@ public class DesktopRenderer : OpenGlControlBase
     /// </summary>
     protected override unsafe void OnOpenGlRender(GlInterface gl, int fb)
     {
-        var silkGlContext = GL.GetApi(gl.GetProcAddress);
-        
-        silkGlContext.ClearColor(Color.Black);
-        silkGlContext.Clear((uint)(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit));
-        silkGlContext.Enable(EnableCap.DepthTest);
-
-        // Blending
-        silkGlContext.Enable(EnableCap.Blend);
-        silkGlContext.BlendFunc(GLEnum.SrcAlpha, GLEnum.OneMinusSrcAlpha);
-
-        silkGlContext.Viewport(0, 0, (uint)_viewportWidth, (uint)_viewportHeight);
-
-        // Surface mode camera positioning
-        if (_isSurfaceRunMode)
+        try
         {
-            ProcessSurfaceRunMovement();
+            var silkGlContext = GL.GetApi(gl.GetProcAddress);
             
-            SurfaceRunPositionCamera();
-        }
+            silkGlContext.ClearColor(Color.Black);
+            silkGlContext.Clear((uint)(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit));
+            silkGlContext.Enable(EnableCap.DepthTest);
 
-        _defaultShader.Use();
+            // Blending
+            silkGlContext.Enable(EnableCap.Blend);
+            silkGlContext.BlendFunc(GLEnum.SrcAlpha, GLEnum.OneMinusSrcAlpha);
 
-        // Setting shader parameters (common)
-        //_defaultShader.SetUniform2f("resolution", new Vector2(_viewportWidth, _viewportHeight));
+            silkGlContext.Viewport(0, 0, (uint)_viewportWidth, (uint)_viewportHeight);
 
-        // Setting shader parameters (vertices)
-        _defaultShader.SetUniform4f("uModel", _camera.ModelMatrix.ToMatrix4x4());
-        _defaultShader.SetUniform4f("uView", _camera.ViewMatrix.ToMatrix4x4());
-        _defaultShader.SetUniform4f("uProjection", _camera.ProjectionMatrix.ToMatrix4x4());
+            // Surface mode camera positioning
+            if (_isSurfaceRunMode)
+            {
+                ProcessSurfaceRunMovement();
+                
+                SurfaceRunPositionCamera();
+            }
 
-        // Setting shader parameters (fragments)
-        _defaultShader.SetUniform1i("ourTexture", 0);
+            _defaultShader.Use();
 
-        //silkGlContext.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Line);
+            // Setting shader parameters (common)
+            //_defaultShader.SetUniform2f("resolution", new Vector2(_viewportWidth, _viewportHeight));
 
-        // If zoom level changed, we have to regenerate everything Earth-related
-        if (_isZoomLevelChanged)
-        {
-            _earthSegments.ForEach(es => es.MarkToRegeneration());
+            // Setting shader parameters (vertices)
+            _defaultShader.SetUniform4f("uModel", _camera.ModelMatrix.ToMatrix4x4());
+            _defaultShader.SetUniform4f("uView", _camera.ViewMatrix.ToMatrix4x4());
+            _defaultShader.SetUniform4f("uProjection", _camera.ProjectionMatrix.ToMatrix4x4());
+
+            // Setting shader parameters (fragments)
+            _defaultShader.SetUniform1i("ourTexture", 0);
+
+            //silkGlContext.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Line);
+
+            // If zoom level changed, we have to regenerate everything Earth-related
+            if (_isZoomLevelChanged)
+            {
+                GenerateEarthSegments();
+                _earthSegments.ForEach(es => es.MarkToRegeneration());
+                
+                _isZoomLevelChanged = false;
+            }
             
-            _isZoomLevelChanged = false;
-        }
-        
-        // Work only with those segments
-        FindVisibleEarthSegments();
-        
-        // Regenerating Earth segments
-        RegenerateEarthSegments(silkGlContext);
-        
-        // Draw Earth
-        DrawEarth(silkGlContext);
+            // Work only with those segments
+            FindVisibleEarthSegments();
+            
+            // Regenerating Earth segments
+            RegenerateEarthSegments(silkGlContext);
+            
+            // Draw Earth
+            DrawEarth(silkGlContext);
 
-        // Draw the distance
-        if (_isDistanceRegenerationNeeded)
+            // Draw the distance
+            if (_isDistanceRegenerationNeeded)
+            {
+                _distanceProvider.DisposeDistanceSegment();
+
+                _isDistanceRegenerationNeeded = false;
+            }
+
+            _distanceProvider.GenerateDistanceSegment(silkGlContext, _currentMapsSurfaceAltitudeIncrement);
+            _distanceProvider.DrawDistance(silkGlContext);
+
+            // UI
+            _ui.DrawUi(silkGlContext, _viewportWidth, _viewportHeight, _uiData);
+
+            // Everything is drawn
+            _framesDrawn++;
+
+            Dispatcher.UIThread.Post(InvalidateVisual, DispatcherPriority.Background);
+        }
+        catch (Exception e)
         {
-            _distanceProvider.DisposeDistanceSegment();
-
-            _isDistanceRegenerationNeeded = false;
+            _logger.Error($"{ e.Message } Stack trace: { e.StackTrace }");
         }
-
-        _distanceProvider.GenerateDistanceSegment(silkGlContext, _currentMapsSurfaceAltitudeIncrement);
-        _distanceProvider.DrawDistance(silkGlContext);
-
-        // UI
-        _ui.DrawUi(silkGlContext, _viewportWidth, _viewportHeight, _uiData);
-
-        // Everything is drawn
-        _framesDrawn++;
-
-        Dispatcher.UIThread.Post(InvalidateVisual, DispatcherPriority.Background);
     }
 
     /// <summary>
@@ -693,11 +706,17 @@ public class DesktopRenderer : OpenGlControlBase
         
         for (var lat = -0.5 * Math.PI; lat < 0.5 * Math.PI; lat += _zoomService.ZoomLevelData.SegmentSize)
         {
+            var nLat = lat + _zoomService.ZoomLevelData.SegmentSize;
+            if (nLat > 0.5 * Math.PI)
+            {
+                nLat = 0.5 * Math.PI;
+            }
+            
             for (var lon = Math.PI; lon > GeoPoint.SumLongitudesWithWrap(-1.0 * Math.PI, _zoomService.ZoomLevelData.SegmentSize); lon -= _zoomService.ZoomLevelData.SegmentSize)
             {
                 _earthSegments.Add(_earthGenerator.GenerateEarthSegment(
                     new GeoSegment(
-                        GeoPoint.SumLatitudesWithWrap(lat, _zoomService.ZoomLevelData.SegmentSize),
+                        nLat,
                         lon,
                         lat,
                         GeoPoint.SumLongitudesWithWrap(lon, -1.0 * _zoomService.ZoomLevelData.SegmentSize))));
@@ -707,26 +726,28 @@ public class DesktopRenderer : OpenGlControlBase
 
     private void RegenerateEarthSegments(GL silkGl)
     {
-        var toRegenerateInThisFrame = _visibleEarthSegments
-            .Where(es => es.IsRegenerationNeeded)
-            .TakeLast(RendererConstants.MaxSegmentsPerFrameRegeneration);
-
         // Regenerating meshes
-        foreach (var segment in toRegenerateInThisFrame)
+        if (_activeRegenerationThreads < RendererConstants.SegmentsRegenerationThreads)
         {
-            _earthGenerator.GenerateMeshForSegment(segment);
+            var toRegenerateMeshes = _visibleEarthSegments
+                .Where(ves => !ves.IsMeshReady);
+        
+            foreach (var segment in toRegenerateMeshes)
+            {
+                _activeRegenerationThreads++;
+                var meshGenerationThread = new Thread(() => segment.RegenerateMesh(ref _activeRegenerationThreads));
+                meshGenerationThread.Start();
+            }
         }
+        
 
         // Regenerating buffers
-        foreach (var segment in toRegenerateInThisFrame)
+        var toRegenerateBuffers = _visibleEarthSegments
+            .Where(ves => ves.IsMeshReady && !ves.IsBufferReady);
+        foreach (var segment in toRegenerateBuffers)
         {
             segment.Mesh.GenerateBuffers(silkGl);
-        }
-
-        // Done
-        foreach (var segment in toRegenerateInThisFrame)
-        {
-            segment.MarkAsRegenerated();
+            segment.IsBufferReady = true;
         }
     }
 
@@ -736,9 +757,9 @@ public class DesktopRenderer : OpenGlControlBase
         
         foreach (var earthSegment in _visibleEarthSegments)
         {
-            if (earthSegment.Mesh == null)
+            if (!earthSegment.IsMeshReady || !earthSegment.IsBufferReady)
             {
-                continue; // Mesh is not generated yet
+                continue; // Not ready yet
             }
             
             earthSegment.Mesh.BindBuffers(silkGl);
@@ -753,43 +774,80 @@ public class DesktopRenderer : OpenGlControlBase
         var undergroundPoint = _isSurfaceRunMode
             ? _sphereCoordinatesProvider.GeoToPlanar3D(new GeoPoint(_camera.Lat, _camera.Lon, RendererConstants.SurfaceRunModeUndergroundPlaneHeight)) 
             : new PlanarPoint3D(GeoConstants.EarthCenter[0], GeoConstants.EarthCenter[1], GeoConstants.EarthCenter[2]);
-        
-        foreach (var earthSegment in _earthSegments)
+
+        var visibleSegmentsBag = new ConcurrentBag<EarthSegment>();
+
+        Parallel.ForEach(_earthSegments, segment =>
         {
-            var viewportSegment = _camera.ProjectSegmentToViewport(earthSegment.GeoSegment);
-            
-            // Segment corners
-            var c1 = new PlanarPoint2D(viewportSegment.Left, viewportSegment.Bottom);
-            var c2 = new PlanarPoint2D(viewportSegment.Left, viewportSegment.Top);
-            var c3 = new PlanarPoint2D(viewportSegment.Right, viewportSegment.Top);
-            var c4 = new PlanarPoint2D(viewportSegment.Right, viewportSegment.Bottom);
-
-            var isC1InViewport = c1.IsPointInCullingViewport();
-            var isC2InViewport = c2.IsPointInCullingViewport();
-            var isC3InViewport = c3.IsPointInCullingViewport();
-            var isC4InViewport = c4.IsPointInCullingViewport();
-
-            var isViewportCoveredBySegment = viewportSegment.IsCullingViewpointCoveredBySegment();
-
-            if (isC1InViewport || isC2InViewport || isC3InViewport || isC4InViewport || isViewportCoveredBySegment)
+            if (IsSegmentVisible(segment, undergroundPoint))
             {
-                // Removing far-side segments
-                var p1 = _sphereCoordinatesProvider.GeoToPlanar3D(new GeoPoint(earthSegment.GeoSegment.SouthLat, earthSegment.GeoSegment.WestLon, GeoConstants.EarthRadius));
-                var p2 = _sphereCoordinatesProvider.GeoToPlanar3D(new GeoPoint(earthSegment.GeoSegment.NorthLat, earthSegment.GeoSegment.WestLon, GeoConstants.EarthRadius));
-                var p3 = _sphereCoordinatesProvider.GeoToPlanar3D(new GeoPoint(earthSegment.GeoSegment.NorthLat, earthSegment.GeoSegment.EastLon, GeoConstants.EarthRadius));
-                var p4 = _sphereCoordinatesProvider.GeoToPlanar3D(new GeoPoint(earthSegment.GeoSegment.SouthLat, earthSegment.GeoSegment.EastLon, GeoConstants.EarthRadius));
-
-                if (_camera.IsPointOnCameraSideOfEarth(undergroundPoint, p1)
-                    || _camera.IsPointOnCameraSideOfEarth(undergroundPoint, p2)
-                    || _camera.IsPointOnCameraSideOfEarth(undergroundPoint, p3)
-                    || _camera.IsPointOnCameraSideOfEarth(undergroundPoint, p4))
-                {
-                    _visibleEarthSegments.Add(earthSegment);    
-                }
+                visibleSegmentsBag.Add(segment);
             }
-        }
+        });
+        
+        _visibleEarthSegments = visibleSegmentsBag.ToList();
     }
 
+    private bool IsSegmentVisible(EarthSegment segment, PlanarPoint3D undergroundPoint)
+    {
+        // Removing far-side segments
+        var p1 = _sphereCoordinatesProvider.GeoToPlanar3D(segment.GeoSegment.SouthLat, segment.GeoSegment.WestLon, GeoConstants.EarthRadius);
+        var p2 = _sphereCoordinatesProvider.GeoToPlanar3D(segment.GeoSegment.NorthLat, segment.GeoSegment.WestLon, GeoConstants.EarthRadius);
+        var p3 = _sphereCoordinatesProvider.GeoToPlanar3D(segment.GeoSegment.NorthLat, segment.GeoSegment.EastLon, GeoConstants.EarthRadius);
+        var p4 = _sphereCoordinatesProvider.GeoToPlanar3D(segment.GeoSegment.SouthLat, segment.GeoSegment.EastLon, GeoConstants.EarthRadius);
+
+        if (!(_camera.IsPointOnCameraSideOfEarth(undergroundPoint, p1)
+              && _camera.IsPointOnCameraSideOfEarth(undergroundPoint, p2)
+              && _camera.IsPointOnCameraSideOfEarth(undergroundPoint, p3)
+              && _camera.IsPointOnCameraSideOfEarth(undergroundPoint, p4)))
+        {
+            return false;
+        }
+
+        // Removig far segments for surface run mode case
+        if (_isSurfaceRunMode)
+        {
+            var averagedX = (p1.X + p2.X + p3.X + p4.X) / 4.0;
+            var averagedY = (p1.Y + p2.Y + p3.Y + p4.Y) / 4.0;
+            var averagedZ = (p1.Z + p2.Z + p3.Z + p4.Z) / 4.0;
+            
+            if (_camera.Position3D.DistanceTo(averagedX, averagedY, averagedZ) > RendererConstants.SurfaceRunSegmentsCullingDistance)
+            {
+                return false;
+            }
+        }
+
+        var viewportSegment = _camera.ProjectSegmentToViewport(segment.GeoSegment);
+        
+        // Segment corners
+        if (RendererHelper.IsPointInCullingViewport(viewportSegment.Left, viewportSegment.Bottom))
+        {
+            return true;
+        }
+        
+        if (RendererHelper.IsPointInCullingViewport(viewportSegment.Left, viewportSegment.Top))
+        {
+            return true;
+        }
+        
+        if (RendererHelper.IsPointInCullingViewport(viewportSegment.Right, viewportSegment.Top))
+        {
+            return true;
+        }
+        
+        if (RendererHelper.IsPointInCullingViewport(viewportSegment.Right, viewportSegment.Bottom))
+        {
+            return true;
+        }
+
+        if (viewportSegment.IsCullingViewpointCoveredBySegment())
+        {
+            return true;
+        }
+
+        return false;
+    }
+    
     /// <summary>
     /// Called when camera zoom changed
     /// </summary>

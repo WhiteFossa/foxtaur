@@ -27,6 +27,8 @@ public class DemResourcesProvider : IFragmentedResourcesProvider
     private object _clearCacheLock = new object();
     
     private DemFragment _lastHitFragment = null;
+    
+    private Mutex _getResourceLock = new Mutex();
 
     public DemResourcesProvider()
     {
@@ -1627,16 +1629,25 @@ public class DemResourcesProvider : IFragmentedResourcesProvider
 
     public FragmentedResourceBase GetResource(double lat, double lon, ZoomLevel zoomLevel)
     {
-        if (_lastHitFragment != null && _lastHitFragment.IsHit(lat, lon) && FastContains(_lastHitFragment.ZoomLevels, zoomLevel))
+        _getResourceLock.WaitOne();
+
+        try
         {
-            return _lastHitFragment; // Avoid full scan
+            if (_lastHitFragment != null && _lastHitFragment.IsHit(lat, lon) && FastContains(_lastHitFragment.ZoomLevels, zoomLevel))
+            {
+                return _lastHitFragment; // Avoid full scan
+            }
+
+            _lastHitFragment = _fragments
+                .Where(f => f.IsHit(lat, lon))
+                .FirstOrDefault(f => FastContains(f.ZoomLevels, zoomLevel));
+
+            return _lastHitFragment;
         }
-
-        _lastHitFragment = _fragments
-            .Where(f => f.IsHit(lat, lon))
-            .FirstOrDefault(f => FastContains(f.ZoomLevels, zoomLevel));
-
-        return _lastHitFragment;
+        finally
+        {
+            _getResourceLock.ReleaseMutex();
+        }
     }
 
     private bool FastContains(ZoomLevel[] levels, ZoomLevel level)

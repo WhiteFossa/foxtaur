@@ -17,9 +17,14 @@ public class SphereCoordinatesProvider : ISphereCoordinatesProvider
 
     public PlanarPoint3D GeoToPlanar3D(GeoPoint geo)
     {
-        var z = geo.H * Math.Cos(geo.Lat) * Math.Cos(geo.Lon);
-        var x = geo.H * Math.Cos(geo.Lat) * Math.Sin(geo.Lon);
-        var y = geo.H * Math.Sin(geo.Lat);
+        return GeoToPlanar3D(geo.Lat, geo.Lon, geo.H);
+    }
+
+    public PlanarPoint3D GeoToPlanar3D(double lat, double lon, double h)
+    {
+        var z = h * Math.Cos(lat) * Math.Cos(lon);
+        var x = h * Math.Cos(lat) * Math.Sin(lon);
+        var y = h * Math.Sin(lat);
 
         return new PlanarPoint3D(x + GeoConstants.EarthCenter[0], y + GeoConstants.EarthCenter[1], z + GeoConstants.EarthCenter[2]);
     }
