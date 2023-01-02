@@ -125,5 +125,5 @@ public static class RendererConstants
     /// <summary>
     /// Do not show segments, further than given distance (in Earth's radiuses)
     /// </summary>
-    public const double SegmentsCullingDistance = 0.03;
+    public const double SegmentsCullingDistance = 0.1;
 }
