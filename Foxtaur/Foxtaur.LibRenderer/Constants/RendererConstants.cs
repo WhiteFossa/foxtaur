@@ -120,7 +120,7 @@ public static class RendererConstants
     /// <summary>
     /// Do not show segments, further than given distance (in Earth's radiuses) (for surface run mode)
     /// </summary>
-    public const double SurfaceRunSegmentsCullingDistance = 0.03;
+    public const double SurfaceRunSegmentsCullingDistance = 0.01;
 
     /// <summary>
     /// Number of Earth segments regeneration threads
