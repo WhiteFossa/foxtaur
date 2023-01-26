@@ -128,6 +128,11 @@ public static class RendererConstants
     public const int SegmentsRegenerationThreads = 1;
 
     /// <summary>
+    /// If we have some free segment regeneration threads, start no more than this amount of new ones
+    /// </summary>
+    public const int SegmentsRegenerationLimit = 1;
+
+    /// <summary>
     /// Regenerate no more than this number of buffers per frame
     /// </summary>
     public const int RegenerateBuffersPerFrame = 32;

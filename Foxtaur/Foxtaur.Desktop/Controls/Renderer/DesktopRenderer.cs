@@ -753,7 +753,8 @@ public class DesktopRenderer : OpenGlControlBase
         if (_activeRegenerationThreads < RendererConstants.SegmentsRegenerationThreads)
         {
             var toRegenerateMeshes = _visibleEarthSegments
-                .Where(ves => ves.Status == EarthSegmentStatus.ReadyForRegeneration);
+                .Where(ves => ves.Status == EarthSegmentStatus.ReadyForRegeneration)
+                .Take(RendererConstants.SegmentsRegenerationLimit);
         
             foreach (var segment in toRegenerateMeshes)
             {
@@ -762,14 +763,16 @@ public class DesktopRenderer : OpenGlControlBase
                 meshGenerationThread.Start();
             }
         }
-        
+
         // Swapping meshes
         var toSwapMeshes = _visibleEarthSegments
             .Where(ves => ves.Status == EarthSegmentStatus.ReadyForMeshesSwap);
 
-        foreach (var segmantToSwapMeshes in toSwapMeshes)
+        var toSwapCount = toSwapMeshes.Count();
+        
+        foreach (var segmentToSwapMeshes in toSwapMeshes)
         {
-            segmantToSwapMeshes.SwapMeshes();
+            segmentToSwapMeshes.SwapMeshes();
         }
 
         // Regenerating buffers

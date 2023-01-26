@@ -39,7 +39,7 @@ public class EarthSegment
     
     private Logger _logger = LogManager.GetCurrentClassLogger();
 
-    protected static Semaphore RegenerationLimiter = new Semaphore(RendererConstants.SegmentsRegenerationThreads, RendererConstants.SegmentsRegenerationThreads);
+    private Mutex _regenerationMutex = new Mutex();
 
     public EarthSegment(GeoSegment geoSegment)
     {
@@ -114,7 +114,7 @@ public class EarthSegment
     /// </summary>
     public void RegenerateMesh(ref int threadsCount)
     {
-        RegenerationLimiter.WaitOne();
+        _regenerationMutex.WaitOne();
 
         try
         {
@@ -132,7 +132,7 @@ public class EarthSegment
         }
         finally
         {
-            RegenerationLimiter.Release();
+            _regenerationMutex.ReleaseMutex();
 
             threadsCount--;
         }
@@ -143,7 +143,12 @@ public class EarthSegment
     /// </summary>
     public void SetStatus(EarthSegmentStatus status)
     {
-        RegenerationLimiter.WaitOne();
+        lock (this)
+        {
+            Status = status;
+        }
+        
+        _regenerationMutex.WaitOne();
 
         try
         {
@@ -151,7 +156,7 @@ public class EarthSegment
         }
         finally
         {
-            RegenerationLimiter.Release();
+            _regenerationMutex.ReleaseMutex();
         }
     }
 }
