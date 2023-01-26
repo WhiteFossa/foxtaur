@@ -217,10 +217,13 @@ public class DesktopRenderer : OpenGlControlBase
     private IDistanceProvider _distanceProvider = Program.Di.GetService<IDistanceProvider>();
 
     #endregion
-    
+
     #region Locks
 
-    private object _demRegenerationLock = new object();
+    /// <summary>
+    /// Set when rendering in progress
+    /// </summary>
+    private Mutex _renderingMutex = new Mutex();
 
     #endregion
 
@@ -342,77 +345,86 @@ public class DesktopRenderer : OpenGlControlBase
     /// </summary>
     protected override unsafe void OnOpenGlRender(GlInterface gl, int fb)
     {
-        var silkGlContext = GL.GetApi(gl.GetProcAddress);
-        
-        silkGlContext.ClearColor(Color.Black);
-        silkGlContext.Clear((uint)(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit));
-        silkGlContext.Enable(EnableCap.DepthTest);
+        _renderingMutex.WaitOne();
 
-        // Blending
-        silkGlContext.Enable(EnableCap.Blend);
-        silkGlContext.BlendFunc(GLEnum.SrcAlpha, GLEnum.OneMinusSrcAlpha);
-
-        silkGlContext.Viewport(0, 0, (uint)_viewportWidth, (uint)_viewportHeight);
-
-        // Surface mode camera positioning
-        if (_isSurfaceRunMode)
+        try
         {
-            ProcessSurfaceRunMovement();
-            
-            SurfaceRunPositionCamera();
+            var silkGlContext = GL.GetApi(gl.GetProcAddress);
+
+            silkGlContext.ClearColor(Color.Black);
+            silkGlContext.Clear((uint)(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit));
+            silkGlContext.Enable(EnableCap.DepthTest);
+
+            // Blending
+            silkGlContext.Enable(EnableCap.Blend);
+            silkGlContext.BlendFunc(GLEnum.SrcAlpha, GLEnum.OneMinusSrcAlpha);
+
+            silkGlContext.Viewport(0, 0, (uint)_viewportWidth, (uint)_viewportHeight);
+
+            // Surface mode camera positioning
+            if (_isSurfaceRunMode)
+            {
+                ProcessSurfaceRunMovement();
+
+                SurfaceRunPositionCamera();
+            }
+
+            _defaultShader.Use();
+
+            // Setting shader parameters (common)
+            //_defaultShader.SetUniform2f("resolution", new Vector2(_viewportWidth, _viewportHeight));
+
+            // Setting shader parameters (vertices)
+            _defaultShader.SetUniform4f("uModel", _camera.ModelMatrix.ToMatrix4x4());
+            _defaultShader.SetUniform4f("uView", _camera.ViewMatrix.ToMatrix4x4());
+            _defaultShader.SetUniform4f("uProjection", _camera.ProjectionMatrix.ToMatrix4x4());
+
+            // Setting shader parameters (fragments)
+            _defaultShader.SetUniform1i("ourTexture", 0);
+
+            //silkGlContext.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Line);
+
+            // If zoom level changed, we have to regenerate everything Earth-related
+            if (_isZoomLevelChanged)
+            {
+                GenerateEarthSegments();
+                _earthSegments.ForEach(es => es.SetStatus(EarthSegmentStatus.ReadyForPurge));
+
+                _isZoomLevelChanged = false;
+            }
+
+            // Work only with those segments
+            FindVisibleEarthSegments();
+
+            // Regenerating Earth segments
+            RegenerateEarthSegments(silkGlContext);
+
+            // Draw Earth
+            DrawEarth(silkGlContext);
+
+            // Draw the distance
+            if (_isDistanceRegenerationNeeded)
+            {
+                _distanceProvider.DisposeDistanceSegment();
+
+                _isDistanceRegenerationNeeded = false;
+            }
+
+            _distanceProvider.GenerateDistanceSegment(silkGlContext, _currentMapsSurfaceAltitudeIncrement);
+            _distanceProvider.DrawDistance(silkGlContext);
+
+            // UI
+            _ui.DrawUi(silkGlContext, _viewportWidth, _viewportHeight, _uiData);
+
+            // Everything is drawn
+            _framesDrawn++;
+
+            Dispatcher.UIThread.Post(InvalidateVisual, DispatcherPriority.Background);
         }
-
-        _defaultShader.Use();
-
-        // Setting shader parameters (common)
-        //_defaultShader.SetUniform2f("resolution", new Vector2(_viewportWidth, _viewportHeight));
-
-        // Setting shader parameters (vertices)
-        _defaultShader.SetUniform4f("uModel", _camera.ModelMatrix.ToMatrix4x4());
-        _defaultShader.SetUniform4f("uView", _camera.ViewMatrix.ToMatrix4x4());
-        _defaultShader.SetUniform4f("uProjection", _camera.ProjectionMatrix.ToMatrix4x4());
-
-        // Setting shader parameters (fragments)
-        _defaultShader.SetUniform1i("ourTexture", 0);
-
-        //silkGlContext.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Line);
-
-        // If zoom level changed, we have to regenerate everything Earth-related
-        if (_isZoomLevelChanged)
+        finally
         {
-            GenerateEarthSegments();
-            _earthSegments.ForEach(es => es.SetStatus(EarthSegmentStatus.ReadyForPurge));
-            
-            _isZoomLevelChanged = false;
+            _renderingMutex.ReleaseMutex();
         }
-        
-        // Work only with those segments
-        FindVisibleEarthSegments();
-        
-        // Regenerating Earth segments
-        RegenerateEarthSegments(silkGlContext);
-        
-        // Draw Earth
-        DrawEarth(silkGlContext);
-
-        // Draw the distance
-        if (_isDistanceRegenerationNeeded)
-        {
-            _distanceProvider.DisposeDistanceSegment();
-
-            _isDistanceRegenerationNeeded = false;
-        }
-
-        _distanceProvider.GenerateDistanceSegment(silkGlContext, _currentMapsSurfaceAltitudeIncrement);
-        _distanceProvider.DrawDistance(silkGlContext);
-
-        // UI
-        _ui.DrawUi(silkGlContext, _viewportWidth, _viewportHeight, _uiData);
-
-        // Everything is drawn
-        _framesDrawn++;
-
-        Dispatcher.UIThread.Post(InvalidateVisual, DispatcherPriority.Background);
     }
 
     /// <summary>
@@ -677,7 +689,9 @@ public class DesktopRenderer : OpenGlControlBase
     {
         Dispatcher.UIThread.InvokeAsync(() =>
         {
-            lock (_demRegenerationLock)
+            _renderingMutex.WaitOne();
+
+            try
             {
                 var segmentsToRegenerate = _earthSegments
                     .Where(es => es.GeoSegment.IsCoveredBy(args.Segment));
@@ -686,9 +700,13 @@ public class DesktopRenderer : OpenGlControlBase
                 {
                     segment.SetStatus(EarthSegmentStatus.ReadyForPurge);
                 }
-                
+
                 // Marking distance's map for regeneration too
                 _isDistanceRegenerationNeeded = true;
+            }
+            finally
+            {
+                _renderingMutex.ReleaseMutex();
             }
         });
     }
@@ -726,7 +744,10 @@ public class DesktopRenderer : OpenGlControlBase
         var toPurge = _visibleEarthSegments
             .Where(ves => ves.Status == EarthSegmentStatus.ReadyForPurge);
 
-        Parallel.ForEach(toPurge, segment => segment.Purge());
+        foreach (var segmentToPurge in toPurge)
+        {
+            segmentToPurge.Purge();
+        }
 
         // Regenerating meshes
         if (_activeRegenerationThreads < RendererConstants.SegmentsRegenerationThreads)
@@ -746,7 +767,10 @@ public class DesktopRenderer : OpenGlControlBase
         var toSwapMeshes = _visibleEarthSegments
             .Where(ves => ves.Status == EarthSegmentStatus.ReadyForMeshesSwap);
 
-        Parallel.ForEach(toSwapMeshes, segment => segment.SwapMeshes());
+        foreach (var segmantToSwapMeshes in toSwapMeshes)
+        {
+            segmantToSwapMeshes.SwapMeshes();
+        }
 
         // Regenerating buffers
         var toRegenerateBuffers = _visibleEarthSegments
@@ -874,9 +898,18 @@ public class DesktopRenderer : OpenGlControlBase
 
     private void OnDemScaleChanged(object sender, ISettingsService.OnDemScaleChangedArgs args)
     {
-        _earthSegments.ForEach(es => es.SetStatus(EarthSegmentStatus.ReadyForPurge));
-        
-        _isDistanceRegenerationNeeded = true;
+        _renderingMutex.WaitOne();
+
+        try
+        {
+            _earthSegments.ForEach(es => es.SetStatus(EarthSegmentStatus.ReadyForPurge));
+
+            _isDistanceRegenerationNeeded = true;
+        }
+        finally
+        {
+            _renderingMutex.ReleaseMutex();
+        }
     }
 
     public void OnKeyPressed(KeyEventArgs e)
