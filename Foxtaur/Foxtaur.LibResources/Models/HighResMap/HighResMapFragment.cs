@@ -77,7 +77,7 @@ public class HighResMapFragment : FragmentedResourceBase
             {
                 // Processing
                 _logger.Info($"Processing map { ResourceName }...");
-                
+
                 _reader = new GeoTiffReader();
                 _reader.Open(decompressedStream);
                 
