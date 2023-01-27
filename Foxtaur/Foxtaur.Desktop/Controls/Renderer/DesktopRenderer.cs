@@ -80,7 +80,7 @@ public class DesktopRenderer : OpenGlControlBase
     /// <summary>
     /// Earth segments
     /// </summary>
-    private List<EarthSegment> _earthSegments = new List<EarthSegment>();
+    private ConcurrentBag<EarthSegment> _earthSegments = new ConcurrentBag<EarthSegment>();
 
     /// <summary>
     /// Currently visible Earth segments
@@ -290,7 +290,9 @@ public class DesktopRenderer : OpenGlControlBase
         
         // Generating the Earth
         _earthSphere = _earthGenerator.GenerateEarthSphere();
-        GenerateEarthSegments();
+        
+        var earthSegmentsGenerationThread = new Thread(() => GenerateEarthSegments());
+        earthSegmentsGenerationThread.Start();
 
         // Creating camera
         _camera.Lat = 0.0f;
@@ -383,12 +385,14 @@ public class DesktopRenderer : OpenGlControlBase
             _defaultShader.SetUniform1i("ourTexture", 0);
 
             //silkGlContext.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Line);
-
+            
             // If zoom level changed, we have to regenerate everything Earth-related
             if (_isZoomLevelChanged)
             {
-                GenerateEarthSegments();
-                _earthSegments.ForEach(es => es.SetStatus(EarthSegmentStatus.ReadyForPurge));
+                Parallel.ForEach(_earthSegments, es => es.SetStatus(EarthSegmentStatus.ReadyForPurge));
+                
+                var earthSegmentsGenerationThread = new Thread(() => GenerateEarthSegments());
+                earthSegmentsGenerationThread.Start();
 
                 _isZoomLevelChanged = false;
             }
@@ -398,10 +402,10 @@ public class DesktopRenderer : OpenGlControlBase
 
             // Regenerating Earth segments
             RegenerateEarthSegments(silkGlContext);
-
+            
             // Draw Earth
             DrawEarth(silkGlContext);
-
+            
             // Draw the distance
             if (_isDistanceRegenerationNeeded)
             {
@@ -409,10 +413,11 @@ public class DesktopRenderer : OpenGlControlBase
 
                 _isDistanceRegenerationNeeded = false;
             }
-
+            
             _distanceProvider.GenerateDistanceSegment(silkGlContext, _currentMapsSurfaceAltitudeIncrement);
-            _distanceProvider.DrawDistance(silkGlContext);
 
+            _distanceProvider.DrawDistance(silkGlContext);
+            
             // UI
             _ui.DrawUi(silkGlContext, _viewportWidth, _viewportHeight, _uiData);
 
@@ -722,7 +727,7 @@ public class DesktopRenderer : OpenGlControlBase
             {
                 nLat = 0.5 * Math.PI;
             }
-            
+
             for (var lon = Math.PI; lon > GeoPoint.SumLongitudesWithWrap(-1.0 * Math.PI, _zoomService.ZoomLevelData.SegmentSize); lon -= _zoomService.ZoomLevelData.SegmentSize)
             {
                 _earthSegments.Add(_earthGenerator.GenerateEarthSegment(
@@ -905,7 +910,7 @@ public class DesktopRenderer : OpenGlControlBase
 
         try
         {
-            _earthSegments.ForEach(es => es.SetStatus(EarthSegmentStatus.ReadyForPurge));
+            Parallel.ForEach(_earthSegments, es => es.SetStatus(EarthSegmentStatus.ReadyForPurge));
 
             _isDistanceRegenerationNeeded = true;
         }
