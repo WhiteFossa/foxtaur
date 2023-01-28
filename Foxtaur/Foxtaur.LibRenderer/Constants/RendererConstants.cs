@@ -136,4 +136,14 @@ public static class RendererConstants
     /// Regenerate no more than this number of buffers per frame
     /// </summary>
     public const int RegenerateBuffersPerFrame = 32;
+
+    /// <summary>
+    /// Hunter height in Earth radiuses
+    /// </summary>
+    public const double HunterHeight = 0.00001;
+
+    /// <summary>
+    /// Hunter radius in Earth radiuses
+    /// </summary>
+    public const double HunterRadius = 0.000001;
 }

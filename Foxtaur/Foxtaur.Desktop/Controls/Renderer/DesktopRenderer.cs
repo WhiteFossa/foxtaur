@@ -39,6 +39,7 @@ using MathNet.Numerics.LinearAlgebra;
 using Microsoft.Extensions.DependencyInjection;
 using NLog;
 using Silk.NET.OpenGL;
+using Hunter = Foxtaur.Desktop.Controls.Renderer.Models.Hunter;
 using Timer = System.Timers.Timer;
 
 namespace Foxtaur.Desktop.Controls.Renderer;
@@ -233,9 +234,15 @@ public class DesktopRenderer : OpenGlControlBase
 
     private int _activeRegenerationThreads = 0;
 
-    #endregion
-    
     private Distance _activeDistance;
+    
+    #endregion
+
+    #region Debug
+
+    private Hunter _hunter;
+
+    #endregion
 
     /// <summary>
     /// Constructor
@@ -250,6 +257,9 @@ public class DesktopRenderer : OpenGlControlBase
         
         // DEM scale change
         _settingsService.OnDemScaleChanged += OnDemScaleChanged;
+        
+        // Debug
+        _hunter = new Hunter(_sphereCoordinatesProvider);
     }
 
     private void OnPropertyChangedListener(object sender, AvaloniaPropertyChangedEventArgs e)
@@ -417,6 +427,17 @@ public class DesktopRenderer : OpenGlControlBase
             _distanceProvider.GenerateDistanceSegment(silkGlContext, _currentMapsSurfaceAltitudeIncrement);
 
             _distanceProvider.DrawDistance(silkGlContext);
+            
+            // Drawing hunters (debug)
+            var hunterLat = 0.74088;
+            var hunterLon = -0.33637;
+            
+            var hunterHeight = _demProvider.GetSurfaceAltitude(hunterLat, hunterLon, _zoomService.ZoomLevel).ScaleAltitude(_settingsService.GetDemScale());
+            hunterHeight += _isSurfaceRunMode ? RendererConstants.MapsAltitudeIncrementSurfaceRunMode : RendererConstants.MapsAltitudeIncrementSatelliteMode;
+            
+            _hunter.Position = new GeoPoint(hunterLat, hunterLon, hunterHeight);
+            
+            _hunter.Draw(silkGlContext);
             
             // UI
             _ui.DrawUi(silkGlContext, _viewportWidth, _viewportHeight, _uiData);
