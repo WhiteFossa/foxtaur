@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Threading;
@@ -29,10 +28,6 @@ using Foxtaur.LibRenderer.Models;
 using Foxtaur.LibRenderer.Models.UI;
 using Foxtaur.LibRenderer.Services.Abstractions.Camera;
 using Foxtaur.LibRenderer.Services.Abstractions.Zoom;
-using Foxtaur.LibResources.Constants;
-using Foxtaur.LibResources.Enums;
-using Foxtaur.LibResources.Models;
-using Foxtaur.LibResources.Models.HighResMap;
 using Foxtaur.LibSettings.Services.Abstractions;
 using Foxtaur.LibWebClient.Models;
 using MathNet.Numerics.LinearAlgebra;
@@ -325,9 +320,11 @@ public class DesktopRenderer : OpenGlControlBase
         // Zoom events
         _camera.OnZoomChanged += OnZoomChanged;
         _zoomService.OnZoomLevelChanged += OnZoomLevelChanged;
+        
+        // Hunters
+        _hunter.PrepareTexture(silkGlContext);
 
         #endregion
-        
 
         // Loading shaders
         _defaultShader = new Shader(silkGlContext, @"Resources/Shaders/shader.vert", @"Resources/Shaders/shader.frag");

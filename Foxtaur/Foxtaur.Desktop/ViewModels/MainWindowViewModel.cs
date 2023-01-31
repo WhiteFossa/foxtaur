@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reactive;
 using System.Timers;
-using Avalonia.Metadata;
 using Foxtaur.Desktop.Controls.Renderer;
 using Foxtaur.Desktop.Models;
 using Foxtaur.Desktop.Views;

@@ -1,5 +1,4 @@
 using Foxtaur.LibGeo.Models;
-using Foxtaur.LibRenderer.Constants;
 using MathNet.Numerics.LinearAlgebra;
 using NLog;
 

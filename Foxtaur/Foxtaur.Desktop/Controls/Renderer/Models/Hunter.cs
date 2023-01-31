@@ -29,11 +29,11 @@ public class Hunter
     {
         _sphereCoordinatesProvider = sphereCoordinatesProvider;
     }
-    
+
     /// <summary>
-    /// Draw the hunter
+    /// Prepare hunter's texture
     /// </summary>
-    public unsafe void Draw(GL glContext)
+    public void PrepareTexture(GL glContext)
     {
         // Texture
         if (_texture != null)
@@ -45,7 +45,13 @@ public class Hunter
         {
             _texture = new Texture(glContext, hunterTextureImage);
         }
-        
+    }
+    
+    /// <summary>
+    /// Draw the hunter
+    /// </summary>
+    public unsafe void Draw(GL glContext)
+    {
         // 1) Vector from the current position to the Earth center
         var position3D = _sphereCoordinatesProvider.GeoToPlanar3D(Position);
         var nadirVector = GeoConstants.EarthCenter - position3D.AsVector();

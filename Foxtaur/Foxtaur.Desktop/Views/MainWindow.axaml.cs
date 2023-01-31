@@ -1,8 +1,6 @@
-using System.Collections.Generic;
 using System.Linq;
 using Avalonia.Controls;
 using Avalonia.Input;
-using Avalonia.Interactivity;
 using Foxtaur.Desktop.ViewModels;
 
 namespace Foxtaur.Desktop.Views

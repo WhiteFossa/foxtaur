@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using System.Timers;
 using Foxtaur.Helpers;
 using Foxtaur.LibResources.Constants;

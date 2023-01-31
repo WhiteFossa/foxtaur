@@ -1,7 +1,6 @@
 using Foxtaur.LibGeo.Constants;
 using Foxtaur.LibGeo.Models;
 using Foxtaur.LibGeo.Services.Abstractions.CoordinateProviders;
-using Foxtaur.LibGeo.Services.Implementations.CoordinateProviders;
 using Foxtaur.LibRenderer.Constants;
 using Foxtaur.LibRenderer.Helpers;
 using Foxtaur.LibRenderer.Services.Abstractions.Camera;

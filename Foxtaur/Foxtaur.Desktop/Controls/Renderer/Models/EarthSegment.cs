@@ -3,7 +3,6 @@ using System.Threading;
 using Foxtaur.Desktop.Controls.Renderer.Abstractions.Generators;
 using Foxtaur.Desktop.Controls.Renderer.Enums;
 using Foxtaur.LibGeo.Models;
-using Foxtaur.LibRenderer.Constants;
 using Microsoft.Extensions.DependencyInjection;
 using NLog;
 using Silk.NET.OpenGL;

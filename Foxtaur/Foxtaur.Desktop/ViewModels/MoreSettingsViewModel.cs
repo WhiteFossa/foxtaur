@@ -6,12 +6,11 @@ using System.Reflection;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Foxtaur.LibSettings.Services.Abstractions;
-using HarfBuzzSharp;
 using MessageBox.Avalonia;
 using MessageBox.Avalonia.DTO;
 using MessageBox.Avalonia.Enums;
-using ReactiveUI;
 using Microsoft.Extensions.DependencyInjection;
+using ReactiveUI;
 
 namespace Foxtaur.Desktop.ViewModels;
 
