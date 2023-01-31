@@ -267,7 +267,7 @@ public class Camera : ICamera
     {
         ModelMatrix = DoubleHelper.CreateRotationZMatrix(0) * DoubleHelper.CreateRotationYMatrix(0) * DoubleHelper.CreateRotationXMatrix(0); // Rotation
         ViewMatrix = DoubleHelper.CreateLookAt(Position3D.AsVector(), Target.AsVector(), Up); // Camera position
-        ProjectionMatrix = DoubleHelper.CreatePerspectiveFieldOfView(Zoom, AspectRatio, 0.00001, 100.0); // Zoom
+        ProjectionMatrix = DoubleHelper.CreatePerspectiveFieldOfView(Zoom, AspectRatio, 0.00001, 10.0); // Zoom
         
         ForwardProjectionMatrix = ModelMatrix * ViewMatrix * ProjectionMatrix;
         

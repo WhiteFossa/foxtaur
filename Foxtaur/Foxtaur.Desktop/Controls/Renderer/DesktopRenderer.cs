@@ -293,9 +293,9 @@ public class DesktopRenderer : OpenGlControlBase
     protected override void OnOpenGlInit(GlInterface gl, int fb)
     {
         base.OnOpenGlInit(gl, fb);
-
-        var silkGlContext = GL.GetApi(gl.GetProcAddress);
         
+        var silkGlContext = GL.GetApi(gl.GetProcAddress);
+
         #region Initialization
         
         // Generating the Earth

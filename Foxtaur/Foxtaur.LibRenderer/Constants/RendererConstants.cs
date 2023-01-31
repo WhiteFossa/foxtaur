@@ -140,7 +140,7 @@ public static class RendererConstants
     /// <summary>
     /// Hunter height in Earth radiuses
     /// </summary>
-    public const double HunterHeight = 0.00001;
+    public const double HunterHeight = 0.000005;
 
     /// <summary>
     /// Hunter radius in Earth radiuses

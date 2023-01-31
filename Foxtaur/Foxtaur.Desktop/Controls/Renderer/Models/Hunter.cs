@@ -79,31 +79,40 @@ public class Hunter
         {
             rotatedHunterRadiusNew = hunterRadius.RotateAround(hunterHeight, angle);
             
-            var index1 = _mesh.AddVertex(position3D, new PlanarPoint2D(0, 0));
-            var index2 = _mesh.AddVertex(rotatedHunterRadiusOld.AsPlanarPoint3D(), new PlanarPoint2D(0, 1));
-            var index3 = _mesh.AddVertex(rotatedHunterRadiusNew.AsPlanarPoint3D(), new PlanarPoint2D(1, 1));
-        
-            _mesh.AddIndex(index1);
-            _mesh.AddIndex(index2);
-            _mesh.AddIndex(index3);
+            AddHunterTriangles(position3D, rotatedHunterRadiusOld.AsPlanarPoint3D(), rotatedHunterRadiusNew.AsPlanarPoint3D(), hunterHeight3D);
 
             rotatedHunterRadiusOld = rotatedHunterRadiusNew;
         }
         
-        // Last triangle
-        var lastIndex1 = _mesh.AddVertex(position3D, new PlanarPoint2D(0, 0));
-        var lastIndex2 = _mesh.AddVertex(rotatedHunterRadiusNew.AsPlanarPoint3D(), new PlanarPoint2D(0, 1));
-        var lastIndex3 = _mesh.AddVertex(hunterRadius.AsPlanarPoint3D(), new PlanarPoint2D(1, 1));
-        
-        _mesh.AddIndex(lastIndex1);
-        _mesh.AddIndex(lastIndex2);
-        _mesh.AddIndex(lastIndex3);
-        
+        // Last triangles
+        AddHunterTriangles(position3D, rotatedHunterRadiusOld.AsPlanarPoint3D(), hunterRadius.AsPlanarPoint3D(), hunterHeight3D);
 
+        // Actual drawing
         _mesh.GenerateBuffers(glContext);
         
         _texture.Bind();
         _mesh.BindBuffers(glContext);
         glContext.DrawElements(PrimitiveType.Triangles, (uint)_mesh.Indices.Count, DrawElementsType.UnsignedInt, null);
+    }
+
+    private void AddHunterTriangles(PlanarPoint3D hunterPosition, PlanarPoint3D hunterRadiusOld, PlanarPoint3D hunterRadiusNew, PlanarPoint3D hunterHeight)
+    {
+        // Cone side
+        var sideIndex1 = _mesh.AddVertex(hunterPosition, new PlanarPoint2D(0, 0));
+        var sideIndex2 = _mesh.AddVertex(hunterRadiusOld, new PlanarPoint2D(0, 1));
+        var sideIndex3 = _mesh.AddVertex(hunterRadiusNew, new PlanarPoint2D(1, 1));
+        
+        _mesh.AddIndex(sideIndex1);
+        _mesh.AddIndex(sideIndex2);
+        _mesh.AddIndex(sideIndex3);
+            
+        // Top disk
+        var diskIndex1 = _mesh.AddVertex(hunterHeight, new PlanarPoint2D(0, 0));
+        var diskIndex2 = _mesh.AddVertex(hunterRadiusOld, new PlanarPoint2D(0, 1));
+        var diskIndex3 = _mesh.AddVertex(hunterRadiusNew, new PlanarPoint2D(1, 1));
+
+        _mesh.AddIndex(diskIndex1);
+        _mesh.AddIndex(diskIndex2);
+        _mesh.AddIndex(diskIndex3);
     }
 }
