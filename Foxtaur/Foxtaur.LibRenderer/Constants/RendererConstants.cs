@@ -146,4 +146,14 @@ public static class RendererConstants
     /// Hunter radius in Earth radiuses
     /// </summary>
     public const double HunterRadius = 0.000001;
+
+    /// <summary>
+    /// Hunter width (in parts of the screen) for flat UI markers
+    /// </summary>
+    public const double FlatUIHunterWidth = 0.02;
+    
+    /// <summary>
+    /// Hunter height (in parts of the screen) for flat UI markers
+    /// </summary>
+    public const double FlatUIHunterHeight = 0.02;
 }

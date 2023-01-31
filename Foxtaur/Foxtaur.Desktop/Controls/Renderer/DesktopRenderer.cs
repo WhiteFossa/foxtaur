@@ -206,6 +206,7 @@ public class DesktopRenderer : OpenGlControlBase
     private ICoordinatesProvider _sphereCoordinatesProvider = Program.Di.GetService<ISphereCoordinatesProvider>();
     private IEarthGenerator _earthGenerator = Program.Di.GetService<IEarthGenerator>();
     private IUi _ui = Program.Di.GetService<IUi>();
+    private IHuntersDisplay _huntersDisplay = Program.Di.GetService<IHuntersDisplay>();
     private IDemProvider _demProvider = Program.Di.GetService<IDemProvider>();
     private IZoomService _zoomService = Program.Di.GetService<IZoomService>();
     private IMapSegmentGenerator _mapSegmentGenerator = Program.Di.GetService<IMapSegmentGenerator>();
@@ -233,9 +234,13 @@ public class DesktopRenderer : OpenGlControlBase
     
     #endregion
 
-    #region Debug
+    #region Hunters
 
-    private Hunter _hunter;
+    private List<Hunter> _hunters = new List<Hunter>();
+    
+    #endregion
+    
+    #region Debug
 
     #endregion
 
@@ -254,7 +259,7 @@ public class DesktopRenderer : OpenGlControlBase
         _settingsService.OnDemScaleChanged += OnDemScaleChanged;
         
         // Debug
-        _hunter = new Hunter(_sphereCoordinatesProvider);
+        _hunters.Add(new Hunter(_sphereCoordinatesProvider));
     }
 
     private void OnPropertyChangedListener(object sender, AvaloniaPropertyChangedEventArgs e)
@@ -279,6 +284,7 @@ public class DesktopRenderer : OpenGlControlBase
         _camera.AspectRatio = _viewportWidth / (double)_viewportHeight;
 
         // Marking GUI as requiring re-initialization
+        _huntersDisplay.IsNeedToReinitialize = true;
         _ui.IsNeedToReinitialize = true;
     }
 
@@ -322,7 +328,10 @@ public class DesktopRenderer : OpenGlControlBase
         _zoomService.OnZoomLevelChanged += OnZoomLevelChanged;
         
         // Hunters
-        _hunter.PrepareTexture(silkGlContext);
+        foreach (var hunter in _hunters)
+        {
+            hunter.PrepareTextures(silkGlContext);
+        }
 
         #endregion
 
@@ -331,6 +340,9 @@ public class DesktopRenderer : OpenGlControlBase
 
         // Loading textures
         _earthTexture = new Texture(silkGlContext, @"Resources/Textures/Basemaps/HYP_HR_SR_OB_DR_resized.jpeg");
+
+        // Hunters (for satellite view)
+        _huntersDisplay.Initialize(silkGlContext, _viewportWidth, _viewportHeight);
 
         // UI
         _ui.Initialize(silkGlContext, _viewportWidth, _viewportHeight, _uiData); // We also need to re-initialize on viewport size change
@@ -425,16 +437,16 @@ public class DesktopRenderer : OpenGlControlBase
 
             _distanceProvider.DrawDistance(silkGlContext);
             
-            // Drawing hunters (debug)
+            // Moving hunters (debug)
             var hunterLat = 0.74088;
             var hunterLon = -0.33637;
             
             var hunterHeight = _demProvider.GetSurfaceAltitude(hunterLat, hunterLon, _zoomService.ZoomLevel).ScaleAltitude(_settingsService.GetDemScale());
             hunterHeight += _isSurfaceRunMode ? RendererConstants.MapsAltitudeIncrementSurfaceRunMode : RendererConstants.MapsAltitudeIncrementSatelliteMode;
+            _hunters.First().Position = new GeoPoint(hunterLat, hunterLon, hunterHeight);
             
-            _hunter.Position = new GeoPoint(hunterLat, hunterLon, hunterHeight);
-            
-            _hunter.Draw(silkGlContext);
+            // Drawing hunters
+            DrawHunters(silkGlContext);
             
             // UI
             _ui.DrawUi(silkGlContext, _viewportWidth, _viewportHeight, _uiData);
@@ -451,11 +463,31 @@ public class DesktopRenderer : OpenGlControlBase
     }
 
     /// <summary>
+    /// Draw hunters in both modes
+    /// </summary>
+    private void DrawHunters(GL glContext)
+    {
+        if (_isSurfaceRunMode)
+        {
+            // In surface run mode hunters can draw themselves
+            foreach (var hunter in _hunters)
+            {
+                hunter.Draw(glContext);
+            }
+        }
+        else
+        {
+            _huntersDisplay.DrawUi(glContext, _viewportWidth, _viewportHeight, _hunters);
+        }
+    }
+
+    /// <summary>
     /// OpenGL de-initialization
     /// </summary>
     protected override void OnOpenGlDeinit(GlInterface gl, int fb)
     {
         _ui.DeInitialize();
+        _huntersDisplay.DeInitialize();
 
         // Cleaning Earth segments
         DisposeEarthSegments();

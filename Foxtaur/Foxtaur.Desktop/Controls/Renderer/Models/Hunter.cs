@@ -19,7 +19,12 @@ public class Hunter
     private ICoordinatesProvider _sphereCoordinatesProvider;
     private Mesh _mesh;
     private Texture _texture;
-    
+
+    /// <summary>
+    /// Texture to use in flat UI
+    /// </summary>
+    public Texture UiTexture { get; private set; }
+
     /// <summary>
     /// Hunter position
     /// </summary>
@@ -33,9 +38,9 @@ public class Hunter
     /// <summary>
     /// Prepare hunter's texture
     /// </summary>
-    public void PrepareTexture(GL glContext)
+    public void PrepareTextures(GL glContext)
     {
-        // Texture
+        // 3D UI texture
         if (_texture != null)
         {
             _texture.Dispose();
@@ -45,6 +50,14 @@ public class Hunter
         {
             _texture = new Texture(glContext, hunterTextureImage);
         }
+        
+        // Flat UI texture
+        if (UiTexture != null)
+        {
+            UiTexture.Dispose();
+        }
+        
+        UiTexture = new Texture(glContext, @"Resources/Textures/hunter_marker.png");
     }
     
     /// <summary>

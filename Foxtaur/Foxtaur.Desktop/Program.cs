@@ -96,6 +96,7 @@ namespace Foxtaur.Desktop
             services.AddSingleton<IWebClientRaw, WebClientRawStub>();
             services.AddSingleton<IWebClient, WebClient>();
             services.AddSingleton<IDistanceProvider, DistanceProvider>();
+            services.AddSingleton<IHuntersDisplay, HuntersDisplay>();
 
             return services;
         }

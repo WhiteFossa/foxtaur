@@ -18,9 +18,6 @@
         <None Update="Resources\Shaders\shader.vert">
           <CopyToOutputDirectory>Always</CopyToOutputDirectory>
         </None>
-        <None Update="Resources\Textures\davydovo.png">
-          <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-        </None>
         <None Update="Resources\Shaders\ui_shader.vert">
           <CopyToOutputDirectory>Always</CopyToOutputDirectory>
         </None>
@@ -37,6 +34,9 @@
           <CopyToOutputDirectory>Always</CopyToOutputDirectory>
         </None>
         <None Update="Resources\Textures\Basemaps\HYP_HR_SR_OB_DR_resized.jpeg">
+          <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
+        <None Update="Resources\Textures\hunter_marker.png">
           <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </None>
     </ItemGroup>
