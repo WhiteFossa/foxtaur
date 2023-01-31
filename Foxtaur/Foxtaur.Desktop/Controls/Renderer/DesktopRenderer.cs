@@ -467,18 +467,18 @@ public class DesktopRenderer : OpenGlControlBase
     /// </summary>
     private void DrawHunters(GL glContext)
     {
-        if (_isSurfaceRunMode)
-        {
+        /*if (_isSurfaceRunMode)
+        {*/
             // In surface run mode hunters can draw themselves
             foreach (var hunter in _hunters)
             {
                 hunter.Draw(glContext);
             }
-        }
+        /*}
         else
-        {
+        {*/
             _huntersDisplay.DrawUi(glContext, _viewportWidth, _viewportHeight, _hunters);
-        }
+        /*}*/
     }
 
     /// <summary>

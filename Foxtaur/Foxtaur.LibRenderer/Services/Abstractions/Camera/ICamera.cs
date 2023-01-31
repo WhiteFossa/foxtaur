@@ -114,6 +114,11 @@ public interface ICamera
     PlanarPoint2D ProjectPointToViewport(PlanarPoint3D point);
 
     /// <summary>
+    /// As ProjectPointToViewport, but results will be in [0; 1] range
+    /// </summary>
+    PlanarPoint2D ProjectPointToViewportNormalized(PlanarPoint3D point);
+
+    /// <summary>
     /// Project geo segment to planar segment (in viewport coordinates)
     /// </summary>
     PlanarSegment ProjectSegmentToViewport(GeoSegment segment);

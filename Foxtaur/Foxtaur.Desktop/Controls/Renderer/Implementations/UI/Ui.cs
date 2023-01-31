@@ -13,8 +13,8 @@ namespace Foxtaur.Desktop.Controls.Renderer.Implementations.UI;
 
 public class Ui : IUi
 {
-    private ITextDrawer _textDrawer;
-    private IRectangleGenerator _rectangleGenerator;
+    private readonly ITextDrawer _textDrawer;
+    private readonly IRectangleGenerator _rectangleGenerator;
 
     public bool IsNeedToReinitialize { get; set; }
 

@@ -217,6 +217,15 @@ public class Camera : ICamera
         return new PlanarPoint2D(projectedPoint[0], projectedPoint[1]);
     }
 
+    public PlanarPoint2D ProjectPointToViewportNormalized(PlanarPoint3D point)
+    {
+        _ = point ?? throw new ArgumentNullException(nameof(point));
+
+        var projectedPoint = ProjectPointToViewport(point);
+
+        return new PlanarPoint2D((projectedPoint.X + 1.0) / 2.0, (projectedPoint.Y + 1.0) / 2.0);
+    }
+
     public PlanarSegment ProjectSegmentToViewport(GeoSegment segment)
     {
         _ = segment ?? throw new ArgumentNullException(nameof(segment));

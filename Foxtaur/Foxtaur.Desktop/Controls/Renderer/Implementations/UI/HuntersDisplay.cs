@@ -3,9 +3,12 @@ using System.Collections.Generic;
 using Foxtaur.Desktop.Controls.Renderer.Abstractions.Generators;
 using Foxtaur.Desktop.Controls.Renderer.Abstractions.UI;
 using Foxtaur.Desktop.Controls.Renderer.Models;
+using Foxtaur.LibGeo.Constants;
 using Foxtaur.LibGeo.Models;
+using Foxtaur.LibGeo.Services.Abstractions.CoordinateProviders;
 using Foxtaur.LibRenderer.Constants;
 using Foxtaur.LibRenderer.Models.UI;
+using Foxtaur.LibRenderer.Services.Abstractions.Camera;
 using Foxtaur.LibRenderer.Services.Abstractions.Drawers;
 using ImageMagick;
 using Silk.NET.OpenGL;
@@ -14,8 +17,10 @@ namespace Foxtaur.Desktop.Controls.Renderer.Implementations.UI;
 
 public class HuntersDisplay : IHuntersDisplay
 {
-    private ITextDrawer _textDrawer;
-    private IRectangleGenerator _rectangleGenerator;
+    private readonly ITextDrawer _textDrawer;
+    private readonly IRectangleGenerator _rectangleGenerator;
+    private readonly ICamera _camera;
+    private ICoordinatesProvider _sphereCoordinatesProvider;
     
     public bool IsNeedToReinitialize { get; set; }
 
@@ -25,10 +30,14 @@ public class HuntersDisplay : IHuntersDisplay
     private Shader _uiShader;
     
     public HuntersDisplay(ITextDrawer textDrawer,
-        IRectangleGenerator rectangleGenerator)
+        IRectangleGenerator rectangleGenerator,
+        ICamera camera,
+        ISphereCoordinatesProvider sphereCoordinatesProvider)
     {
         _textDrawer = textDrawer;
         _rectangleGenerator = rectangleGenerator;
+        _camera = camera;
+        _sphereCoordinatesProvider = sphereCoordinatesProvider;
     }
     
     public void Initialize(GL silkGlContext, int uiWidth, int uiHeight)
@@ -62,14 +71,14 @@ public class HuntersDisplay : IHuntersDisplay
         _uiShader.SetUniform1i("ourTexture", 0);
 
         foreach (var hunter in hunters)
-        {
-            var hunterX = 0.1;
-            var hunterY = 0.3;
-            
+        { 
+            var hunterPosition3D = _sphereCoordinatesProvider.GeoToPlanar3D(hunter.Position);
+            var hunterDisplayPosition = _camera.ProjectPointToViewportNormalized(hunterPosition3D);
+
             var hunterMesh = _rectangleGenerator.GenerateRectangle(
-                new PlanarPoint3D(hunterX, hunterY + RendererConstants.FlatUIHunterHeight, 0.0), // TODO: Set hunter sizes here
+                new PlanarPoint3D(hunterDisplayPosition.X - RendererConstants.FlatUiHunterHalfWidth, hunterDisplayPosition.Y, 0.0), // TODO: Set hunter sizes here
                 new PlanarPoint2D(0.0, 1.0),
-                new PlanarPoint3D(hunterX + RendererConstants.FlatUIHunterWidth, hunterY, 0.0),
+                new PlanarPoint3D(hunterDisplayPosition.X + RendererConstants.FlatUiHunterHalfWidth, hunterDisplayPosition.Y - RendererConstants.FlatUiHunterHeight, 0.0),
                 new PlanarPoint2D(1.0, 0.0));
 
             hunterMesh.GenerateBuffers(silkGlContext);

@@ -148,12 +148,12 @@ public static class RendererConstants
     public const double HunterRadius = 0.000001;
 
     /// <summary>
-    /// Hunter width (in parts of the screen) for flat UI markers
+    /// Hunter half width (in parts of the screen) for flat UI markers
     /// </summary>
-    public const double FlatUIHunterWidth = 0.02;
+    public const double FlatUiHunterHalfWidth = 0.02;
     
     /// <summary>
     /// Hunter height (in parts of the screen) for flat UI markers
     /// </summary>
-    public const double FlatUIHunterHeight = 0.02;
+    public const double FlatUiHunterHeight = 0.04;
 }
