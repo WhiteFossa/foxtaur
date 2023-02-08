@@ -440,7 +440,7 @@ public class DesktopRenderer : OpenGlControlBase
             // Moving hunters (debug)
             var hunterLat = 0.74088;
             var hunterLon = -0.33637;
-            
+
             var hunterHeight = _demProvider.GetSurfaceAltitude(hunterLat, hunterLon, _zoomService.ZoomLevel).ScaleAltitude(_settingsService.GetDemScale());
             hunterHeight += _isSurfaceRunMode ? RendererConstants.MapsAltitudeIncrementSurfaceRunMode : RendererConstants.MapsAltitudeIncrementSatelliteMode;
             _hunters.First().Position = new GeoPoint(hunterLat, hunterLon, hunterHeight);

@@ -214,7 +214,7 @@ public class Camera : ICamera
         
         var projectedPoint = DoubleHelper.Transform(Vector<double>.Build.DenseOfArray(new double[] { point.X, point.Y, point.Z, 1.0}), ForwardProjectionMatrix);
         
-        return new PlanarPoint2D(projectedPoint[0], projectedPoint[1]);
+        return new PlanarPoint2D(projectedPoint[0] / projectedPoint[2], projectedPoint[1] / projectedPoint[2]);
     }
 
     public PlanarPoint2D ProjectPointToViewportNormalized(PlanarPoint3D point)
@@ -222,8 +222,8 @@ public class Camera : ICamera
         _ = point ?? throw new ArgumentNullException(nameof(point));
 
         var projectedPoint = ProjectPointToViewport(point);
-
-        return new PlanarPoint2D((projectedPoint.X + 1.0) / 2.0, (projectedPoint.Y + 1.0) / 2.0);
+        
+        return new PlanarPoint2D((projectedPoint.X+ 1.0) / 2.0, (projectedPoint.Y + 1.0) / 2.0);
     }
 
     public PlanarSegment ProjectSegmentToViewport(GeoSegment segment)
@@ -277,8 +277,8 @@ public class Camera : ICamera
         ViewMatrix = DoubleHelper.CreateLookAt(Position3D.AsVector(), Target.AsVector(), Up); // Camera position
         ProjectionMatrix = DoubleHelper.CreatePerspectiveFieldOfView(Zoom, AspectRatio, 0.00001, 10.0); // Zoom
         
-        ForwardProjectionMatrix = ModelMatrix * ViewMatrix * ProjectionMatrix;
-        
+        ForwardProjectionMatrix = ViewMatrix * ModelMatrix * ProjectionMatrix;
+
         // Back-projection matrix (for raycasting)
         var forwardProjection = ViewMatrix * ProjectionMatrix;
 
