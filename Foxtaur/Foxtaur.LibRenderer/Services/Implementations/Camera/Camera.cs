@@ -223,7 +223,7 @@ public class Camera : ICamera
 
         var projectedPoint = ProjectPointToViewport(point);
         
-        return new PlanarPoint2D((projectedPoint.X+ 1.0) / 2.0, (projectedPoint.Y + 1.0) / 2.0);
+        return new PlanarPoint2D((projectedPoint.X + 1.0) / 2.0, (projectedPoint.Y + 1.0) / 2.0);
     }
 
     public PlanarSegment ProjectSegmentToViewport(GeoSegment segment)
@@ -277,7 +277,7 @@ public class Camera : ICamera
         ViewMatrix = DoubleHelper.CreateLookAt(Position3D.AsVector(), Target.AsVector(), Up); // Camera position
         ProjectionMatrix = DoubleHelper.CreatePerspectiveFieldOfView(Zoom, AspectRatio, 0.00001, 10.0); // Zoom
         
-        ForwardProjectionMatrix = ViewMatrix * ModelMatrix * ProjectionMatrix;
+        ForwardProjectionMatrix = ModelMatrix * ViewMatrix * ProjectionMatrix;
 
         // Back-projection matrix (for raycasting)
         var forwardProjection = ViewMatrix * ProjectionMatrix;

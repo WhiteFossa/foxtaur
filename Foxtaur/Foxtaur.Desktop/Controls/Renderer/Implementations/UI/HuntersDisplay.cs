@@ -76,7 +76,7 @@ public class HuntersDisplay : IHuntersDisplay
             var hunterDisplayPosition = _camera.ProjectPointToViewportNormalized(hunterPosition3D);
 
             var hunterMesh = _rectangleGenerator.GenerateRectangle(
-                new PlanarPoint3D(hunterDisplayPosition.X - RendererConstants.FlatUiHunterHalfWidth, hunterDisplayPosition.Y, 0.0), // TODO: Set hunter sizes here
+                new PlanarPoint3D(hunterDisplayPosition.X - RendererConstants.FlatUiHunterHalfWidth, hunterDisplayPosition.Y, 0.0),
                 new PlanarPoint2D(0.0, 1.0),
                 new PlanarPoint3D(hunterDisplayPosition.X + RendererConstants.FlatUiHunterHalfWidth, hunterDisplayPosition.Y - RendererConstants.FlatUiHunterHeight, 0.0),
                 new PlanarPoint2D(1.0, 0.0));
