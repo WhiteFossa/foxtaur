@@ -213,6 +213,11 @@ public class Camera : ICamera
         _ = point ?? throw new ArgumentNullException(nameof(point));
         
         var projectedPoint = DoubleHelper.Transform(Vector<double>.Build.DenseOfArray(new double[] { point.X, point.Y, point.Z, 1.0}), ForwardProjectionMatrix);
+
+        projectedPoint[0] /= projectedPoint[3];
+        projectedPoint[1] /= projectedPoint[3];
+        projectedPoint[2] /= projectedPoint[3];
+        projectedPoint[3] /= projectedPoint[3];
         
         return new PlanarPoint2D(projectedPoint[0] / projectedPoint[2], projectedPoint[1] / projectedPoint[2]);
     }
