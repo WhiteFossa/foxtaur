@@ -259,7 +259,7 @@ public class DesktopRenderer : OpenGlControlBase
         _settingsService.OnDemScaleChanged += OnDemScaleChanged;
         
         // Debug
-        _hunters.Add(new Hunter(_sphereCoordinatesProvider));
+        _hunters.Add(new Hunter(_sphereCoordinatesProvider, _camera));
     }
 
     private void OnPropertyChangedListener(object sender, AvaloniaPropertyChangedEventArgs e)
@@ -438,8 +438,8 @@ public class DesktopRenderer : OpenGlControlBase
             _distanceProvider.DrawDistance(silkGlContext);
             
             // Moving hunters (debug)
-            var hunterLat = 0.74088;
-            var hunterLon = -0.33637;
+            var hunterLat = 42.449278.ToRadians();
+            var hunterLon = -19.273122.ToRadians();
 
             var hunterHeight = _demProvider.GetSurfaceAltitude(hunterLat, hunterLon, _zoomService.ZoomLevel).ScaleAltitude(_settingsService.GetDemScale());
             hunterHeight += _isSurfaceRunMode ? RendererConstants.MapsAltitudeIncrementSurfaceRunMode : RendererConstants.MapsAltitudeIncrementSatelliteMode;
@@ -467,18 +467,18 @@ public class DesktopRenderer : OpenGlControlBase
     /// </summary>
     private void DrawHunters(GL glContext)
     {
-        /*if (_isSurfaceRunMode)
-        {*/
+        if (_isSurfaceRunMode)
+        {
             // In surface run mode hunters can draw themselves
             foreach (var hunter in _hunters)
             {
                 hunter.Draw(glContext);
             }
-        /*}
+        }
         else
-        {*/
+        {
             _huntersDisplay.DrawUi(glContext, _viewportWidth, _viewportHeight, _hunters);
-        /*}*/
+        }
     }
 
     /// <summary>

@@ -1,10 +1,12 @@
 using System;
+using Foxtaur.Helpers;
 using Foxtaur.LibGeo.Constants;
 using Foxtaur.LibGeo.Helpers;
 using Foxtaur.LibGeo.Models;
 using Foxtaur.LibGeo.Services.Abstractions.CoordinateProviders;
 using Foxtaur.LibRenderer.Constants;
 using Foxtaur.LibRenderer.Helpers;
+using Foxtaur.LibRenderer.Services.Abstractions.Camera;
 using ImageMagick;
 using MathNet.Numerics.LinearAlgebra;
 using Silk.NET.OpenGL;
@@ -16,6 +18,8 @@ namespace Foxtaur.Desktop.Controls.Renderer.Models;
 /// </summary>
 public class Hunter
 {
+    private readonly ICamera _camera;
+    
     private ICoordinatesProvider _sphereCoordinatesProvider;
     private Mesh _mesh;
     private Texture _texture;
@@ -30,9 +34,11 @@ public class Hunter
     /// </summary>
     public GeoPoint Position { get; set; }
 
-    public Hunter(ICoordinatesProvider sphereCoordinatesProvider)
+    public Hunter(ICoordinatesProvider sphereCoordinatesProvider,
+        ICamera camera)
     {
         _sphereCoordinatesProvider = sphereCoordinatesProvider;
+        _camera = camera;
     }
 
     /// <summary>
@@ -46,10 +52,7 @@ public class Hunter
             _texture.Dispose();
         }
         
-        using (var hunterTextureImage = new MagickImage(new MagickColor(255, 0, 0, 255), 100, 100))
-        {
-            _texture = new Texture(glContext, hunterTextureImage);
-        }
+        _texture = new Texture(glContext, @"Resources/Textures/hunter_marker.png");
         
         // Flat UI texture
         if (UiTexture != null)
@@ -60,7 +63,62 @@ public class Hunter
         UiTexture = new Texture(glContext, @"Resources/Textures/hunter_marker.png");
     }
     
-    /// <summary>
+        /// <summary>
+    /// Draw the hunter
+    /// </summary>
+    public unsafe void Draw(GL glContext)
+    {
+        // 1) 3D position
+        var hunterPosition3DLower = _sphereCoordinatesProvider.GeoToPlanar3D(Position);
+        var hunterPosition3DHigher = _sphereCoordinatesProvider.GeoToPlanar3D(new GeoPoint(Position.Lat, Position.Lon, Position.H + 0.000005)); // TODO: Specify Y size here
+        
+        // 2) Vector from camera position to hunter position (normalized)
+        var vectorFromCameraLower = (hunterPosition3DLower.AsVector() - _camera.Position3D.AsVector()).Normalize() * 0.000005; // TODO: Specify X size here
+        var vectorFromCameraHigher = (hunterPosition3DHigher.AsVector() - _camera.Position3D.AsVector()).Normalize() * 0.000005;
+        
+        // 3) Nadir vector, we will rotate around it
+        var nadirVectorLower = GeoConstants.EarthCenter - hunterPosition3DLower.AsVector();
+        var nadirVectorHigher = GeoConstants.EarthCenter - hunterPosition3DHigher.AsVector();
+        
+        // 4) Corners
+        var leftBottom = vectorFromCameraLower.RotateAround(nadirVectorLower, -90.0.ToRadians()) + hunterPosition3DLower.AsVector();
+        var rightBottom = vectorFromCameraLower.RotateAround(nadirVectorLower, 90.0.ToRadians()) + hunterPosition3DLower.AsVector();
+        
+        var leftTop = vectorFromCameraHigher.RotateAround(nadirVectorHigher, -90.0.ToRadians()) + hunterPosition3DHigher.AsVector();
+        var rightTop = vectorFromCameraHigher.RotateAround(nadirVectorHigher, 90.0.ToRadians()) + hunterPosition3DHigher.AsVector();
+        
+        // Mesh
+        if (_mesh != null)
+        {
+            _mesh.Dispose();
+        }
+
+        _mesh = new Mesh();
+        
+        var leftBottomIndex = _mesh.AddVertex(leftBottom.AsPlanarPoint3D(), new PlanarPoint2D(0, 1));
+        _mesh.AddIndex(leftBottomIndex);
+        
+        var leftTopIndex = _mesh.AddVertex(leftTop.AsPlanarPoint3D(), new PlanarPoint2D(0, 0));
+        _mesh.AddIndex(leftTopIndex);
+        
+        var rightBottomIndex = _mesh.AddVertex(rightBottom.AsPlanarPoint3D(), new PlanarPoint2D(1, 1));
+        _mesh.AddIndex(rightBottomIndex);
+        
+        var rightTopIndex = _mesh.AddVertex(rightTop.AsPlanarPoint3D(), new PlanarPoint2D(1, 0));
+        
+        _mesh.AddIndex(rightBottomIndex);
+        _mesh.AddIndex(leftTopIndex);
+        _mesh.AddIndex(rightTopIndex);
+
+        // Actual drawing
+        _mesh.GenerateBuffers(glContext);
+        
+        _texture.Bind();
+        _mesh.BindBuffers(glContext);
+        glContext.DrawElements(PrimitiveType.Triangles, (uint)_mesh.Indices.Count, DrawElementsType.UnsignedInt, null);
+    }
+    
+    /*/// <summary>
     /// Draw the hunter
     /// </summary>
     public unsafe void Draw(GL glContext)
@@ -112,7 +170,7 @@ public class Hunter
         _texture.Bind();
         _mesh.BindBuffers(glContext);
         glContext.DrawElements(PrimitiveType.Triangles, (uint)_mesh.Indices.Count, DrawElementsType.UnsignedInt, null);
-    }
+    }*/
 
     private void AddHunterTriangles(PlanarPoint3D hunterPosition, PlanarPoint3D hunterRadiusOld, PlanarPoint3D hunterRadiusNew, PlanarPoint3D hunterHeight)
     {
