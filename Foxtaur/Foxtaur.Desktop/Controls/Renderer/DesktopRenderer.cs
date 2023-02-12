@@ -413,6 +413,8 @@ public class DesktopRenderer : OpenGlControlBase
                 var earthSegmentsGenerationThread = new Thread(() => GenerateEarthSegments());
                 earthSegmentsGenerationThread.Start();
 
+                _isDistanceRegenerationNeeded = true;
+
                 _isZoomLevelChanged = false;
             }
 
@@ -444,7 +446,7 @@ public class DesktopRenderer : OpenGlControlBase
             var hunterHeight = _demProvider.GetSurfaceAltitude(hunterLat, hunterLon, _zoomService.ZoomLevel).ScaleAltitude(_settingsService.GetDemScale());
             hunterHeight += _isSurfaceRunMode ? RendererConstants.MapsAltitudeIncrementSurfaceRunMode : RendererConstants.MapsAltitudeIncrementSatelliteMode;
             _hunters.First().Position = new GeoPoint(hunterLat, hunterLon, hunterHeight);
-            
+
             // Drawing hunters
             DrawHunters(silkGlContext);
             
@@ -1076,7 +1078,7 @@ public class DesktopRenderer : OpenGlControlBase
     {
         _activeDistance = distance ?? throw new ArgumentNullException(nameof(distance));
         
-        _isDistanceRegenerationNeeded= true;
+        _isDistanceRegenerationNeeded = true;
         _distanceProvider.SetActiveDistance(_activeDistance);
     }
 
