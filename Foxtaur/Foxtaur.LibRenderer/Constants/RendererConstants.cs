@@ -120,7 +120,7 @@ public static class RendererConstants
     /// <summary>
     /// Do not show segments, further than given distance (in Earth's radiuses) (for surface run mode)
     /// </summary>
-    public const double SurfaceRunSegmentsCullingDistance = 0.02;
+    public const double SurfaceRunSegmentsCullingDistance = 0.01;
 
     /// <summary>
     /// Number of Earth segments regeneration threads
@@ -136,16 +136,6 @@ public static class RendererConstants
     /// Regenerate no more than this number of buffers per frame
     /// </summary>
     public const int RegenerateBuffersPerFrame = 32;
-
-    /// <summary>
-    /// Hunter height in Earth radiuses
-    /// </summary>
-    public const double HunterHeight = 0.000005;
-
-    /// <summary>
-    /// Hunter radius in Earth radiuses
-    /// </summary>
-    public const double HunterRadius = 0.000001;
 
     /// <summary>
     /// Hunter half width (in parts of the screen) for flat UI markers
